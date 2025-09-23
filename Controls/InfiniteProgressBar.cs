@@ -1,5 +1,5 @@
 ﻿namespace SnapLabel.Controls {
-    public class InfiniteProgressBar : ProgressBar {
+    public partial class InfiniteProgressBar : ProgressBar {
 
         private CancellationTokenSource? _cts;
 
@@ -37,7 +37,7 @@
         }
 
         private void InfiniteProgressBar_Unloaded(object? sender, EventArgs e) {
-            _cts.Cancel();
+            _cts!.Cancel();
         }
 
 

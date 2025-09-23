@@ -2,34 +2,31 @@
 
     public class Operation() {
 
-        public static byte[] CompressImage(byte[] originaBytes, int targetWith = 1000) {
+        public static byte[]? CompressImage(byte[] originalBytes, int initialWidth = 1000, int maxSizeKb = 20) {
+            int targetWidth = initialWidth;
+            float compressionQuality = 0.6f;
 
-            using var inputStream = new MemoryStream(originaBytes);
-            var image = PlatformImage.FromStream(inputStream);
+            byte[] compressed;
 
-            var resizedImage = image.Downsize(targetWith, true);
+            do {
+                using var inputStream = new MemoryStream(originalBytes);
+                var image = PlatformImage.FromStream(inputStream);
 
-            using var outputStream = new MemoryStream();
+                var resized = image.Downsize(targetWidth, true);
 
-            float compressionQuality = 0.5f; // 70%
-            resizedImage.Save(outputStream, ImageFormat.Jpeg, quality: compressionQuality);
-
-            byte[] compressed = outputStream.ToArray();
-
-            // 🔁 If image is still too big, reduce quality and/or width
-            while(compressed.Length > 1024 * 1024 && compressionQuality > 0.3f) {
-                compressionQuality -= 0.1f;
-                targetWith -= 100;
-
-                resizedImage = image.Downsize(targetWith, true);
-                outputStream.SetLength(0); // Clear stream
-                resizedImage.Save(outputStream, ImageFormat.Jpeg, quality: compressionQuality);
+                using var outputStream = new MemoryStream();
+                resized.Save(outputStream, ImageFormat.Jpeg, quality: compressionQuality);
                 compressed = outputStream.ToArray();
-            }
 
-            return compressed;
+                if(compressed.Length <= maxSizeKb * 1024)
+                    return compressed;
 
+                compressionQuality -= 0.1f;
+                targetWidth -= 100;
+
+            } while(compressionQuality >= 0.3f && targetWidth >= 300);
+
+            return null;
         }
-
     }
 }

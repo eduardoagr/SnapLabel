@@ -2,9 +2,9 @@
 
 public class BluetoothDeviceModel {
 
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
-    public string Address { get; set; }
+    public required string Address { get; set; }
 
-    public string FontIcon { get; set; } = FontsConstants.Bluetooth_audio;
+    public required string FontIcon { get; set; } = FontsConstants.Bluetooth;
 }

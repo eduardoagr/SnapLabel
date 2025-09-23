@@ -47,6 +47,10 @@
         [Ignore]
         public partial string IsImageLoaded { get; set; }
 
+        [ObservableProperty]
+        [Ignore]
+        public partial byte[] ImageBytes { get; set; }
+
         public void NormalizeName() {
             Name = Normalize.NormalizeStrings(Name);
         }

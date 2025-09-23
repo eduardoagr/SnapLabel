@@ -8,9 +8,6 @@ namespace SnapLabel.ViewModels {
         private readonly IBluetoothService _bluetoothService;
 
         [ObservableProperty]
-        public partial bool Scanning { get; set; }
-
-        [ObservableProperty]
         public partial bool IsPopUpOpen { get; set; }
 
         public ObservableCollection<Product> Products { get; set; } = [];
@@ -52,6 +49,11 @@ namespace SnapLabel.ViewModels {
             }
         }
 
+        [RelayCommand]
+        void ClosePopUp() {
+
+            IsPopUpOpen = false;
+        }
 
         [RelayCommand]
         void ScanBluetooth() {
@@ -59,7 +61,6 @@ namespace SnapLabel.ViewModels {
             IsPopUpOpen = true;
             Devices.Clear();
             _bluetoothService.StartScan();
-            Scanning = true;
 
         }
 

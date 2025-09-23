@@ -101,10 +101,27 @@
             WidthRequest="500">
             <sfPopup:SfPopup.HeaderTemplate>
                 <DataTemplate>
-                    <Grid BackgroundColor="{AppThemeBinding Dark={StaticResource Black}, Light={StaticResource White}}">
+                    <Grid BackgroundColor="{AppThemeBinding Dark={StaticResource Black}, Light={StaticResource White}}" ColumnDefinitions="*,Auto">
+
+                        <Label
+                            Grid.Column="1"
+                            FontFamily="Mat"
+                            FontSize="24"
+                            HorizontalTextAlignment="End"
+                            Text="{Static constant:FontsConstants.Close}"
+                            VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ClosePopUpCommand}"/>
+                            </Label.GestureRecognizers>
+                            <Label.Behaviors>
+                                <mct:TouchBehavior HoveredBackgroundColor="#e81123" />
+                            </Label.Behaviors>
+                        </Label>
+
                         <Label
                             Margin="5"
                             FontSize="10"
+                            HorizontalTextAlignment="Start"
                             Text="Add a device"
                             VerticalOptions="Center" />
                     </Grid>
@@ -118,11 +135,10 @@
                     <Grid
                         BackgroundColor="{AppThemeBinding Dark={StaticResource PrimaryDarkText},
                                                           Light={StaticResource White}}"
-                        
                         RowDefinitions="4, 30, 60, 300, Auto"
                         RowSpacing="5">
 
-                        <controls:InfiniteProgressBar/>
+                        <controls:InfiniteProgressBar />
 
                         <Label
                             Grid.Row="1"
@@ -137,14 +153,30 @@
                             FontSize="14"
                             Text="Make sure your device is turned on and discoverable. Select a device below to connect." />
 
-                        <CollectionView>
+                        <CollectionView
+                            Grid.Row="3"
+                            Margin="5"
+                            ItemsSource="{Binding Devices}">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout ItemSpacing="12" Orientation="Vertical" />
+                            </CollectionView.ItemsLayout>
                             <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    
+                                <DataTemplate x:DataType="models:BluetoothDeviceModel">
+                                    <Grid ColumnDefinitions="32,*" ColumnSpacing="10">
+                                        <Label
+                                            FontFamily="Mat"
+                                            FontSize="Large"
+                                            Text="{Binding FontIcon}"
+                                            VerticalTextAlignment="Center" />
+                                        <Label
+                                            Grid.Column="1"
+                                            Text="{Binding Name}"
+                                            VerticalTextAlignment="Center" />
+                                    </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
-                        
+
                     </Grid>
 
                 </DataTemplate>

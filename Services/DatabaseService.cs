@@ -55,7 +55,8 @@
         /// Attempts to add a product if it doesn't already exist.
         /// Checks for uniqueness by ID, name, and image content.
         /// </summary>
-        public async Task<bool> TryAddItemAsync(Product product) {
+        public async Task<long?> TryAddItemAsync(Product product) {
+
             await InitializeAsync();
 
             var existing = await _database!.Table<Product>()
@@ -64,14 +65,13 @@
 
             if(existing is not null) {
                 // Duplicate found — do not insert
-                return false;
+                return null;
             }
-
 
 
             await _database.InsertAsync(product);
 
-            return true;
+            return product.Id;
         }
 
         /// <summary>
@@ -89,5 +89,14 @@
             await InitializeAsync();
             return await _database!.FindAsync<Product>(id);
         }
+
+        /// <summary>
+        /// Update product from the database, by passing it
+        /// </summary>
+        public async Task<int> UpdateItemAsync(Product product) {
+            await InitializeAsync();
+            return await _database!.UpdateAsync(product);
+        }
+
     }
 }

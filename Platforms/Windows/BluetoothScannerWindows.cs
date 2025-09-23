@@ -2,18 +2,22 @@
 using Windows.Devices.Enumeration;
 
 namespace SnapLabel.Platforms.Windows {
+
     /// <summary>
     /// Windows-specific implementation of IBluetoothService.
     /// Uses DeviceWatcher to discover nearby Bluetooth devices.
     /// </summary>
     public class WindowsBluetoothService : IBluetoothService {
+
         public event Action<BluetoothDeviceModel>? DeviceFound;
 
         private DeviceWatcher? _watcher;
-        private readonly HashSet<string> _seenDevices = [];
         private bool _keepScanning;
+        private readonly HashSet<string> _seenDevices = [];
+
 
         public void StartScan() {
+
             _keepScanning = true;
             _seenDevices.Clear();
             StartWatcher();
@@ -55,7 +59,7 @@ namespace SnapLabel.Platforms.Windows {
                 if(!_seenDevices.Add(name))
                     return;
 
-                string fontIcon = FontsConstants.Bluetooth_audio;
+                string fontIcon = FontsConstants.Bluetooth;
 
                 try {
                     var btDevice = await BluetoothDevice.FromIdAsync(deviceInfo.Id);
