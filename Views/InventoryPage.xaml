@@ -1,0 +1,158 @@
+<ContentPage
+    x:Class="SnapLabel.Views.InventoryPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:constant="clr-namespace:SnapLabel.Constants"
+    xmlns:controls="clr-namespace:SnapLabel.Controls"
+    xmlns:ffimageloading="clr-namespace:FFImageLoading.Maui;assembly=FFImageLoading.Maui"
+    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:models="clr-namespace:SnapLabel.Models"
+    xmlns:sfPopup="clr-namespace:Syncfusion.Maui.Popup;assembly=Syncfusion.Maui.Popup"
+    xmlns:vm="clr-namespace:SnapLabel.ViewModels"
+    x:Name="Root"
+    Title="Inventory"
+    x:DataType="vm:InventoryPageViewModel">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding ScanBluetoothCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource
+                    FontFamily="Mat"
+                    Glyph="{Static constant:FontsConstants.Bluetooth}"
+                    Size="26"
+                    Color="{AppThemeBinding Light={StaticResource Black},
+                                            Dark={StaticResource White}}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+
+        <ToolbarItem Command="{Binding AddItemCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource
+                    FontFamily="Mat"
+                    Glyph="{Static constant:FontsConstants.Add}"
+                    Size="26"
+                    Color="{AppThemeBinding Light={StaticResource Black},
+                                            Dark={StaticResource White}}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <CollectionView
+            HorizontalOptions="Start"
+            ItemsSource="{Binding Products}"
+            SelectionMode="None"
+            VerticalScrollBarVisibility="Never"
+            WidthRequest="{OnIdiom Desktop=400,
+                                   Phone=400}">
+
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Product">
+                    <Border Stroke="{x:Null}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Grid Padding="12" RowDefinitions="Auto, Auto, 400">
+                            <Label
+                                Margin="6,0,0,0"
+                                FontAttributes="Bold"
+                                FontSize="18"
+                                Text="{Binding Name}" />
+                            <Label
+                                Grid.Row="1"
+                                Margin="6,0,0,0"
+                                Text="{Binding Price, StringFormat='{}{0:C}'}" />
+                            <Border Grid.Row="2" StrokeThickness="2">
+                                <Border.Shadow>
+                                    <Shadow
+                                        Brush="{AppThemeBinding Dark={StaticResource White},
+                                                                Light={StaticResource Black}}"
+                                        Opacity="0.4"
+                                        Radius="3"
+                                        Offset="5,5" />
+                                </Border.Shadow>
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="16" />
+                                </Border.StrokeShape>
+                                <ffimageloading:CachedImage
+                                    Aspect="AspectFill"
+                                    CacheDuration="30"
+                                    FadeAnimationDuration="400"
+                                    FadeAnimationEnabled="true"
+                                    LoadingPlaceholder="out.gif"
+                                    Source="{Binding ImagePath}" />
+
+                            </Border>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <sfPopup:SfPopup
+            HeaderHeight="24"
+            HeightRequest="500"
+            IsOpen="{Binding IsPopUpOpen}"
+            StaysOpen="True"
+            WidthRequest="500">
+            <sfPopup:SfPopup.HeaderTemplate>
+                <DataTemplate>
+                    <Grid BackgroundColor="{AppThemeBinding Dark={StaticResource Black}, Light={StaticResource White}}">
+                        <Label
+                            Margin="5"
+                            FontSize="10"
+                            Text="Add a device"
+                            VerticalOptions="Center" />
+                    </Grid>
+                </DataTemplate>
+            </sfPopup:SfPopup.HeaderTemplate>
+            <sfPopup:SfPopup.PopupStyle>
+                <sfPopup:PopupStyle CornerRadius="8" HasShadow="True" />
+            </sfPopup:SfPopup.PopupStyle>
+            <sfPopup:SfPopup.ContentTemplate>
+                <DataTemplate>
+                    <Grid
+                        BackgroundColor="{AppThemeBinding Dark={StaticResource PrimaryDarkText},
+                                                          Light={StaticResource White}}"
+                        
+                        RowDefinitions="4, 30, 60, 300, Auto"
+                        RowSpacing="5">
+
+                        <controls:InfiniteProgressBar/>
+
+                        <Label
+                            Grid.Row="1"
+                            Margin="5,0,0,0"
+                            FontAttributes="Bold"
+                            FontSize="20"
+                            Text="Add a device" />
+
+                        <Label
+                            Grid.Row="2"
+                            Margin="5"
+                            FontSize="14"
+                            Text="Make sure your device is turned on and discoverable. Select a device below to connect." />
+
+                        <CollectionView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        
+                    </Grid>
+
+                </DataTemplate>
+            </sfPopup:SfPopup.ContentTemplate>
+        </sfPopup:SfPopup>
+    </Grid>
+
+
+
+
+</ContentPage>
