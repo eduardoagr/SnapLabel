@@ -2,16 +2,60 @@
 
 namespace SnapLabel.ViewModels {
 
-    public partial class NewProductPageViewModel(IMediaPicker mediaPicker,
-        IShellService shellService, DatabaseService databaseService) : ObservableObject {
+    public partial class NewProductPageViewModel : ObservableObject {
 
+        #region Readonly and Static Fields
         private static readonly QRCodeGenerator qrGenerator = new();
         private readonly string sharedRoot = @"\\Ed-pc\E\SnapLabel.Images";
         private readonly string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        private readonly IMediaPicker mediaPicker;
+        private readonly IShellService shellService;
+        private readonly DatabaseService databaseService;
+        #endregion
+
 
         [ObservableProperty]
-        public partial Product Product { get; set; } = new();
+        public partial Color SaveIconColor { get; set; } = (Application.Current?.RequestedTheme ?? AppTheme.Light) switch {
+            AppTheme.Dark => Colors.White,
+            _ => Colors.Black
+        };
 
+        public ProductViewModel ProductVM { get; }
+
+        // Explicit command
+        public IRelayCommand? SaveProductCommand { get; }
+
+        #region Constructor
+        public NewProductPageViewModel(IMediaPicker mediaPicker, IShellService shellService,
+            DatabaseService databaseService) {
+            this.mediaPicker = mediaPicker;
+            this.shellService = shellService;
+            this.databaseService = databaseService;
+
+
+            ProductVM = new ProductViewModel(new Product());
+            ProductVM.ProductPropertiesChanged += ProductVM_ProductPropertiesChanged;
+
+            SaveProductCommand = new RelayCommand(async () => await SaveProductAsync(), CanSaveProduct);
+        }
+        #endregion
+
+        private void ProductVM_ProductPropertiesChanged() {
+
+            SaveProductCommand?.NotifyCanExecuteChanged();
+            UpdateIconColor();
+        }
+
+        private void UpdateIconColor() {
+            var theme = Application.Current?.RequestedTheme ?? AppTheme.Light;
+            SaveIconColor = ProductVM.CanSave
+              ? (theme == AppTheme.Dark ? Colors.White : Colors.Black)
+              : Colors.Gray;
+        }
+
+        private bool CanSaveProduct() => ProductVM.CanSave;
+
+        #region Command for picking/capturing images
         [RelayCommand]
         public async Task CaptureImageAsync() {
             if(!mediaPicker.IsCaptureSupported)
@@ -26,13 +70,16 @@ namespace SnapLabel.ViewModels {
             await stream.CopyToAsync(ms);
 
             var compressed = Operation.CompressImage(ms.ToArray());
-            Product.ImagePreview = ImageSource.FromStream(() => new MemoryStream(compressed!));
-            Product.ImageSize = $"{compressed!.Length / 1024.0:F2} KB";
-            Product.ImageBytes = compressed;
+            ProductVM.ImagePreview = ImageSource.FromStream(() => new MemoryStream(compressed!));
+            ProductVM.ImageSize = $"{compressed!.Length / 1024.0:F2} KB";
+            ProductVM.ImageBytes = compressed;
         }
+        #endregion
 
-        [RelayCommand]
+        #region Command for saving to database
         public async Task SaveProductAsync() {
+
+            var Product = ProductVM.GetProduct();
             Product.NormalizeName();
 
             var productId = await databaseService.TryAddItemAsync(Product);
@@ -49,7 +96,7 @@ namespace SnapLabel.ViewModels {
 
             string imageFileName = $"{Product.Name}_image.jpg";
             string imageFilePath = Path.Combine(folder, imageFileName);
-            File.WriteAllBytes(imageFilePath, Product.ImageBytes);
+            File.WriteAllBytes(imageFilePath, Product.ImageBytes!);
             Product.ImagePath = $"file://{imageFilePath}"; // ✅ ensures CachedImage loads instantly
 
             // Update DB with image path before navigating
@@ -80,12 +127,15 @@ namespace SnapLabel.ViewModels {
                 await databaseService.UpdateItemAsync(Product);
             });
         }
+        #endregion
 
+        #region Method for generating QR code bytes
         public byte[] GenerateQrCodeBytes(string content) {
             var qrCodeData = qrGenerator.CreateQrCode
                 (content, QRCodeGenerator.ECCLevel.Q);
             var qrCode = new PngByteQRCode(qrCodeData);
             return qrCode.GetGraphic(10);
         }
+        #endregion
     }
 }

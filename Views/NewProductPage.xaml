@@ -17,8 +17,7 @@
                     FontFamily="Mat"
                     Glyph="{Static constant:FontsConstants.Save}"
                     Size="26"
-                    Color="{AppThemeBinding Light={StaticResource Black},
-                                            Dark={StaticResource White}}" />
+                    Color="{Binding SaveIconColor}" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
     </ContentPage.ToolbarItems>
@@ -29,12 +28,10 @@
             RowDefinitions="80, 80, 80, Auto"
             RowSpacing="20">
 
-            <inputLayout:SfTextInputLayout
-                Padding="8,0,0,0"
-                Hint="Name">
+            <inputLayout:SfTextInputLayout Padding="8,0,0,0" Hint="Name">
                 <Entry
                     Keyboard="Text"
-                    Text="{Binding Product.Name}"
+                    Text="{Binding ProductVM.Name}"
                     TextColor="{AppThemeBinding Dark={StaticResource White},
                                                 Light={StaticResource Black}}"
                     VerticalTextAlignment="Center" />
@@ -55,7 +52,7 @@
                     ShowClearButton="False"
                     TextColor="{AppThemeBinding Dark={StaticResource White},
                                                 Light={StaticResource Black}}"
-                    Value="{Binding Product.Price}" />
+                    Value="{Binding ProductVM.Price}" />
             </inputLayout:SfTextInputLayout>
 
             <!--  Image Preview  -->
@@ -68,7 +65,7 @@
                 <Image
                     Margin="10"
                     Aspect="AspectFill"
-                    Source="{Binding Product.ImagePreview}" />
+                    Source="{Binding ProductVM.ImagePreview}" />
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="8" />
                 </Border.StrokeShape>

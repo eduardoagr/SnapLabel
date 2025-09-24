@@ -2,6 +2,7 @@
     x:Class="SnapLabel.Views.InventoryPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:constant="clr-namespace:SnapLabel.Constants"
     xmlns:controls="clr-namespace:SnapLabel.Controls"
     xmlns:ffimageloading="clr-namespace:FFImageLoading.Maui;assembly=FFImageLoading.Maui"
@@ -52,7 +53,7 @@
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Product">
-                    <Border Stroke="{x:Null}">
+                    <Border StrokeThickness="0">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="12" />
                         </Border.StrokeShape>
@@ -111,7 +112,7 @@
                             Text="{Static constant:FontsConstants.Close}"
                             VerticalOptions="Center">
                             <Label.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding ClosePopUpCommand}"/>
+                                <TapGestureRecognizer Command="{Binding ClosePopUpCommand}" />
                             </Label.GestureRecognizers>
                             <Label.Behaviors>
                                 <mct:TouchBehavior HoveredBackgroundColor="#e81123" />
@@ -156,7 +157,9 @@
                         <CollectionView
                             Grid.Row="3"
                             Margin="5"
-                            ItemsSource="{Binding Devices}">
+                            ItemsSource="{Binding Devices}"
+                            VerticalScrollBarVisibility="{OnIdiom Desktop=Always,
+                                                                  Phone=Never}">
                             <CollectionView.ItemsLayout>
                                 <LinearItemsLayout ItemSpacing="12" Orientation="Vertical" />
                             </CollectionView.ItemsLayout>
@@ -176,6 +179,47 @@
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
+
+                        <buttons:SfButton
+                            Grid.Row="4"
+                            Margin="10"
+                            Background="{AppThemeBinding Light='#E0E0E0',
+                                                         Dark='#2A2A2A'}"
+                            Command="{Binding ClosePopUpCommand}"
+                            CornerRadius="6"
+                            HeightRequest="32"
+                            HorizontalOptions="End"
+                            Stroke="{AppThemeBinding Light='#E0E0E0',
+                                                     Dark='#2A2A2A'}"
+                            StrokeThickness="1"
+                            Text="Cancel"
+                            TextColor="{AppThemeBinding Light='Black',
+                                                        Dark='White'}"
+                            WidthRequest="200">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+
+                                    <!--  Default state  -->
+                                    <VisualState x:Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter Property="Background" Value="{AppThemeBinding Light='#E0E0E0', Dark='#2A2A2A'}" />
+                                            <Setter Property="Stroke" Value="{AppThemeBinding Light='#E0E0E0', Dark='#2A2A2A'}" />
+                                            <Setter Property="StrokeThickness" Value="1" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+
+                                    <!--  Simulated ripple press  -->
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Property="Background" Value="{AppThemeBinding Light='#CCCCCC', Dark='#444444'}" />
+                                            <Setter Property="Stroke" Value="{AppThemeBinding Light='#888888', Dark='#AAAAAA'}" />
+                                            <Setter Property="Scale" Value="0.98" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </buttons:SfButton>
 
                     </Grid>
 

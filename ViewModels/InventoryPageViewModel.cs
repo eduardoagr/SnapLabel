@@ -53,6 +53,7 @@ namespace SnapLabel.ViewModels {
         void ClosePopUp() {
 
             IsPopUpOpen = false;
+            _bluetoothService.StopScan();
         }
 
         [RelayCommand]
