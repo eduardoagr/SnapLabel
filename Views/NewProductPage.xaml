@@ -10,17 +10,26 @@
     Title="Add product"
     x:DataType="vm:NewProductPageViewModel">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Command="{Binding SaveProductCommand}">
-            <ToolbarItem.IconImageSource>
-                <FontImageSource
-                    FontFamily="Mat"
-                    Glyph="{Static constant:FontsConstants.Save}"
-                    Size="26"
-                    Color="{Binding SaveIconColor}" />
-            </ToolbarItem.IconImageSource>
-        </ToolbarItem>
-    </ContentPage.ToolbarItems>
+    <Shell.TitleView>
+        <Grid>
+            <Label
+                Margin="0,0,10,0"
+                FontFamily="Mat"
+                FontSize="26"
+                HorizontalTextAlignment="End"
+                Opacity="{Binding SaveIconOpacity}"
+                Text="{Static constant:FontsConstants.Save}"
+                TextColor="{AppThemeBinding Light={StaticResource Black},
+                                            Dark={StaticResource White}}"
+                VerticalTextAlignment="Center">
+
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SaveProductCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+
+        </Grid>
+    </Shell.TitleView>
 
     <ScrollView>
         <Grid

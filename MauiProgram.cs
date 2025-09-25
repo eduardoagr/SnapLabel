@@ -2,6 +2,12 @@
 
 #if WINDOWS
 using SnapLabel.Platforms.Windows;
+#elif ANDROID
+using SnapLabel.Platforms.Android;
+#elif IOS
+using SnapLabel.Platforms.iOS;
+#elif MACCATALYST
+using SnapLabel.Platforms.MacCatalyst;
 #endif
 
 namespace SnapLabel;
@@ -34,7 +40,13 @@ public static class MauiProgram {
         builder.Services.AddSingleton<DatabaseService>();
 
 #if WINDOWS
-        builder.Services.AddSingleton<IBluetoothService, WindowsBluetoothService>();
+        builder.Services.AddSingleton<IBluetoothService, WindowsBluetoothScanner>();
+#elif ANDROID
+        builder.Services.AddSingleton<IBluetoothService, AndroidBluetoothScanner>();
+#elif IOS
+        builder.Services.AddSingleton<IBluetoothService, IOSBluetoothScanner>();
+#elif MACCATALYST
+        builder.Services.AddSingleton<IBluetoothService, MacBluetoothScanner>();
 #endif
         return builder.Build();
     }

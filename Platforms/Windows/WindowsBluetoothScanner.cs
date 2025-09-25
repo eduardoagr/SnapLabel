@@ -7,7 +7,7 @@ namespace SnapLabel.Platforms.Windows {
     /// Windows-specific implementation of IBluetoothService.
     /// Uses DeviceWatcher to discover nearby Bluetooth devices.
     /// </summary>
-    public class WindowsBluetoothService : IBluetoothService {
+    public class WindowsBluetoothScanner : IBluetoothService {
 
         public event Action<BluetoothDeviceModel>? DeviceFound;
 
@@ -71,6 +71,7 @@ namespace SnapLabel.Platforms.Windows {
                             4 => FontsConstants.Headphones,
                             5 => FontsConstants.Mouse,
                             6 => FontsConstants.Print,
+                            7 => FontsConstants.Keyboard,
                             _ => FontsConstants.Bluetooth_audio
                         };
                     }

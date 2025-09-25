@@ -5,6 +5,7 @@
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:constant="clr-namespace:SnapLabel.Constants"
     xmlns:controls="clr-namespace:SnapLabel.Controls"
+    xmlns:effectsView="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:ffimageloading="clr-namespace:FFImageLoading.Maui;assembly=FFImageLoading.Maui"
     xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:models="clr-namespace:SnapLabel.Models"
@@ -14,29 +15,39 @@
     Title="Inventory"
     x:DataType="vm:InventoryPageViewModel">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Command="{Binding ScanBluetoothCommand}">
-            <ToolbarItem.IconImageSource>
-                <FontImageSource
-                    FontFamily="Mat"
-                    Glyph="{Static constant:FontsConstants.Bluetooth}"
-                    Size="26"
-                    Color="{AppThemeBinding Light={StaticResource Black},
-                                            Dark={StaticResource White}}" />
-            </ToolbarItem.IconImageSource>
-        </ToolbarItem>
+    <!--  TODO: Change to Shell.TitleView if needed  -->
 
-        <ToolbarItem Command="{Binding AddItemCommand}">
-            <ToolbarItem.IconImageSource>
-                <FontImageSource
-                    FontFamily="Mat"
-                    Glyph="{Static constant:FontsConstants.Add}"
-                    Size="26"
-                    Color="{AppThemeBinding Light={StaticResource Black},
-                                            Dark={StaticResource White}}" />
-            </ToolbarItem.IconImageSource>
-        </ToolbarItem>
-    </ContentPage.ToolbarItems>
+    <Shell.TitleView>
+        <HorizontalStackLayout
+            Margin="0,0,10,0"
+            FlowDirection="RightToLeft"
+            Spacing="30">
+
+            <Label
+                FontFamily="Mat"
+                FontSize="26"
+                Text="{Static constant:FontsConstants.Add}"
+                VerticalTextAlignment="Center">
+
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding AddItemCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+
+
+            <Label
+                FontFamily="Mat"
+                FontSize="26"
+                Text="{Static constant:FontsConstants.Bluetooth}"
+                VerticalTextAlignment="Center">
+
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ScanBluetoothCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+
+        </HorizontalStackLayout>
+    </Shell.TitleView>
 
     <Grid>
         <CollectionView
@@ -44,8 +55,7 @@
             ItemsSource="{Binding Products}"
             SelectionMode="None"
             VerticalScrollBarVisibility="Never"
-            WidthRequest="{OnIdiom Desktop=400,
-                                   Phone=400}">
+            WidthRequest="400">
 
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
@@ -95,29 +105,34 @@
         </CollectionView>
 
         <sfPopup:SfPopup
-            HeaderHeight="24"
-            HeightRequest="500"
+            x:Name="BluetoothDiscoveryPopUp"
+            AnimationMode="Zoom"
+            HeaderHeight="26"
             IsOpen="{Binding IsPopUpOpen}"
-            StaysOpen="True"
-            WidthRequest="500">
+            StaysOpen="True">
             <sfPopup:SfPopup.HeaderTemplate>
                 <DataTemplate>
-                    <Grid BackgroundColor="{AppThemeBinding Dark={StaticResource Black}, Light={StaticResource White}}" ColumnDefinitions="*,Auto">
+                    <Grid BackgroundColor="{AppThemeBinding Dark={StaticResource Black}, Light={StaticResource White}}" ColumnDefinitions="*,40">
 
-                        <Label
-                            Grid.Column="1"
-                            FontFamily="Mat"
-                            FontSize="24"
-                            HorizontalTextAlignment="End"
-                            Text="{Static constant:FontsConstants.Close}"
-                            VerticalOptions="Center">
-                            <Label.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding ClosePopUpCommand}" />
-                            </Label.GestureRecognizers>
-                            <Label.Behaviors>
-                                <mct:TouchBehavior HoveredBackgroundColor="#e81123" />
-                            </Label.Behaviors>
-                        </Label>
+                        <Border Grid.Column="1" StrokeThickness="0">
+                            <Label
+                                FontFamily="Mat"
+                                FontSize="24"
+                                HorizontalTextAlignment="Center"
+                                Text="{Static constant:FontsConstants.Close}"
+                                VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ClosePopUpCommand}" />
+                                </Label.GestureRecognizers>
+                                <Label.Behaviors>
+                                    <mct:TouchBehavior HoveredBackgroundColor="#e81123" />
+                                </Label.Behaviors>
+                            </Label>
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="0,8,0,0" />
+                            </Border.StrokeShape>
+                        </Border>
 
                         <Label
                             Margin="5"
@@ -129,15 +144,22 @@
                 </DataTemplate>
             </sfPopup:SfPopup.HeaderTemplate>
             <sfPopup:SfPopup.PopupStyle>
-                <sfPopup:PopupStyle CornerRadius="8" HasShadow="True" />
+                <sfPopup:PopupStyle
+                    CornerRadius="8"
+                    HasShadow="True"
+                    PopupBackground="{AppThemeBinding Dark={StaticResource Gray950},
+                                                      Light={StaticResource White}}"
+                    Stroke="{AppThemeBinding Light='#20000000',
+                                             Dark='#20FFFFFF'}"
+                    StrokeThickness="4" />
             </sfPopup:SfPopup.PopupStyle>
             <sfPopup:SfPopup.ContentTemplate>
                 <DataTemplate>
                     <Grid
                         BackgroundColor="{AppThemeBinding Dark={StaticResource PrimaryDarkText},
                                                           Light={StaticResource White}}"
-                        RowDefinitions="4, 30, 60, 300, Auto"
-                        RowSpacing="5">
+                        RowDefinitions="4, 30, 40, 300, Auto"
+                        RowSpacing="2">
 
                         <controls:InfiniteProgressBar />
 
@@ -155,17 +177,27 @@
                             Text="Make sure your device is turned on and discoverable. Select a device below to connect." />
 
                         <CollectionView
+                            x:Name="DevicesColection"
                             Grid.Row="3"
-                            Margin="5"
+                            Margin="5,0,0,0"
+                            ItemSizingStrategy="MeasureAllItems"
                             ItemsSource="{Binding Devices}"
+                            SelectionChangedCommand="{Binding DeviceSelectedCommand}"
+                            SelectionChangedCommandParameter="{Binding SelectedItem, Source={x:Reference DevicesColection}}"
+                            SelectionMode="Single"
                             VerticalScrollBarVisibility="{OnIdiom Desktop=Always,
                                                                   Phone=Never}">
+
                             <CollectionView.ItemsLayout>
-                                <LinearItemsLayout ItemSpacing="12" Orientation="Vertical" />
+                                <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
                             </CollectionView.ItemsLayout>
+
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:BluetoothDeviceModel">
-                                    <Grid ColumnDefinitions="32,*" ColumnSpacing="10">
+                                    <Grid
+                                        ColumnDefinitions="32,*"
+                                        ColumnSpacing="10"
+                                        HeightRequest="52">
                                         <Label
                                             FontFamily="Mat"
                                             FontSize="Large"

@@ -1,12 +1,14 @@
-﻿
-namespace SnapLabel.ViewModels {
+﻿namespace SnapLabel.ViewModels {
 
     public partial class InventoryPageViewModel : ObservableObject {
 
+        #region Readonly and Static Fields
         private readonly IShellService _shellService;
         private readonly DatabaseService _databaseService;
-        private readonly IBluetoothService _bluetoothService;
+        private readonly IBluetoothService? _bluetoothService;
+        #endregion
 
+        #region Observable Properties
         [ObservableProperty]
         public partial bool IsPopUpOpen { get; set; }
 
@@ -14,8 +16,11 @@ namespace SnapLabel.ViewModels {
 
         public ObservableCollection<BluetoothDeviceModel> Devices { get; set; } = [];
 
+        [ObservableProperty]
+        public partial BluetoothDeviceModel? SelectedDevice { get; set; }
+        #endregion
 
-
+        #region Constructor
         public InventoryPageViewModel(
             IShellService shellService,
             DatabaseService databaseService,
@@ -24,6 +29,7 @@ namespace SnapLabel.ViewModels {
             _shellService = shellService;
             _databaseService = databaseService;
             _bluetoothService = bluetoothService;
+
 
             _bluetoothService.DeviceFound += device => {
                 MainThread.BeginInvokeOnMainThread(() => {
@@ -36,7 +42,9 @@ namespace SnapLabel.ViewModels {
             };
         }
 
+        #endregion
 
+        #region Methods and Commands
         public async Task GetItems() {
             var items = await _databaseService.GetItemsAsync();
 
@@ -53,7 +61,7 @@ namespace SnapLabel.ViewModels {
         void ClosePopUp() {
 
             IsPopUpOpen = false;
-            _bluetoothService.StopScan();
+            _bluetoothService?.StopScan();
         }
 
         [RelayCommand]
@@ -61,7 +69,7 @@ namespace SnapLabel.ViewModels {
 
             IsPopUpOpen = true;
             Devices.Clear();
-            _bluetoothService.StartScan();
+            _bluetoothService?.StartScan();
 
         }
 
@@ -69,5 +77,13 @@ namespace SnapLabel.ViewModels {
         public async Task AddItem() {
             await _shellService.NavigateToAsync(nameof(NewProductPage));
         }
+        #endregion
+
+        [RelayCommand]
+        void DeviceSelected(BluetoothDeviceModel bluetoothDeviceModel) {
+
+
+        }
     }
+
 }

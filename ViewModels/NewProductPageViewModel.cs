@@ -15,10 +15,10 @@ namespace SnapLabel.ViewModels {
 
 
         [ObservableProperty]
-        public partial Color SaveIconColor { get; set; } = (Application.Current?.RequestedTheme ?? AppTheme.Light) switch {
-            AppTheme.Dark => Colors.White,
-            _ => Colors.Black
-        };
+        public partial double SaveIconOpacity { get; set; } = 0.5;
+
+        [ObservableProperty]
+        public partial bool IsEffectEnabled { get; set; } = false;
 
         public ProductViewModel ProductVM { get; }
 
@@ -47,10 +47,15 @@ namespace SnapLabel.ViewModels {
         }
 
         private void UpdateIconColor() {
-            var theme = Application.Current?.RequestedTheme ?? AppTheme.Light;
-            SaveIconColor = ProductVM.CanSave
-              ? (theme == AppTheme.Dark ? Colors.White : Colors.Black)
-              : Colors.Gray;
+
+            if(CanSaveProduct()) {
+                IsEffectEnabled = true;
+                SaveIconOpacity = 1.0;
+            }
+            else {
+                IsEffectEnabled = false;
+                SaveIconOpacity = 0.5;
+            }
         }
 
         private bool CanSaveProduct() => ProductVM.CanSave;
@@ -84,6 +89,7 @@ namespace SnapLabel.ViewModels {
 
             var productId = await databaseService.TryAddItemAsync(Product);
             if(productId is null) {
+
                 await shellService.DisplayAlertAsync("Duplicate Detected", "A product with the same name already exists.", "OK");
                 return;
             }
