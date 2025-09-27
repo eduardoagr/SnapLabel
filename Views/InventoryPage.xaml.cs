@@ -8,11 +8,6 @@ public partial class InventoryPage : ContentPage {
 
 
         BindingContext = inventoryPageViewModel;
-
-        BluetoothDiscoveryPopUp.WidthRequest = DeviceDisplay.MainDisplayInfo.Width / DeviceDisplay.MainDisplayInfo.Density * 0.35;
-        BluetoothDiscoveryPopUp.HeightRequest = DeviceDisplay.MainDisplayInfo.Height / DeviceDisplay.MainDisplayInfo.Density * 0.48;
-
-
     }
 
     protected override async void OnNavigatedTo(NavigatedToEventArgs args) {

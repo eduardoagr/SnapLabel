@@ -106,34 +106,19 @@
 
         <sfPopup:SfPopup
             x:Name="BluetoothDiscoveryPopUp"
+            Padding="{OnIdiom Phone=20,
+                              Desktop=0}"
             AnimationMode="Zoom"
             HeaderHeight="26"
+            HeightRequest="{OnIdiom Desktop=500}"
+            IsFullScreen="{OnIdiom Phone=True,
+                                   Desktop=False}"
             IsOpen="{Binding IsPopUpOpen}"
-            StaysOpen="True">
+            StaysOpen="True"
+            WidthRequest="{OnIdiom Desktop=500}">
             <sfPopup:SfPopup.HeaderTemplate>
                 <DataTemplate>
-                    <Grid BackgroundColor="{AppThemeBinding Dark={StaticResource Black}, Light={StaticResource White}}" ColumnDefinitions="*,40">
-
-                        <Border Grid.Column="1" StrokeThickness="0">
-                            <Label
-                                FontFamily="Mat"
-                                FontSize="24"
-                                HorizontalTextAlignment="Center"
-                                Text="{Static constant:FontsConstants.Close}"
-                                VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ClosePopUpCommand}" />
-                                </Label.GestureRecognizers>
-                                <Label.Behaviors>
-                                    <mct:TouchBehavior HoveredBackgroundColor="#e81123" />
-                                </Label.Behaviors>
-                            </Label>
-
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="0,8,0,0" />
-                            </Border.StrokeShape>
-                        </Border>
-
+                    <Grid BackgroundColor="{AppThemeBinding Dark={StaticResource Black}, Light={StaticResource White}}">
                         <Label
                             Margin="5"
                             FontSize="10"
@@ -158,7 +143,7 @@
                     <Grid
                         BackgroundColor="{AppThemeBinding Dark={StaticResource PrimaryDarkText},
                                                           Light={StaticResource White}}"
-                        RowDefinitions="4, 30, 40, 300, Auto"
+                        RowDefinitions="4, 30, Auto, *, *"
                         RowSpacing="2">
 
                         <controls:InfiniteProgressBar />
@@ -227,6 +212,7 @@
                             Text="Cancel"
                             TextColor="{AppThemeBinding Light='Black',
                                                         Dark='White'}"
+                            VerticalOptions="End"
                             WidthRequest="200">
                             <VisualStateManager.VisualStateGroups>
                                 <VisualStateGroup x:Name="CommonStates">

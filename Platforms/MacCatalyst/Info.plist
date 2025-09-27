@@ -34,5 +34,7 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>We use Bluetooth to discover nearby devices.</string>
 </dict>
 </plist>
