@@ -1,8 +1,9 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core">
-    xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core">
+
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
     </Style>
@@ -176,18 +177,14 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
     </Style>
 
-    <Style
-        x:Key="Headline"
-        TargetType="Label">
+    <Style x:Key="Headline" TargetType="Label">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource MidnightBlue}, Dark={StaticResource White}}" />
         <Setter Property="FontSize" Value="32" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="HorizontalTextAlignment" Value="Center" />
     </Style>
 
-    <Style
-        x:Key="SubHeadline"
-        TargetType="Label">
+    <Style x:Key="SubHeadline" TargetType="Label">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource MidnightBlue}, Dark={StaticResource White}}" />
         <Setter Property="FontSize" Value="24" />
         <Setter Property="HorizontalOptions" Value="Center" />
@@ -413,16 +410,12 @@
     </Style>
     -->
 
-    <Style
-        ApplyToDerivedTypes="True"
-        TargetType="Page">
+    <Style ApplyToDerivedTypes="True" TargetType="Page">
         <Setter Property="Padding" Value="0" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
     </Style>
 
-    <Style
-        ApplyToDerivedTypes="True"
-        TargetType="Shell">
+    <Style ApplyToDerivedTypes="True" TargetType="Shell">
         <Setter Property="Shell.BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
         <Setter Property="Shell.ForegroundColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
         <Setter Property="Shell.TitleColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
@@ -448,7 +441,7 @@
         <Setter Property="SelectedTabColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
 
-    <!--  Style for Syncfusion's SfTextInputLayout  -->
+    <!--  Custom styles  -->
 
     <Style TargetType="inputLayout:SfTextInputLayout">
         <Setter Property="ContainerType" Value="Outlined" />
@@ -461,5 +454,45 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style x:Key="RippleButtonStyle" TargetType="buttons:SfButton">
+
+        <!--  Layout & Sizing  -->
+        <Setter Property="WidthRequest" Value="200" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="HeightRequest" Value="30"/>
+        <Setter Property="CornerRadius" Value="8" />
+
+        <!--  Theme-aware colors  -->
+        <Setter Property="Background" Value="{AppThemeBinding Light=#E0E0E0, Dark=#2A2A2A}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light=#E0E0E0, Dark=#2A2A2A}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=Black, Dark=White}" />
+
+        <!--  Ripple effect  -->
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <Setter.Value>
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <VisualState.Setters>
+                                <Setter Property="Background" Value="{AppThemeBinding Light=#E0E0E0, Dark=#2A2A2A}" />
+                                <Setter Property="Stroke" Value="{AppThemeBinding Light=#E0E0E0, Dark=#2A2A2A}" />
+                                <Setter Property="StrokeThickness" Value="1" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Pressed">
+                            <VisualState.Setters>
+                                <Setter Property="Background" Value="{AppThemeBinding Light=#CCCCCC, Dark=#444444}" />
+                                <Setter Property="Stroke" Value="{AppThemeBinding Light=#888888, Dark=#AAAAAA}" />
+                                <Setter Property="Scale" Value="0.98" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+
 
 </ResourceDictionary>

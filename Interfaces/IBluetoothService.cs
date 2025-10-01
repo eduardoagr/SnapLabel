@@ -1,21 +1,52 @@
-﻿namespace SnapLabel.Interfaces;
-
-public interface IBluetoothService {
-
+﻿namespace SnapLabel.Interfaces {
     /// <summary>
-    /// Fired every time a new device is found
+    /// Contract for platform-specific Bluetooth service implementations.
+    /// Supports scanning, connecting, data transfer, and disconnecting.
     /// </summary>
+    public interface IBluetoothService {
 
-    event Action<BluetoothDeviceModel> DeviceFound;
+        /// <summary>
+        /// Event raised when a Bluetooth device is discovered during scanning.
+        /// </summary>
+        event Action<BluetoothDeviceModel> DeviceFound;
 
-    /// <summary>
-    /// Start scanning for nearby devices
-    /// </summary>
-    void StartScan();
+        /// <summary>
+        /// Event raised when the connection to a Bluetooth device is lost
+        /// or manually disconnected.
+        /// </summary>
+        event Action DeviceDisconnected;
 
-    /// <summary>
-    /// Stop scanning
-    /// </summary>
-    void StopScan();
+        /// <summary>
+        /// Starts scanning for nearby Bluetooth devices.
+        /// Triggers <see cref="DeviceFound"/> when new devices are found.
+        /// </summary>
+        void StartScan();
 
+        /// <summary>
+        /// Stops the current Bluetooth device scan.
+        /// </summary>
+        void StopScan();
+
+        /// <summary>
+        /// Attempts to establish a connection to a Bluetooth device
+        /// using the provided device identifier.
+        /// </summary>
+        /// <param name="address">The device identifier or address used to connect.</param>
+        /// <returns>True if the connection was successful; otherwise, false.</returns>
+        Task<bool> ConnectAsync(string address);
+
+        /// <summary>
+        /// Sends raw byte data to the connected Bluetooth device.
+        /// Intended for sending printer payloads, images, or commands.
+        /// </summary>
+        /// <param name="data">The byte array to send.</param>
+        /// <returns>True if data was sent successfully; otherwise, false.</returns>
+        Task<bool> SendDataAsync(byte[] data);
+
+        /// <summary>
+        /// Disconnects from the currently connected Bluetooth device.
+        /// Also triggers the <see cref="DeviceDisconnected"/> event.
+        /// </summary>
+        void Disconnect();
+    }
 }

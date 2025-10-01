@@ -1,11 +1,11 @@
 ﻿using FFImageLoading.Maui;
 
 
+
 #if ANDROID
 using SnapLabel.Platforms.Android;
 #elif WINDOWS
 using SnapLabel.Platforms.Windows;
-#elif IOS || MACCATALYST
 #endif
 
 
@@ -37,13 +37,12 @@ public static class MauiProgram {
         builder.Services.AddSingleton(MediaPicker.Default);
         builder.Services.AddSingleton<IShellService, ShellService>();
         builder.Services.AddSingleton<DatabaseService>();
+        builder.Services.AddSingleton(Preferences.Default);
 
 #if WINDOWS
         builder.Services.AddSingleton<IBluetoothService, WindowsBluetoothScanner>();
 #elif ANDROID
         builder.Services.AddSingleton<IBluetoothService, AndroidBluetoothScanner>();
-#elif IOS || MACCATALYST
-        builder.Services.AddSingleton<IBluetoothService, >();
 #endif
         return builder.Build();
     }

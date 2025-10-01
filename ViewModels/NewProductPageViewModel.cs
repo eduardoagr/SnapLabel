@@ -74,7 +74,7 @@ namespace SnapLabel.ViewModels {
             using var ms = new MemoryStream();
             await stream.CopyToAsync(ms);
 
-            var compressed = Operation.CompressImage(ms.ToArray());
+            var compressed = Operations.CompressImage(ms.ToArray());
             ProductVM.ImagePreview = ImageSource.FromStream(() => new MemoryStream(compressed!));
             ProductVM.ImageSize = $"{compressed!.Length / 1024.0:F2} KB";
             ProductVM.ImageBytes = compressed;

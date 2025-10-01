@@ -15,8 +15,6 @@
     Title="Inventory"
     x:DataType="vm:InventoryPageViewModel">
 
-    <!--  TODO: Change to Shell.TitleView if needed  -->
-
     <Shell.TitleView>
         <HorizontalStackLayout
             Margin="0,0,10,0"
@@ -36,6 +34,7 @@
 
 
             <Label
+                x:Name="BluetoothPicker"
                 FontFamily="Mat"
                 FontSize="26"
                 Text="{Static constant:FontsConstants.Bluetooth}"
@@ -46,12 +45,60 @@
                 </Label.GestureRecognizers>
             </Label>
 
+            <sfPopup:SfPopup
+                x:Name="sfPopup"
+                AutoSizeMode="Both"
+                IsOpen="{Binding IsDeviceConnectedPopupVisible}"
+                RelativePosition="AlignBottomLeft"
+                RelativeView="{Reference BluetoothPicker}"
+                ShowHeader="False">
+
+                <sfPopup:SfPopup.PopupStyle>
+                    <sfPopup:PopupStyle CornerRadius="6" />
+                </sfPopup:SfPopup.PopupStyle>
+
+                <sfPopup:SfPopup.ContentTemplate>
+                    <DataTemplate>
+                        <Grid
+                            Padding="8"
+                            BackgroundColor="{AppThemeBinding Dark='#1f1f1f',
+                                                              Light={StaticResource White}}"
+                            ColumnDefinitions="40,Auto,*"
+                            ColumnSpacing="5"
+                            FlowDirection="LeftToRight">
+
+                            <Label
+                                FontFamily="Mat"
+                                FontSize="Large"
+                                Text="{Binding BluetoothDevice.FontIcon}"
+                                VerticalOptions="Center"
+                                VerticalTextAlignment="Center" />
+
+                            <Label
+                                Grid.Column="1"
+                                Text="{Binding BluetoothDevice.Name}"
+                                VerticalOptions="Center"
+                                VerticalTextAlignment="Center" />
+
+                            <buttons:SfButton
+                                Grid.Column="2"
+                                Margin="20,0,0,0"
+                                Command="{Binding DisconnectDeviceCommand}"
+                                Style="{StaticResource RippleButtonStyle}"
+                                Text="Disconnect" />
+                        </Grid>
+
+                    </DataTemplate>
+                </sfPopup:SfPopup.ContentTemplate>
+            </sfPopup:SfPopup>
+
         </HorizontalStackLayout>
     </Shell.TitleView>
 
     <Grid>
         <CollectionView
             HorizontalOptions="Start"
+            ItemSizingStrategy="MeasureAllItems"
             ItemsSource="{Binding Products}"
             SelectionMode="None"
             VerticalScrollBarVisibility="Never"
@@ -77,7 +124,7 @@
                                 Grid.Row="1"
                                 Margin="6,0,0,0"
                                 Text="{Binding Price, StringFormat='{}{0:C}'}" />
-                            <Border Grid.Row="2" StrokeThickness="2">
+                            <Border Grid.Row="2">
                                 <Border.Shadow>
                                     <Shadow
                                         Brush="{AppThemeBinding Dark={StaticResource White},
@@ -89,14 +136,29 @@
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="16" />
                                 </Border.StrokeShape>
-                                <ffimageloading:CachedImage
-                                    Aspect="AspectFill"
-                                    CacheDuration="30"
-                                    FadeAnimationDuration="400"
-                                    FadeAnimationEnabled="true"
-                                    LoadingPlaceholder="out.gif"
-                                    Source="{Binding ImagePath}" />
+                                <Grid>
+                                    <ffimageloading:CachedImage
+                                        Aspect="AspectFill"
+                                        CacheDuration="30"
+                                        FadeAnimationDuration="400"
+                                        FadeAnimationEnabled="true"
+                                        LoadingPlaceholder="out.gif"
+                                        Source="{Binding ImagePath}" />
 
+                                    <Button
+                                        Margin="10"
+                                        BackgroundColor="{AppThemeBinding Light=#E0E0E0,
+                                                                          Dark=#2A2A2A}"
+                                        CornerRadius="60"
+                                        FontFamily="Mat"
+                                        FontSize="Large"
+                                        HorizontalOptions="End"
+                                        IsVisible="{Binding IsRadyToPrint, Source={RelativeSource AncestorType={Type vm:InventoryPageViewModel}}}"
+                                        Text="{Static constant:FontsConstants.Print}"
+                                        TextColor="{AppThemeBinding Dark={StaticResource White},
+                                                                    Light={StaticResource Black}}"
+                                        VerticalOptions="End" />
+                                </Grid>
                             </Border>
                         </Grid>
                     </Border>
@@ -105,7 +167,6 @@
         </CollectionView>
 
         <sfPopup:SfPopup
-            x:Name="BluetoothDiscoveryPopUp"
             Padding="{OnIdiom Phone=20,
                               Desktop=0}"
             AnimationMode="Zoom"
@@ -113,7 +174,7 @@
             HeightRequest="{OnIdiom Desktop=500}"
             IsFullScreen="{OnIdiom Phone=True,
                                    Desktop=False}"
-            IsOpen="{Binding IsPopUpOpen}"
+            IsOpen="{Binding IsDevicesPopupVisible}"
             StaysOpen="True"
             WidthRequest="{OnIdiom Desktop=500}">
             <sfPopup:SfPopup.HeaderTemplate>
@@ -143,7 +204,7 @@
                     <Grid
                         BackgroundColor="{AppThemeBinding Dark={StaticResource PrimaryDarkText},
                                                           Light={StaticResource White}}"
-                        RowDefinitions="4, 30, Auto, *, *"
+                        RowDefinitions="4, Auto, Auto, *, *"
                         RowSpacing="2">
 
                         <controls:InfiniteProgressBar />
@@ -180,10 +241,12 @@
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:BluetoothDeviceModel">
                                     <Grid
-                                        ColumnDefinitions="32,*"
+                                        ColumnDefinitions="Auto,*"
                                         ColumnSpacing="10"
-                                        HeightRequest="52">
+                                        HeightRequest="52"
+                                        RowDefinitions="Auto,Auto">
                                         <Label
+                                            Grid.RowSpan="2"
                                             FontFamily="Mat"
                                             FontSize="Large"
                                             Text="{Binding FontIcon}"
@@ -192,6 +255,12 @@
                                             Grid.Column="1"
                                             Text="{Binding Name}"
                                             VerticalTextAlignment="Center" />
+
+                                        <Label
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            FontSize="12"
+                                            Text="{Binding Status}" />
                                     </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
@@ -200,47 +269,13 @@
                         <buttons:SfButton
                             Grid.Row="4"
                             Margin="10"
-                            Background="{AppThemeBinding Light='#E0E0E0',
-                                                         Dark='#2A2A2A'}"
                             Command="{Binding ClosePopUpCommand}"
-                            CornerRadius="6"
-                            HeightRequest="32"
                             HorizontalOptions="End"
-                            Stroke="{AppThemeBinding Light='#E0E0E0',
-                                                     Dark='#2A2A2A'}"
-                            StrokeThickness="1"
-                            Text="Cancel"
-                            TextColor="{AppThemeBinding Light='Black',
-                                                        Dark='White'}"
-                            VerticalOptions="End"
-                            WidthRequest="200">
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup x:Name="CommonStates">
-
-                                    <!--  Default state  -->
-                                    <VisualState x:Name="Normal">
-                                        <VisualState.Setters>
-                                            <Setter Property="Background" Value="{AppThemeBinding Light='#E0E0E0', Dark='#2A2A2A'}" />
-                                            <Setter Property="Stroke" Value="{AppThemeBinding Light='#E0E0E0', Dark='#2A2A2A'}" />
-                                            <Setter Property="StrokeThickness" Value="1" />
-                                        </VisualState.Setters>
-                                    </VisualState>
-
-                                    <!--  Simulated ripple press  -->
-                                    <VisualState x:Name="Pressed">
-                                        <VisualState.Setters>
-                                            <Setter Property="Background" Value="{AppThemeBinding Light='#CCCCCC', Dark='#444444'}" />
-                                            <Setter Property="Stroke" Value="{AppThemeBinding Light='#888888', Dark='#AAAAAA'}" />
-                                            <Setter Property="Scale" Value="0.98" />
-                                        </VisualState.Setters>
-                                    </VisualState>
-
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>
-                        </buttons:SfButton>
+                            Style="{StaticResource RippleButtonStyle}"
+                            Text="{Binding DevicePopupBtonText}"
+                            VerticalOptions="End" />
 
                     </Grid>
-
                 </DataTemplate>
             </sfPopup:SfPopup.ContentTemplate>
         </sfPopup:SfPopup>

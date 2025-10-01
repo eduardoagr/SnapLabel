@@ -6,14 +6,13 @@ public partial class InventoryPage : ContentPage {
 
         InitializeComponent();
 
-
         BindingContext = inventoryPageViewModel;
     }
 
     protected override async void OnNavigatedTo(NavigatedToEventArgs args) {
 
         if(BindingContext is InventoryPageViewModel vm) {
-            await vm.GetItems();
+            await vm.InitializeAsync();
         }
     }
 }

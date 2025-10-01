@@ -1,6 +1,4 @@
-﻿using SnapLabel.Constants;
-
-using Syncfusion.Licensing;
+﻿using Syncfusion.Licensing;
 
 namespace SnapLabel {
     public partial class App : Application {
@@ -9,7 +7,7 @@ namespace SnapLabel {
 
         public App(AppShell appShell) {
 
-            SyncfusionLicenseProvider.RegisterLicense(ApiKeys.SYNCFUSION);
+            SyncfusionLicenseProvider.RegisterLicense(Constants.Constants.SYNCFUSION);
 
             AppShell = appShell;
 

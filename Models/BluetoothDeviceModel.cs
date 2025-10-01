@@ -1,10 +1,23 @@
-﻿namespace SnapLabel.Models;
+﻿using CommunityToolkit.Mvvm.Messaging;
 
-public class BluetoothDeviceModel {
+namespace SnapLabel.Models;
 
-    public required string Name { get; set; }
+public partial class BluetoothDeviceModel : ObservableObject {
 
-    public required string Address { get; set; }
+    public string? Name { get; set; }
 
-    public required string FontIcon { get; set; } = FontsConstants.Bluetooth;
+    public string? Address { get; set; }
+
+    public string FontIcon { get; set; } = FontsConstants.Bluetooth;
+
+    public string DeviceId { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string Status { get; set; }
+
+    partial void OnStatusChanged(string value) {
+        WeakReferenceMessenger.Default.Send(new BluetoothDeviceMessage(this));
+
+        Debug.WriteLineIf(value == DeviceConectionStatusEnum.Disconnected.ToDisplayString(), "We disconnect");
+    }
 }

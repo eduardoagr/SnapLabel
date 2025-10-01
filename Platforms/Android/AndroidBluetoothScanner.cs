@@ -6,6 +6,7 @@ namespace SnapLabel.Platforms.Android {
     public class AndroidBluetoothScanner : IBluetoothService {
 
         public event Action<BluetoothDeviceModel>? DeviceFound;
+        public event Action DeviceDisconnected;
 
         private readonly BluetoothAdapter _bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
         private readonly HashSet<string> _seenDevices = [];
@@ -96,6 +97,18 @@ namespace SnapLabel.Platforms.Android {
             });
         }
 
+        public Task<bool> ConnectAsync(string address) {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> SendDataAsync(byte[] data) {
+            throw new NotImplementedException();
+        }
+
+        public void Disconnect() {
+            throw new NotImplementedException();
+        }
+
         private class BluetoothScanReceiver(Action<BluetoothDeviceModel> onDeviceFound, Action onDiscoveryFinished) : BroadcastReceiver {
 
             public override void OnReceive(Context context, Intent intent) {
@@ -120,7 +133,8 @@ namespace SnapLabel.Platforms.Android {
                         var model = new BluetoothDeviceModel {
                             Name = name ?? string.Empty,
                             Address = device.Address ?? string.Empty,
-                            FontIcon = GetFontIcon(device)
+                            FontIcon = GetFontIcon(device),
+                            DeviceId = device.Address ?? string.Empty
                         };
 
                         Log.Info("BluetoothScan", $"Device: {model.Name}, MajorClass: {major}, Icon: {model.FontIcon}");
