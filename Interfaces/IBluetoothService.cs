@@ -56,12 +56,5 @@
         /// Checks if Bluetooth is enabled on the device.
         /// </summary>
         Task<bool> IsBluetoothEnabledAsync();
-
-        /// <summary>
-        /// Attempts to read incoming data from the connected Bluetooth device.
-        /// Intended for echo confirmation or printer response.
-        /// </summary>
-        /// <param name="expectedLength">Optional: number of bytes to read.</param>
-        /// <returns>Byte array of received data, or null if nothing received.</returns>
     }
 }

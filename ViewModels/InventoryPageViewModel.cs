@@ -66,6 +66,7 @@ namespace SnapLabel.ViewModels {
                 });
             };
 
+
             if(DeviceInfo.Platform == DevicePlatform.Android) {
                 _ = _bluetoothService.StartListeningAsync(); // fire-and-forget
             }
@@ -80,7 +81,7 @@ namespace SnapLabel.ViewModels {
 
                         case var s when s == DeviceConectionStatusEnum.Connected.ToDisplayString():
 
-                            await _shellService.DisplayToast($"Device connected successfully to: \n {device.Name}",
+                            await _shellService.DisplayToastAsync($"Device connected successfully to: \n {device.Name}",
                                ToastDuration.Short);
 
                             bluetoothIcon = FontsConstants.Bluetooth_connected;
@@ -97,7 +98,7 @@ namespace SnapLabel.ViewModels {
                         case var s when s == DeviceConectionStatusEnum.Disconnected.ToDisplayString():
 
 
-                            await _shellService.DisplayToast($"Device Disconnected from: \n {device.Name}",
+                            await _shellService.DisplayToastAsync($"Device Disconnected from: \n {device.Name}",
                                ToastDuration.Short);
 
                             bluetoothIcon = FontsConstants.Bluetooth;
@@ -119,8 +120,6 @@ namespace SnapLabel.ViewModels {
         public async Task InitializeAsync() {
 
             var items = await _databaseService.GetItemsAsync();
-
-            Products.Clear();
 
             _preferences.Clear();
 
@@ -196,7 +195,7 @@ namespace SnapLabel.ViewModels {
 
                 await AssignAndConnectAsync(bluetoothDeviceModel);
 
-                IsDevicesPopupVisible = false;
+                //IsDevicesPopupVisible = false;
             }
         }
 
@@ -206,7 +205,7 @@ namespace SnapLabel.ViewModels {
             var success = await _bluetoothService!.SendDataAsync(Encoding.ASCII.GetBytes("Hello Printer\n"));
 
             if(success) {
-                Debug.WriteLine("[SUCCESS] ✅ Data sent and delivery confirmed!");
+                await _shellService.DisplayToastAsync("I aconfirmed I gor the data", ToastDuration.Short);
             }
             else {
                 Debug.WriteLine("[FAILED] ❌ Data send failed or no confirmation received");
@@ -227,7 +226,7 @@ namespace SnapLabel.ViewModels {
                 ? DeviceConectionStatusEnum.Connected.ToDisplayString()
                 : DeviceConectionStatusEnum.Failed.ToDisplayString();
 
-            if(isConnected && !Operations.IsDeviceAlreadySaved(_preferences, device)) {
+            if(isConnected || !Operations.IsDeviceAlreadySaved(_preferences, device)) {
 
                 Operations.SavePreferenceInJson(_preferences, device);
 

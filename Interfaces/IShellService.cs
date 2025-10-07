@@ -4,7 +4,7 @@
 
         Task DisplayAlertAsync(string title, string message, string cancel);
 
-        Task DisplayToast(string message, ToastDuration toastDuration, double fontSize = 14);
+        Task DisplayToastAsync(string message, ToastDuration toastDuration, double fontSize = 14);
 
         Task NavigateBackAsync();
 

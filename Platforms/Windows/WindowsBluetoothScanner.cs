@@ -1,6 +1,7 @@
 ﻿using System.Text;
 
 using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.Rfcomm;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Radios;
 using Windows.Networking.Sockets;
@@ -157,14 +158,20 @@ namespace SnapLabel.Platforms.Windows {
                     return false;
 
                 // Get RFCOMM services and pick the first available
-                var services = await device.GetRfcommServicesAsync();
-                var service = services.Services.FirstOrDefault();
-                if(service == null)
-                    return false;
+                var services = await device.GetRfcommServicesForIdAsync(
+                                  RfcommServiceId.SerialPort,
+                                  BluetoothCacheMode.Uncached
+               );
 
-                // Initialize StreamSocket and connect
+                var service = services.Services.FirstOrDefault();
+                if(service == null) {
+                    Debug.WriteLine("[ERROR] No RFCOMM service found.");
+                    return false;
+                }
+
                 _socket = new StreamSocket();
                 await _socket.ConnectAsync(service.ConnectionHostName, service.ConnectionServiceName);
+
 
                 return true;
             } catch(Exception ex) {

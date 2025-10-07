@@ -5,31 +5,33 @@ using System.Text;
 
 namespace SnapLabel.Platforms.Android {
     public class AndroidBluetoothScanner : IBluetoothService {
-        readonly IShellService shellService;
+        readonly IShellService? shellService;
         public event Action<BluetoothDeviceModel>? DeviceFound;
         public event Action? DeviceDisconnected;
         public event Action<byte[]>? DataReceived;
 
-        private readonly BluetoothAdapter _bluetoothAdapter;
+        private readonly BluetoothAdapter? _bluetoothAdapter;
         private readonly HashSet<string> _seenDevices = [];
         private BluetoothSocket? _socket;
         private bool _keepScanning;
-        private readonly BroadcastReceiver _receiver;
+        private readonly BroadcastReceiver? _receiver;
 
         public AndroidBluetoothScanner(IShellService shell) {
-            shellService = shell;
 
-            _bluetoothAdapter = BluetoothAdapter.DefaultAdapter
-                ?? throw new InvalidOperationException("No Bluetooth adapter found on this device.");
+            if(BluetoothPermissionHelper.EnsureBluetoothScanPermission() == true) {
+                shellService = shell;
+                _bluetoothAdapter = BluetoothAdapter.DefaultAdapter
+                    ?? throw new InvalidOperationException("No Bluetooth adapter found on this device.");
 
-            _receiver = new BluetoothScanReceiver(OnDeviceFound);
+                _receiver = new BluetoothScanReceiver(OnDeviceFound);
+            }
         }
 
         public async Task StartListeningAsync() {
             var sppUuid = Java.Util.UUID.FromString("00001101-0000-1000-8000-00805F9B34FB");
             var serverSocket = BluetoothAdapter.DefaultAdapter.ListenUsingRfcommWithServiceRecord("SnapLabel", sppUuid);
-
             ShowToast("📡 Listening for Bluetooth...");
+
 
             while(true) {
                 try {
@@ -45,21 +47,19 @@ namespace SnapLabel.Platforms.Android {
                     await socket.OutputStream.WriteAsync(echo, 0, echo.Length);
                     await socket.OutputStream.FlushAsync();
                     ShowToast("📤 Echo sent: OK");
-
-                    await Task.Delay(1000000); // ⏳ Give Windows time to read
-                    socket.Close();
                 } catch(Exception ex) {
+
                     ShowToast($"❌ Error: {ex.Message}");
                 }
             }
         }
 
         private void ShowToast(string message) {
-            shellService.DisplayToast(message, ToastDuration.Short);
+            shellService?.DisplayToastAsync(message, ToastDuration.Short);
         }
 
         public void StartScan() {
-            if(!_bluetoothAdapter.IsEnabled) {
+            if(!_bluetoothAdapter!.IsEnabled) {
                 System.Diagnostics.Debug.WriteLine("[INFO] Bluetooth is disabled.");
                 return;
             }

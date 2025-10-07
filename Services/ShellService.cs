@@ -6,7 +6,7 @@
             return Shell.Current.DisplayAlert(title, message, cancel);
         }
 
-        public async Task DisplayToast(string message, ToastDuration toastDuration, double fontSize = 14) {
+        public async Task DisplayToastAsync(string message, ToastDuration toastDuration, double fontSize = 14) {
             var cancellationTokenSource = new CancellationTokenSource();
             var toast = Toast.Make(message, toastDuration, fontSize);
             await toast.Show(cancellationTokenSource.Token);
