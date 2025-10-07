@@ -5,7 +5,7 @@
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:constant="clr-namespace:SnapLabel.Constants"
     xmlns:controls="clr-namespace:SnapLabel.Controls"
-    xmlns:effectsView="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:effect="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:ffimageloading="clr-namespace:FFImageLoading.Maui;assembly=FFImageLoading.Maui"
     xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:models="clr-namespace:SnapLabel.Models"
@@ -16,40 +16,52 @@
     x:DataType="vm:InventoryPageViewModel">
 
     <Shell.TitleView>
-        <HorizontalStackLayout
-            Margin="0,0,10,0"
-            FlowDirection="RightToLeft"
-            Spacing="30">
+        <Grid ColumnDefinitions="Auto,*">
 
             <Label
-                FontFamily="Mat"
-                FontSize="26"
-                Text="{Static constant:FontsConstants.Add}"
-                VerticalTextAlignment="Center">
+                Padding="5"
+                FontSize="Medium"
+                Text="Inventory"
+                VerticalTextAlignment="Center" />
 
-                <Label.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding AddItemCommand}" />
-                </Label.GestureRecognizers>
-            </Label>
+            <HorizontalStackLayout
+                Grid.Column="1"
+                HorizontalOptions="End"
+                Spacing="20">
 
+                <Label
+                    x:Name="BluetoothPicker"
+                    FontFamily="Mat"
+                    FontSize="26"
+                    HorizontalTextAlignment="End"
+                    Text="{Binding bluetoothIcon}"
+                    VerticalTextAlignment="Center">
 
-            <Label
-                x:Name="BluetoothPicker"
-                FontFamily="Mat"
-                FontSize="26"
-                Text="{Static constant:FontsConstants.Bluetooth}"
-                VerticalTextAlignment="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding HandleBluetoothCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
 
-                <Label.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding ScanBluetoothCommand}" />
-                </Label.GestureRecognizers>
-            </Label>
+                <Label
+                    FontFamily="Mat"
+                    FontSize="26"
+                    HorizontalTextAlignment="End"
+                    Text="{Static constant:FontsConstants.Add}"
+                    VerticalTextAlignment="Center">
+
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding AddItemCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+            </HorizontalStackLayout>
+
 
             <sfPopup:SfPopup
-                x:Name="sfPopup"
+                AnimationMode="None"
                 AutoSizeMode="Both"
                 IsOpen="{Binding IsDeviceConnectedPopupVisible}"
-                RelativePosition="AlignBottomLeft"
+                RelativePosition="AlignBottom"
                 RelativeView="{Reference BluetoothPicker}"
                 ShowHeader="False">
 
@@ -63,26 +75,24 @@
                             Padding="8"
                             BackgroundColor="{AppThemeBinding Dark='#1f1f1f',
                                                               Light={StaticResource White}}"
-                            ColumnDefinitions="40,Auto,*"
-                            ColumnSpacing="5"
-                            FlowDirection="LeftToRight">
+                            ColumnDefinitions="Auto,Auto"
+                            FlowDirection="LeftToRight"
+                            RowDefinitions="Auto,Auto"
+                            RowSpacing="10">
 
                             <Label
                                 FontFamily="Mat"
                                 FontSize="Large"
-                                Text="{Binding BluetoothDevice.FontIcon}"
-                                VerticalOptions="Center"
-                                VerticalTextAlignment="Center" />
+                                Text="{Binding BluetoothDevice.FontIcon}" />
 
                             <Label
                                 Grid.Column="1"
                                 Text="{Binding BluetoothDevice.Name}"
-                                VerticalOptions="Center"
                                 VerticalTextAlignment="Center" />
 
                             <buttons:SfButton
-                                Grid.Column="2"
-                                Margin="20,0,0,0"
+                                Grid.Row="1"
+                                Grid.ColumnSpan="2"
                                 Command="{Binding DisconnectDeviceCommand}"
                                 Style="{StaticResource RippleButtonStyle}"
                                 Text="Disconnect" />
@@ -92,7 +102,7 @@
                 </sfPopup:SfPopup.ContentTemplate>
             </sfPopup:SfPopup>
 
-        </HorizontalStackLayout>
+        </Grid>
     </Shell.TitleView>
 
     <Grid>
@@ -149,6 +159,8 @@
                                         Margin="10"
                                         BackgroundColor="{AppThemeBinding Light=#E0E0E0,
                                                                           Dark=#2A2A2A}"
+                                        Command="{Binding SendDataCommand, Source={RelativeSource AncestorType={Type vm:InventoryPageViewModel}}}"
+                                        CommandParameter="{Binding .}"
                                         CornerRadius="60"
                                         FontFamily="Mat"
                                         FontSize="Large"
@@ -204,27 +216,20 @@
                     <Grid
                         BackgroundColor="{AppThemeBinding Dark={StaticResource PrimaryDarkText},
                                                           Light={StaticResource White}}"
-                        RowDefinitions="4, Auto, Auto, *, *"
-                        RowSpacing="2">
+                        RowDefinitions="4, Auto, *,Auto"
+                        RowSpacing="12">
 
                         <controls:InfiniteProgressBar />
 
                         <Label
                             Grid.Row="1"
-                            Margin="5,0,0,0"
-                            FontAttributes="Bold"
-                            FontSize="20"
-                            Text="Add a device" />
-
-                        <Label
-                            Grid.Row="2"
                             Margin="5"
                             FontSize="14"
                             Text="Make sure your device is turned on and discoverable. Select a device below to connect." />
 
                         <CollectionView
                             x:Name="DevicesColection"
-                            Grid.Row="3"
+                            Grid.Row="2"
                             Margin="5,0,0,0"
                             ItemSizingStrategy="MeasureAllItems"
                             ItemsSource="{Binding Devices}"

@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 
+using System.Text;
+
 namespace SnapLabel.ViewModels {
 
     public partial class InventoryPageViewModel : ObservableObject {
@@ -12,6 +14,9 @@ namespace SnapLabel.ViewModels {
         #endregion
 
         #region Observable Properties
+
+        [ObservableProperty]
+        public partial string bluetoothIcon { get; set; } = FontsConstants.Bluetooth;
 
         [ObservableProperty]
         public partial BluetoothDeviceModel? BluetoothDevice { get; set; }
@@ -42,7 +47,7 @@ namespace SnapLabel.ViewModels {
 
             _shellService = shellService;
             _databaseService = databaseService;
-            _bluetoothService = bluetoothService;
+            _bluetoothService = bluetoothService ?? throw new ArgumentNullException(nameof(bluetoothService));
             _preferences = preferences;
 
             _bluetoothService.DeviceFound += device => {
@@ -61,6 +66,11 @@ namespace SnapLabel.ViewModels {
                 });
             };
 
+            if(DeviceInfo.Platform == DevicePlatform.Android) {
+                _ = _bluetoothService.StartListeningAsync(); // fire-and-forget
+            }
+
+
             WeakReferenceMessenger.Default.Register<BluetoothDeviceMessage>(this, (r, message) => {
 
                 var device = message.Value;
@@ -70,9 +80,10 @@ namespace SnapLabel.ViewModels {
 
                         case var s when s == DeviceConectionStatusEnum.Connected.ToDisplayString():
 
-                            await _shellService.DisplayToast($"Device connected successfully to {device.Name}",
+                            await _shellService.DisplayToast($"Device connected successfully to: \n {device.Name}",
                                ToastDuration.Short);
 
+                            bluetoothIcon = FontsConstants.Bluetooth_connected;
                             IsRadyToPrint = true;
                             BluetoothDevice = device;
                             DevicePopupBtonText = "Done";
@@ -84,6 +95,12 @@ namespace SnapLabel.ViewModels {
                             break;
 
                         case var s when s == DeviceConectionStatusEnum.Disconnected.ToDisplayString():
+
+
+                            await _shellService.DisplayToast($"Device Disconnected from: \n {device.Name}",
+                               ToastDuration.Short);
+
+                            bluetoothIcon = FontsConstants.Bluetooth;
                             IsRadyToPrint = false;
                             BluetoothDevice = null;
                             break;
@@ -100,9 +117,12 @@ namespace SnapLabel.ViewModels {
 
         #region Methods and Commands
         public async Task InitializeAsync() {
+
             var items = await _databaseService.GetItemsAsync();
 
             Products.Clear();
+
+            _preferences.Clear();
 
             if(items.Count > 0) {
                 foreach(var item in items) {
@@ -125,13 +145,11 @@ namespace SnapLabel.ViewModels {
 
             IsDeviceConnectedPopupVisible = false;
 
-            var device = BluetoothDevice; // snapshot
-            if(device is null)
-                return;
+            var device = BluetoothDevice;
 
-            _bluetoothService?.Disconnect();
+            _bluetoothService?.Disconnect(BluetoothDevice!.DeviceId);
 
-            device.Status = DeviceConectionStatusEnum.Disconnected.ToDisplayString();
+            device!.Status = DeviceConectionStatusEnum.Disconnected.ToDisplayString();
 
             _preferences.Clear();
 
@@ -145,7 +163,13 @@ namespace SnapLabel.ViewModels {
         }
 
         [RelayCommand]
-        void ScanBluetooth() {
+        async Task HandleBluetooth() {
+
+            if(!await _bluetoothService!.IsBluetoothEnabledAsync()) {
+                await _shellService.DisplayAlertAsync("Bluetooth is disabled",
+                    "Please enable Bluetooth to connect to a device.", "OK");
+                return;
+            }
 
             if(BluetoothDevice is not null) {
                 IsDeviceConnectedPopupVisible = true;
@@ -158,27 +182,46 @@ namespace SnapLabel.ViewModels {
         }
 
         [RelayCommand]
-        public async Task AddItem() {
+        async Task AddItem() {
             await _shellService.NavigateToAsync(nameof(NewProductPage));
         }
-
 
         [RelayCommand]
         async Task DeviceSelected(BluetoothDeviceModel bluetoothDeviceModel) {
 
             if(bluetoothDeviceModel is not null) {
 
+                // Reflect to the UI
                 bluetoothDeviceModel.Status = DeviceConectionStatusEnum.Connecting.ToDisplayString();
 
                 await AssignAndConnectAsync(bluetoothDeviceModel);
 
                 IsDevicesPopupVisible = false;
             }
+        }
+
+        [RelayCommand]
+        async Task SendData(Product product) {
+
+            var success = await _bluetoothService!.SendDataAsync(Encoding.ASCII.GetBytes("Hello Printer\n"));
+
+            if(success) {
+                Debug.WriteLine("[SUCCESS] ✅ Data sent and delivery confirmed!");
+            }
+            else {
+                Debug.WriteLine("[FAILED] ❌ Data send failed or no confirmation received");
+            }
 
 
         }
 
+
         private async Task AssignAndConnectAsync(BluetoothDeviceModel device) {
+
+            if(device is null) {
+                return;
+            }
+
             var isConnected = await _bluetoothService!.ConnectAsync(device.DeviceId);
             device.Status = isConnected
                 ? DeviceConectionStatusEnum.Connected.ToDisplayString()

@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:constant="clr-namespace:SnapLabel.Constants"
+    xmlns:effect="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:helpers="clr-namespace:SnapLabel.Helpers"
     xmlns:input="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
     xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
@@ -12,6 +13,13 @@
 
     <Shell.TitleView>
         <Grid>
+            <Label
+                Margin="20,0,0,0"
+                FontSize="Medium"
+                Text="New Product"
+                VerticalTextAlignment="Center" />
+
+
             <Label
                 Margin="0,0,10,0"
                 FontFamily="Mat"
@@ -34,9 +42,10 @@
     <ScrollView>
         <Grid
             Padding="20"
-            RowDefinitions="80, 80, 80, Auto"
-            RowSpacing="20">
+            RowDefinitions="80, 80, 80, 80, Auto"
+            RowSpacing="5">
 
+            <!--  Name  -->
             <inputLayout:SfTextInputLayout Padding="8,0,0,0" Hint="Name">
                 <Entry
                     Keyboard="Text"
@@ -44,8 +53,20 @@
                     VerticalTextAlignment="Center" />
             </inputLayout:SfTextInputLayout>
 
+            <!--  Location  -->
+            <inputLayout:SfTextInputLayout
+                Grid.Row="1"
+                Padding="8,0,0,0"
+                Hint="Loation">
+                <Entry
+                    Keyboard="Text"
+                    Text="{Binding ProductVM.Location}"
+                    VerticalTextAlignment="Center" />
+            </inputLayout:SfTextInputLayout>
+
+
             <!--  Price  -->
-            <inputLayout:SfTextInputLayout Grid.Row="1" Hint="Price">
+            <inputLayout:SfTextInputLayout Grid.Row="2" Hint="Price">
                 <input:SfNumericEntry
                     Padding="10"
                     CustomFormat="C2"
@@ -58,9 +79,21 @@
                     Value="{Binding ProductVM.Price}" />
             </inputLayout:SfTextInputLayout>
 
+            <!--  Capture Image Button  -->
+            <Button
+                Grid.Row="3"
+                BackgroundColor="#2196F3"
+                Command="{Binding CaptureImageCommand}"
+                CornerRadius="8"
+                FontSize="18"
+                HeightRequest="50"
+                Text="Capture Image"
+                TextColor="White" />
+
             <!--  Image Preview  -->
             <Border
-                Grid.Row="3"
+                Grid.Row="4"
+                Margin="0,20,0,0"
                 BackgroundColor="#eee"
                 HeightRequest="300"
                 Stroke="#ccc"
@@ -82,16 +115,7 @@
                 </Border.Shadow>
             </Border>
 
-            <!--  Capture Image Button  -->
-            <Button
-                Grid.Row="2"
-                BackgroundColor="#2196F3"
-                Command="{Binding CaptureImageCommand}"
-                CornerRadius="8"
-                FontSize="18"
-                HeightRequest="50"
-                Text="Capture Image"
-                TextColor="White" />
+
         </Grid>
     </ScrollView>
 

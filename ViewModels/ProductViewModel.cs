@@ -21,6 +21,10 @@ public partial class ProductViewModel : ObservableObject {
     public partial byte[] ImageBytes { get; set; } = Array.Empty<byte>();
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
+    public partial string Location { get; set; }
+
+    [ObservableProperty]
     public partial string ImageSize { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -35,6 +39,7 @@ public partial class ProductViewModel : ObservableObject {
         ImageBytes = product.ImageBytes ?? [];
         ImagePreview = product.ImagePreview;
         ImageSize = product.ImageSize ?? string.Empty;
+        Location = product.Location ?? string.Empty;
 
         // Listen for property changes
         PropertyChanged += (s, e) => ProductPropertiesChanged?.Invoke();
@@ -43,7 +48,8 @@ public partial class ProductViewModel : ObservableObject {
     public bool CanSave =>
         !string.IsNullOrWhiteSpace(Name)
         && Price > 0
-        && ImageBytes.Length > 0;
+        && ImageBytes.Length > 0
+        && !string.IsNullOrWhiteSpace(Location);
 
     [RelayCommand(CanExecute = nameof(CanSave))]
     public void SaveToModel() {
@@ -52,6 +58,7 @@ public partial class ProductViewModel : ObservableObject {
         _product.ImageBytes = ImageBytes;
         _product.ImagePreview = ImagePreview;
         _product.ImageSize = ImageSize;
+        _product.Location = Location;
     }
 
     public Product GetProduct() {

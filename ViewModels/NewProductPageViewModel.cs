@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace SnapLabel.ViewModels {
+﻿namespace SnapLabel.ViewModels {
 
     public partial class NewProductPageViewModel : ObservableObject {
 
@@ -78,6 +76,9 @@ namespace SnapLabel.ViewModels {
             ProductVM.ImagePreview = ImageSource.FromStream(() => new MemoryStream(compressed!));
             ProductVM.ImageSize = $"{compressed!.Length / 1024.0:F2} KB";
             ProductVM.ImageBytes = compressed;
+            Debug.WriteLine($"[Edu] Compressed image length: {compressed?.Length}");
+            ProductVM.SaveToModel();
+            Debug.WriteLine($"[Edu] => Model image length: {ProductVM.GetProduct().ImageBytes?.Length}");
         }
         #endregion
 
@@ -119,6 +120,7 @@ namespace SnapLabel.ViewModels {
                     Product.Name,
                     Product.Price,
                     Product.ImagePath,
+                    Product.Location
                 });
 
                 byte[] qrBytes = GenerateQrCodeBytes(productJson);

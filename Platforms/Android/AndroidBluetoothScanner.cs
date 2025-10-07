@@ -1,176 +1,186 @@
 ﻿using Android.Bluetooth;
 using Android.Content;
-using Android.Util;
+
+using System.Text;
 
 namespace SnapLabel.Platforms.Android {
     public class AndroidBluetoothScanner : IBluetoothService {
-
+        readonly IShellService shellService;
         public event Action<BluetoothDeviceModel>? DeviceFound;
-        public event Action DeviceDisconnected;
+        public event Action? DeviceDisconnected;
+        public event Action<byte[]>? DataReceived;
 
-        private readonly BluetoothAdapter _bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
+        private readonly BluetoothAdapter _bluetoothAdapter;
         private readonly HashSet<string> _seenDevices = [];
-        private BluetoothScanReceiver? _receiver;
+        private BluetoothSocket? _socket;
         private bool _keepScanning;
+        private readonly BroadcastReceiver _receiver;
+
+        public AndroidBluetoothScanner(IShellService shell) {
+            shellService = shell;
+
+            _bluetoothAdapter = BluetoothAdapter.DefaultAdapter
+                ?? throw new InvalidOperationException("No Bluetooth adapter found on this device.");
+
+            _receiver = new BluetoothScanReceiver(OnDeviceFound);
+        }
+
+        public async Task StartListeningAsync() {
+            var sppUuid = Java.Util.UUID.FromString("00001101-0000-1000-8000-00805F9B34FB");
+            var serverSocket = BluetoothAdapter.DefaultAdapter.ListenUsingRfcommWithServiceRecord("SnapLabel", sppUuid);
+
+            ShowToast("📡 Listening for Bluetooth...");
+
+            while(true) {
+                try {
+                    var socket = await serverSocket.AcceptAsync();
+                    ShowToast("🔗 Connected to PC");
+
+                    var buffer = new byte[1024];
+                    int bytesRead = await socket.InputStream.ReadAsync(buffer, 0, buffer.Length);
+                    string received = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    ShowToast($"📥 Received: {received}");
+
+                    var echo = Encoding.UTF8.GetBytes("OK");
+                    await socket.OutputStream.WriteAsync(echo, 0, echo.Length);
+                    await socket.OutputStream.FlushAsync();
+                    ShowToast("📤 Echo sent: OK");
+
+                    await Task.Delay(1000000); // ⏳ Give Windows time to read
+                    socket.Close();
+                } catch(Exception ex) {
+                    ShowToast($"❌ Error: {ex.Message}");
+                }
+            }
+        }
+
+        private void ShowToast(string message) {
+            shellService.DisplayToast(message, ToastDuration.Short);
+        }
 
         public void StartScan() {
-
-            if(_bluetoothAdapter is null) {
-                return;
-            }
-
             if(!_bluetoothAdapter.IsEnabled) {
-                return;
-            }
-
-            if(!BluetoothPermissionHelper.EnsureBluetoothScanPermission()) {
+                System.Diagnostics.Debug.WriteLine("[INFO] Bluetooth is disabled.");
                 return;
             }
 
             _keepScanning = true;
             _seenDevices.Clear();
 
-            _receiver = new BluetoothScanReceiver(
-                onDeviceFound: device => {
-                    if(_seenDevices.Add(device.Address))
-                        DeviceFound?.Invoke(device);
-                },
-                onDiscoveryFinished: RestartDiscoveryIfNeeded
-            );
-
-            var filter = new IntentFilter();
-            filter.AddAction(BluetoothDevice.ActionFound);
-            filter.AddAction(BluetoothAdapter.ActionDiscoveryStarted);
-            filter.AddAction(BluetoothAdapter.ActionDiscoveryFinished);
-
-            Platform.AppContext.RegisterReceiver(_receiver, filter);
-
-
-            bool started = false;
-            try {
-                started = _bluetoothAdapter.StartDiscovery();
-            } catch(Exception ex) {
-                Debug.WriteLine($"StartDiscovery threw: {ex}");
-            }
+            Platform.AppContext.RegisterReceiver(_receiver, new IntentFilter(BluetoothDevice.ActionFound));
+            _bluetoothAdapter.StartDiscovery();
+            System.Diagnostics.Debug.WriteLine("[INFO] Started Bluetooth discovery.");
         }
 
         public void StopScan() {
-
             _keepScanning = false;
 
-            try {
-                if(_bluetoothAdapter?.IsDiscovering == true) {
-                    _bluetoothAdapter.CancelDiscovery();
-                }
-            } catch(Exception ex) {
-                Debug.WriteLine($"CancelDiscovery threw: {ex}");
-            }
+            if(_bluetoothAdapter.IsDiscovering)
+                _bluetoothAdapter.CancelDiscovery();
 
-            if(_receiver != null) {
-                try {
-                    Platform.AppContext.UnregisterReceiver(_receiver);
-                } catch(Exception ex) {
-                    Debug.WriteLine($"UnregisterReceiver threw: {ex}");
-                } finally {
-                    _receiver = null;
-                }
+            try {
+                Platform.AppContext.UnregisterReceiver(_receiver);
+            } catch { }
+
+            System.Diagnostics.Debug.WriteLine("[INFO] Stopped Bluetooth discovery.");
+        }
+
+        public async Task<bool> ConnectAsync(string deviceId) {
+            try {
+                var device = _bluetoothAdapter.GetRemoteDevice(deviceId);
+                if(device == null)
+                    return false;
+
+                var sppUuid = Java.Util.UUID.FromString("00001101-0000-1000-8000-00805F9B34FB");
+                _socket = device.CreateRfcommSocketToServiceRecord(sppUuid);
+
+                if(_bluetoothAdapter.IsDiscovering)
+                    _bluetoothAdapter.CancelDiscovery();
+
+                await _socket!.ConnectAsync();
+                System.Diagnostics.Debug.WriteLine($"[INFO] Connected to {device.Name}.");
+                return true;
+            } catch(Exception ex) {
+                System.Diagnostics.Debug.WriteLine($"[ERROR] ConnectAsync failed: {ex.Message}");
+                return false;
             }
         }
 
-        private void RestartDiscoveryIfNeeded() {
+        public async Task<bool> SendDataAsync(byte[] data) {
+            try {
+                if(_socket == null || !_socket.IsConnected)
+                    return false;
 
-            if(!_keepScanning)
+                await _socket.OutputStream!.WriteAsync(data, 0, data.Length);
+                await _socket.OutputStream.FlushAsync();
+
+                System.Diagnostics.Debug.WriteLine("[INFO] Data sent.");
+                return true;
+            } catch(Exception ex) {
+                System.Diagnostics.Debug.WriteLine($"[ERROR] SendDataAsync failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task Disconnect(string deviceId) {
+            try {
+                _socket?.Close();
+                _socket = null;
+                System.Diagnostics.Debug.WriteLine("[INFO] Disconnected.");
+            } catch(Exception ex) {
+                System.Diagnostics.Debug.WriteLine($"[ERROR] Disconnect failed: {ex.Message}");
+            }
+
+            await Task.CompletedTask;
+        }
+
+        public Task<bool> IsBluetoothEnabledAsync() {
+            return Task.FromResult(_bluetoothAdapter?.IsEnabled ?? false);
+        }
+
+        private void OnDeviceFound(BluetoothDevice device) {
+            if(device == null || string.IsNullOrWhiteSpace(device.Address))
                 return;
 
-            // small delay before restarting to avoid hammering the stack
-            Task.Run(async () => {
-                await Task.Delay(1000);
-                if(!_keepScanning)
-                    return;
+            if(!_seenDevices.Add(device.Address))
+                return;
 
-                try {
-                    bool started = _bluetoothAdapter.StartDiscovery();
-                } catch(Exception ex) {
-                    Debug.WriteLine($"Restart StartDiscovery threw: {ex}");
+            string fontIcon = FontsConstants.Bluetooth;
 
-                }
-            });
-        }
-
-        public Task<bool> ConnectAsync(string address) {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> SendDataAsync(byte[] data) {
-            throw new NotImplementedException();
-        }
-
-        public void Disconnect() {
-            throw new NotImplementedException();
-        }
-
-        private class BluetoothScanReceiver(Action<BluetoothDeviceModel> onDeviceFound, Action onDiscoveryFinished) : BroadcastReceiver {
-
-            public override void OnReceive(Context context, Intent intent) {
-                var action = intent?.Action ?? "<null>";
-                switch(action) {
-                    case BluetoothAdapter.ActionDiscoveryStarted:
-                        break;
-
-                    case BluetoothAdapter.ActionDiscoveryFinished:
-                        onDiscoveryFinished?.Invoke();
-                        break;
-
-                    case BluetoothDevice.ActionFound:
-                        var device = (BluetoothDevice?)intent.GetParcelableExtra(BluetoothDevice.ExtraDevice);
-                        if(device == null) {
-                            return;
-                        }
-
-                        var name = !string.IsNullOrWhiteSpace(device.Name) ? device.Name : device.Address;
-                        int major = device.BluetoothClass != null ? (int)device.BluetoothClass.MajorDeviceClass : -1;
-
-                        var model = new BluetoothDeviceModel {
-                            Name = name ?? string.Empty,
-                            Address = device.Address ?? string.Empty,
-                            FontIcon = GetFontIcon(device),
-                            DeviceId = device.Address ?? string.Empty
-                        };
-
-                        Log.Info("BluetoothScan", $"Device: {model.Name}, MajorClass: {major}, Icon: {model.FontIcon}");
-
-
-
-                        onDeviceFound?.Invoke(model);
-
-
-                        break;
-
-                    default:
-
-                        break;
-                }
-            }
-
-            private static string GetFontIcon(BluetoothDevice device) {
+            try {
                 var btClass = device.BluetoothClass;
-                if(btClass == null)
-                    return FontsConstants.Notification_important; // fallback
+                int major = (int)(btClass?.MajorDeviceClass ?? 0);
 
-                int major = (int)btClass.MajorDeviceClass;
-
-                return major switch {
+                fontIcon = major switch {
                     256 => FontsConstants.Computer,
                     512 => FontsConstants.Smartphone,
                     1024 => FontsConstants.Headphones,
                     1280 => FontsConstants.Mouse,
                     1536 => FontsConstants.Print,
                     1792 => FontsConstants.Watch,
-                    7936 => FontsConstants.Bluetooth_audio, // Uncategorized
-                    _ => FontsConstants.Bluetooth // fallback
+                    7936 => FontsConstants.Bluetooth_audio,
+                    _ => FontsConstants.Bluetooth
                 };
+            } catch(Exception ex) {
+                System.Diagnostics.Debug.WriteLine($"[WARN] Could not map ClassOfDevice: {ex.Message}");
+            }
+
+            DeviceFound?.Invoke(new BluetoothDeviceModel {
+                Name = device.Name ?? "Unknown",
+                FontIcon = fontIcon,
+                DeviceId = device.Address,
+                Address = device.Address.Replace(":", "").ToUpperInvariant()
+            });
+        }
+    }
+
+    internal class BluetoothScanReceiver(Action<BluetoothDevice> onDeviceFound) : BroadcastReceiver {
+        public override void OnReceive(Context? context, Intent? intent) {
+            if(intent?.Action == BluetoothDevice.ActionFound) {
+                var device = (BluetoothDevice?)intent.GetParcelableExtra(BluetoothDevice.ExtraDevice);
+                if(device != null)
+                    onDeviceFound(device);
             }
         }
     }
 }
-

@@ -5,6 +5,9 @@
     /// </summary>
     public interface IBluetoothService {
 
+        Task StartListeningAsync();
+
+
         /// <summary>
         /// Event raised when a Bluetooth device is discovered during scanning.
         /// </summary>
@@ -47,6 +50,18 @@
         /// Disconnects from the currently connected Bluetooth device.
         /// Also triggers the <see cref="DeviceDisconnected"/> event.
         /// </summary>
-        void Disconnect();
+        Task Disconnect(string deviceI);
+
+        /// <summary>
+        /// Checks if Bluetooth is enabled on the device.
+        /// </summary>
+        Task<bool> IsBluetoothEnabledAsync();
+
+        /// <summary>
+        /// Attempts to read incoming data from the connected Bluetooth device.
+        /// Intended for echo confirmation or printer response.
+        /// </summary>
+        /// <param name="expectedLength">Optional: number of bytes to read.</param>
+        /// <returns>Byte array of received data, or null if nothing received.</returns>
     }
 }

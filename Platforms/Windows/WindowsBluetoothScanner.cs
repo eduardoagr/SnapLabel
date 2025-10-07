@@ -1,5 +1,8 @@
-﻿using Windows.Devices.Bluetooth;
+﻿using System.Text;
+
+using Windows.Devices.Bluetooth;
 using Windows.Devices.Enumeration;
+using Windows.Devices.Radios;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 
@@ -11,16 +14,20 @@ namespace SnapLabel.Platforms.Windows {
     /// </summary>
     public class WindowsBluetoothScanner : IBluetoothService {
 
-        // Event fired when a new Bluetooth device is found during scanning
+        /// <summary>
+        /// Event fired when a new Bluetooth device is found during scanning.
+        /// </summary>
         public event Action<BluetoothDeviceModel>? DeviceFound;
 
-        // Event fired when the Bluetooth device connection is lost or disconnected
+        /// <summary>
+        /// Event fired when the Bluetooth device connection is lost or disconnected.
+        /// </summary>
         public event Action? DeviceDisconnected;
+        public event Action<byte[]>? DataReceived;
 
         private DeviceWatcher? _watcher;                 // Device watcher for scanning
-        private CancellationTokenSource? _monitorTokenSource; // For connection health monitoring
-        private bool _keepScanning;                       // Flag for scanning state
-        private StreamSocket? _socket;                     // Active RFCOMM socket connection
+        private bool _keepScanning;                      // Flag for scanning state
+        private StreamSocket? _socket;                   // Active RFCOMM socket connection
         private readonly HashSet<string> _seenDevices = []; // Track discovered devices to avoid duplicates
 
         // Selector string to filter classic Bluetooth (RFCOMM) devices for DeviceWatcher
@@ -29,7 +36,7 @@ namespace SnapLabel.Platforms.Windows {
 
         /// <summary>
         /// Starts scanning for nearby Bluetooth devices.
-        /// Clears previously seen devices and starts DeviceWatcher.
+        /// Clears previously seen devices and starts the DeviceWatcher.
         /// </summary>
         public void StartScan() {
             _keepScanning = true;
@@ -38,7 +45,8 @@ namespace SnapLabel.Platforms.Windows {
         }
 
         /// <summary>
-        /// Stops scanning and shuts down the DeviceWatcher if running.
+        /// Stops scanning for Bluetooth devices.
+        /// If the DeviceWatcher is running, it is stopped and disposed.
         /// </summary>
         public void StopScan() {
             _keepScanning = false;
@@ -124,10 +132,9 @@ namespace SnapLabel.Platforms.Windows {
 
         /// <summary>
         /// Attempts to connect to the Bluetooth device via RFCOMM Serial Port Profile.
-        /// Pairs device if needed, and establishes StreamSocket connection.
-        /// Also starts a background monitor to detect disconnects.
+        /// Pairs the device if needed, and establishes StreamSocket connection.
         /// </summary>
-        /// <param name="deviceId">Device identifier string to connect.</param>
+        /// <param name="deviceId">The DeviceInformation.Id of the target Bluetooth device.</param>
         /// <returns>True if connection succeeded, otherwise false.</returns>
         public async Task<bool> ConnectAsync(string deviceId) {
             try {
@@ -157,7 +164,6 @@ namespace SnapLabel.Platforms.Windows {
 
                 // Initialize StreamSocket and connect
                 _socket = new StreamSocket();
-
                 await _socket.ConnectAsync(service.ConnectionHostName, service.ConnectionServiceName);
 
                 return true;
@@ -168,80 +174,114 @@ namespace SnapLabel.Platforms.Windows {
         }
 
         /// <summary>
-        /// Starts a background task that periodically sends a harmless ping to check connection health.
-        /// If a send operation fails, assumes the connection was lost and triggers disconnect notification.
+        /// Sends raw byte data over the active RFCOMM connection and waits for acknowledgment.
         /// </summary>
-        private void StartConnectionMonitor() {
-            _monitorTokenSource?.Cancel(); // Cancel any existing monitor task
-            _monitorTokenSource = new CancellationTokenSource();
-            var token = _monitorTokenSource.Token;
-
-            Task.Run(async () => {
-                while(!token.IsCancellationRequested) {
-                    try {
-                        if(_socket == null)
-                            break;
-
-                        using(var writer = new DataWriter(_socket.OutputStream)) {
-                            writer.WriteBytes([0x00]); // harmless ping byte
-                            await writer.StoreAsync().AsTask(token);
-                        }
-
-                        await Task.Delay(3000, token); // Wait 3 seconds between pings
-                    } catch(Exception ex) {
-                        Debug.WriteLine($"[WARN] Disconnected during monitor: {ex.Message}");
-                        NotifyDisconnected(); // Cleanup and notify listeners
-                        break;
-                    }
-                }
-            }, token);
-        }
-
-        /// <summary>
-        /// Sends raw byte data over the active RFCOMM connection.
-        /// </summary>
-        /// <param name="data">Data bytes to send.</param>
-        /// <returns>True if data was sent successfully, otherwise false.</returns>
+        /// <param name="data">Byte array to send.</param>
+        /// <returns>True if the data was sent and an acknowledgment was received, otherwise false.</returns>
         public async Task<bool> SendDataAsync(byte[] data) {
+            DataWriter? writer = null;
+            DataReader? reader = null;
             try {
-                if(_socket == null)
+                if(_socket == null || _socket.OutputStream == null || _socket.InputStream == null) {
+                    Debug.WriteLine("[WARN] SendDataAsync: socket is null or disposed");
                     return false;
+                }
 
-                using var writer = new DataWriter(_socket.OutputStream);
+                // --- Send Data ---
+                writer = new DataWriter(_socket.OutputStream);
                 writer.WriteBytes(data);
                 await writer.StoreAsync();
                 await writer.FlushAsync();
-                return true;
+                Debug.WriteLine($"[INFO] Sent {data.Length} bytes: {Encoding.UTF8.GetString(data)}");
+
+                // --- Wait for Acknowledgment ---
+                reader = new DataReader(_socket.InputStream);
+                reader.InputStreamOptions = InputStreamOptions.Partial;
+
+                var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(8));
+
+                try {
+                    // Read available data (flexible size)
+                    var bytesRead = await reader.LoadAsync(1024).AsTask(cancellationTokenSource.Token);
+
+                    if(bytesRead >= 2) {
+                        string response = reader.ReadString(bytesRead).Trim();
+                        Debug.WriteLine($"[INFO] Received acknowledgment: '{response}'");
+
+                        if(response.Contains("OK")) {
+                            Debug.WriteLine("[SUCCESS] Data delivery confirmed!");
+                            return true;
+                        }
+                    }
+                    else {
+                        Debug.WriteLine($"[WARN] Received only {bytesRead} bytes, expected at least 2");
+                    }
+                } catch(TaskCanceledException) {
+                    Debug.WriteLine("[ERROR] Timeout waiting for acknowledgment");
+                } catch(Exception readEx) {
+                    Debug.WriteLine($"[ERROR] Failed to read acknowledgment: {readEx.Message}");
+                }
+
+                return false;
+
             } catch(Exception ex) {
                 Debug.WriteLine($"[ERROR] SendDataAsync failed: {ex.Message}");
                 return false;
+            } finally {
+                // Proper cleanup
+                try {
+                    writer?.DetachStream();
+                    writer?.Dispose();
+                } catch { }
+
+                try {
+                    reader?.DetachStream();
+                    reader?.Dispose();
+                } catch { }
             }
         }
 
-        /// <summary>
-        /// Disconnects the current RFCOMM connection and stops monitoring.
-        /// Notifies subscribers via <see cref="DeviceDisconnected"/> event.
-        /// </summary>
-        public void Disconnect() {
-            NotifyDisconnected();
-        }
 
         /// <summary>
-        /// Cleans up socket and monitoring resources, and fires the DeviceDisconnected event.
+        /// Disconnects the current RFCOMM connection and unpairs the device if paired.
         /// </summary>
-        private void NotifyDisconnected() {
+        /// <param name="deviceId">The device identifier string.</param>
+        public async Task Disconnect(string deviceId) {
             try {
-                _monitorTokenSource?.Cancel();
-                _monitorTokenSource?.Dispose();
-                _monitorTokenSource = null;
+                if(deviceId is null) {
+                    return;
+                }
 
                 _socket?.Dispose();
                 _socket = null;
 
-                DeviceDisconnected?.Invoke();
+                var info = await DeviceInformation.CreateFromIdAsync(deviceId);
+
+                if(info.Pairing.IsPaired) {
+                    var result = await info.Pairing.UnpairAsync();
+                    Debug.WriteLine($"[INFO] Unpairing result: {result.Status}");
+                }
+
             } catch(Exception ex) {
-                Debug.WriteLine($"[ERROR] NotifyDisconnected failed: {ex.Message}");
+                Debug.WriteLine($"[ERROR] DisconnectAsync failed: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Checks if Bluetooth is enabled on the system.
+        /// </summary>
+        /// <returns>True if Bluetooth radio is available and turned on, otherwise false.</returns>
+        public async Task<bool> IsBluetoothEnabledAsync() {
+            var radios = await Radio.GetRadiosAsync();
+            var bluetoothRadio = radios.FirstOrDefault(r => r.Kind == RadioKind.Bluetooth);
+            return bluetoothRadio != null && bluetoothRadio.State == RadioState.On;
+        }
+
+
+        public Task StartListeningAsync() {
+            Debug.WriteLine("[Windows] StartListeningAsync called, but not implemented.");
+            return Task.CompletedTask;
+
         }
     }
 }

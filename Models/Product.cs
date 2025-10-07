@@ -28,10 +28,12 @@
         [Column("Generated date")]
         public string? GeneratedDate { get; set; }
 
+        [Column("Location")]
+        public string? Location { get; set; }
+
         [Ignore]
         public ImageSource? ImagePreview { get; set; }
 
-        [Ignore]
         public byte[]? ImageBytes { get; set; }
 
         public void NormalizeName() {
