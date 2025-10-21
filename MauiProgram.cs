@@ -1,12 +1,9 @@
 ﻿using FFImageLoading.Maui;
 
+using Shiny;
 
+using Supabase;
 
-#if ANDROID
-using SnapLabel.Platforms.Android;
-#elif WINDOWS
-using SnapLabel.Platforms.Windows;
-#endif
 
 
 namespace SnapLabel;
@@ -19,6 +16,7 @@ public static class MauiProgram {
         builder
             .UseMauiApp<App>()
             .UseFFImageLoading()
+            .UseShiny()
             .ConfigureSyncfusionCore()
             .ConfigureFonts(fonts => {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -31,19 +29,22 @@ public static class MauiProgram {
         builder.Logging.AddDebug();
 #endif
 
+        var options = new SupabaseOptions {
+            AutoRefreshToken = true,
+            AutoConnectRealtime = true,
+        };
+
         builder.Services.AddSingleton<AppShell>();
         builder.Services.AddTransient<NewProductPage, NewProductPageViewModel>();
         builder.Services.AddSingleton<InventoryPage, InventoryPageViewModel>();
         builder.Services.AddSingleton(MediaPicker.Default);
         builder.Services.AddSingleton<IShellService, ShellService>();
         builder.Services.AddSingleton<DatabaseService>();
-        builder.Services.AddSingleton(Preferences.Default);
+        builder.Services.AddSingleton(provider =>
+        new Client(Constants.Constants.SUPABASE_URL,
+            Constants.Constants.SUPABASE_APIKEY, options));
+        builder.Services.AddBluetoothLE();
 
-#if WINDOWS
-        builder.Services.AddSingleton<IBluetoothService, WindowsBluetoothScanner>();
-#elif ANDROID
-        builder.Services.AddSingleton<IBluetoothService, AndroidBluetoothScanner>();
-#endif
         return builder.Build();
     }
 }

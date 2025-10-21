@@ -1,4 +1,6 @@
-﻿namespace SnapLabel.ViewModels;
+﻿using System.Globalization;
+
+namespace SnapLabel.ViewModels;
 
 public partial class ProductViewModel : ObservableObject {
 
@@ -14,7 +16,7 @@ public partial class ProductViewModel : ObservableObject {
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
-    public partial decimal Price { get; set; }
+    public partial decimal? Price { get; set; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
@@ -29,6 +31,8 @@ public partial class ProductViewModel : ObservableObject {
 
     [ObservableProperty]
     public partial ImageSource? ImagePreview { get; set; }
+
+    public string FormattedPrice => string.Format(CultureInfo.CurrentCulture, "{0:C}", Price);
 
     public ProductViewModel(Product product) {
         _product = product;
@@ -64,5 +68,9 @@ public partial class ProductViewModel : ObservableObject {
     public Product GetProduct() {
         SaveToModel();
         return _product;
+    }
+
+    partial void OnPriceChanged(decimal? value) {
+        OnPropertyChanged(nameof(FormattedPrice));
     }
 }

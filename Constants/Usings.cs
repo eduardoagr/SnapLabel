@@ -9,8 +9,9 @@ global using Microsoft.Maui.Graphics.Platform;
 
 global using QRCoder;
 
+global using Shiny.BluetoothLE;
+
 global using SnapLabel.Constants;
-global using SnapLabel.Enums;
 global using SnapLabel.Helpers;
 global using SnapLabel.Interfaces;
 global using SnapLabel.Models;
@@ -26,5 +27,4 @@ global using System.Collections.ObjectModel;
 global using System.Diagnostics;
 global using System.Text.Json;
 global using System.Text.RegularExpressions;
-
 global using System.Threading;

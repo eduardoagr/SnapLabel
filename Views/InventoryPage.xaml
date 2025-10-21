@@ -10,102 +10,71 @@
     xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:models="clr-namespace:SnapLabel.Models"
     xmlns:sfPopup="clr-namespace:Syncfusion.Maui.Popup;assembly=Syncfusion.Maui.Popup"
+    xmlns:shiny="clr-namespace:Shiny.BluetoothLE;assembly=Shiny.BluetoothLE"
     xmlns:vm="clr-namespace:SnapLabel.ViewModels"
     x:Name="Root"
     Title="Inventory"
     x:DataType="vm:InventoryPageViewModel">
 
-    <Shell.TitleView>
-        <Grid ColumnDefinitions="Auto,*">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem x:Name="BluetoothPicker" Command="{Binding HandleBluetoothCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="Mat" Glyph="{Binding bluetoothIcon}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
 
-            <Label
-                Padding="5"
-                FontSize="Medium"
-                Text="Inventory"
-                VerticalTextAlignment="Center" />
+        <ToolbarItem Command="{Binding AddItemCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="Mat" Glyph="{Static constant:FontsConstants.Add}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
 
-            <HorizontalStackLayout
-                Grid.Column="1"
-                HorizontalOptions="End"
-                Spacing="20">
-
-                <Label
-                    x:Name="BluetoothPicker"
-                    FontFamily="Mat"
-                    FontSize="26"
-                    HorizontalTextAlignment="End"
-                    Text="{Binding bluetoothIcon}"
-                    VerticalTextAlignment="Center">
-
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding HandleBluetoothCommand}" />
-                    </Label.GestureRecognizers>
-                </Label>
-
-                <Label
-                    FontFamily="Mat"
-                    FontSize="26"
-                    HorizontalTextAlignment="End"
-                    Text="{Static constant:FontsConstants.Add}"
-                    VerticalTextAlignment="Center">
-
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding AddItemCommand}" />
-                    </Label.GestureRecognizers>
-                </Label>
-
-            </HorizontalStackLayout>
-
-
-            <sfPopup:SfPopup
-                AnimationMode="None"
-                AutoSizeMode="Both"
-                IsOpen="{Binding IsDeviceConnectedPopupVisible}"
-                RelativePosition="AlignBottom"
-                RelativeView="{Reference BluetoothPicker}"
-                ShowHeader="False">
-
-                <sfPopup:SfPopup.PopupStyle>
-                    <sfPopup:PopupStyle CornerRadius="6" />
-                </sfPopup:SfPopup.PopupStyle>
-
-                <sfPopup:SfPopup.ContentTemplate>
-                    <DataTemplate>
-                        <Grid
-                            Padding="8"
-                            BackgroundColor="{AppThemeBinding Dark='#1f1f1f',
-                                                              Light={StaticResource White}}"
-                            ColumnDefinitions="Auto,Auto"
-                            FlowDirection="LeftToRight"
-                            RowDefinitions="Auto,Auto"
-                            RowSpacing="10">
-
-                            <Label
-                                FontFamily="Mat"
-                                FontSize="Large"
-                                Text="{Binding BluetoothDevice.FontIcon}" />
-
-                            <Label
-                                Grid.Column="1"
-                                Text="{Binding BluetoothDevice.Name}"
-                                VerticalTextAlignment="Center" />
-
-                            <buttons:SfButton
-                                Grid.Row="1"
-                                Grid.ColumnSpan="2"
-                                Command="{Binding DisconnectDeviceCommand}"
-                                Style="{StaticResource RippleButtonStyle}"
-                                Text="Disconnect" />
-                        </Grid>
-
-                    </DataTemplate>
-                </sfPopup:SfPopup.ContentTemplate>
-            </sfPopup:SfPopup>
-
-        </Grid>
-    </Shell.TitleView>
 
     <Grid>
+        <sfPopup:SfPopup
+            AnimationMode="None"
+            AutoSizeMode="Both"
+            IsOpen="{Binding IsDeviceConnectedPopupVisible}"
+            ShowHeader="False">
+
+            <sfPopup:SfPopup.PopupStyle>
+                <sfPopup:PopupStyle CornerRadius="6" />
+            </sfPopup:SfPopup.PopupStyle>
+
+            <sfPopup:SfPopup.ContentTemplate>
+                <DataTemplate>
+                    <Grid
+                        Padding="8"
+                        BackgroundColor="{AppThemeBinding Dark='#1f1f1f',
+                                                          Light={StaticResource White}}"
+                        ColumnDefinitions="Auto,Auto"
+                        FlowDirection="LeftToRight"
+                        RowDefinitions="Auto,Auto"
+                        RowSpacing="10">
+
+                        <Label
+                            FontFamily="Mat"
+                            FontSize="Large"
+                            Text="{Binding BluetoothDevice.FontIcon}" />
+
+                        <Label
+                            Grid.Column="1"
+                            Text="{Binding BluetoothDevice.Name}"
+                            VerticalTextAlignment="Center" />
+
+                        <buttons:SfButton
+                            Grid.Row="1"
+                            Grid.ColumnSpan="2"
+                            Command="{Binding DisconnectDeviceCommand}"
+                            Style="{StaticResource RippleButtonStyle}"
+                            Text="Disconnect" />
+                    </Grid>
+
+                </DataTemplate>
+            </sfPopup:SfPopup.ContentTemplate>
+        </sfPopup:SfPopup>
+
         <CollectionView
             HorizontalOptions="Start"
             ItemSizingStrategy="MeasureAllItems"
@@ -216,7 +185,7 @@
                     <Grid
                         BackgroundColor="{AppThemeBinding Dark={StaticResource PrimaryDarkText},
                                                           Light={StaticResource White}}"
-                        RowDefinitions="4, Auto, *,Auto"
+                        RowDefinitions="4,Auto,*,Auto"
                         RowSpacing="12">
 
                         <controls:InfiniteProgressBar />
@@ -227,54 +196,31 @@
                             FontSize="14"
                             Text="Make sure your device is turned on and discoverable. Select a device below to connect." />
 
-                        <CollectionView
-                            x:Name="DevicesColection"
-                            Grid.Row="2"
-                            Margin="5,0,0,0"
-                            ItemSizingStrategy="MeasureAllItems"
-                            ItemsSource="{Binding Devices}"
-                            SelectionChangedCommand="{Binding DeviceSelectedCommand}"
-                            SelectionChangedCommandParameter="{Binding SelectedItem, Source={x:Reference DevicesColection}}"
-                            SelectionMode="Single"
-                            VerticalScrollBarVisibility="{OnIdiom Desktop=Always,
-                                                                  Phone=Never}">
+                        <CollectionView Grid.Row="2" ItemsSource="{Binding Devices}">
 
                             <CollectionView.ItemsLayout>
-                                <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
+                                <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
                             </CollectionView.ItemsLayout>
 
                             <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="models:BluetoothDeviceModel">
-                                    <Grid
-                                        ColumnDefinitions="Auto,*"
-                                        ColumnSpacing="10"
-                                        HeightRequest="52"
-                                        RowDefinitions="Auto,Auto">
-                                        <Label
-                                            Grid.RowSpan="2"
-                                            FontFamily="Mat"
-                                            FontSize="Large"
-                                            Text="{Binding FontIcon}"
-                                            VerticalTextAlignment="Center" />
-                                        <Label
-                                            Grid.Column="1"
-                                            Text="{Binding Name}"
-                                            VerticalTextAlignment="Center" />
+                                <DataTemplate x:DataType="shiny:Peripheral">
+                                    <Border Stroke="Transparent">
+                                        <VerticalStackLayout Margin="10">
+                                            <Label Text="{Binding Name}" />
+                                        </VerticalStackLayout>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding DeviceSelectedCommand, Source={x:RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}}}" CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                    </Border>
 
-                                        <Label
-                                            Grid.Row="1"
-                                            Grid.Column="1"
-                                            FontSize="12"
-                                            Text="{Binding Status}" />
-                                    </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
 
                         <buttons:SfButton
-                            Grid.Row="4"
+                            Grid.Row="3"
                             Margin="10"
-                            Command="{Binding ClosePopUpCommand}"
+                            Command="{Binding CloseDevicesPopUpCommand}"
                             HorizontalOptions="End"
                             Style="{StaticResource RippleButtonStyle}"
                             Text="{Binding DevicePopupBtonText}"
@@ -285,6 +231,8 @@
             </sfPopup:SfPopup.ContentTemplate>
         </sfPopup:SfPopup>
     </Grid>
+
+
 
 
 

@@ -11,7 +11,7 @@
         public string? Name { get; set; }
 
         [Column("Price")]
-        public decimal Price { get; set; }
+        public decimal? Price { get; set; }
 
         [Column("ImagePath")]
         public string? ImagePath { get; set; }

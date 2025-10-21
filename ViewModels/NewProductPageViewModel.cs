@@ -11,13 +11,6 @@
         private readonly DatabaseService databaseService;
         #endregion
 
-
-        [ObservableProperty]
-        public partial double SaveIconOpacity { get; set; } = 0.5;
-
-        [ObservableProperty]
-        public partial bool IsEffectEnabled { get; set; } = false;
-
         public ProductViewModel ProductVM { get; }
 
         // Explicit command
@@ -42,18 +35,6 @@
 
             SaveProductCommand?.NotifyCanExecuteChanged();
             UpdateIconColor();
-        }
-
-        private void UpdateIconColor() {
-
-            if(CanSaveProduct()) {
-                IsEffectEnabled = true;
-                SaveIconOpacity = 1.0;
-            }
-            else {
-                IsEffectEnabled = false;
-                SaveIconOpacity = 0.5;
-            }
         }
 
         private bool CanSaveProduct() => ProductVM.CanSave;

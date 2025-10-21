@@ -8,42 +8,19 @@
     xmlns:input="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
     xmlns:inputLayout="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:vm="clr-namespace:SnapLabel.ViewModels"
-    Title="Add product"
+    Title="New Product"
     x:DataType="vm:NewProductPageViewModel">
 
-    <Shell.TitleView>
-        <Grid>
-            <Label
-                Margin="20,0,0,0"
-                FontSize="Medium"
-                Text="New Product"
-                VerticalTextAlignment="Center" />
-
-
-            <Label
-                Margin="0,0,10,0"
-                FontFamily="Mat"
-                FontSize="26"
-                HorizontalTextAlignment="End"
-                Opacity="{Binding SaveIconOpacity}"
-                Text="{Static constant:FontsConstants.Save}"
-                TextColor="{AppThemeBinding Light={StaticResource Black},
-                                            Dark={StaticResource White}}"
-                VerticalTextAlignment="Center">
-
-                <Label.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SaveProductCommand}" />
-                </Label.GestureRecognizers>
-            </Label>
-
-        </Grid>
-    </Shell.TitleView>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding SaveProductCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="Mat" Glyph="{Static constant:FontsConstants.Save}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
 
     <ScrollView>
-        <Grid
-            Padding="20"
-            RowDefinitions="80, 80, 80, 80, Auto"
-            RowSpacing="5">
+        <VerticalStackLayout Padding="20">
 
             <!--  Name  -->
             <inputLayout:SfTextInputLayout Padding="8,0,0,0" Hint="Name">
@@ -54,10 +31,7 @@
             </inputLayout:SfTextInputLayout>
 
             <!--  Location  -->
-            <inputLayout:SfTextInputLayout
-                Grid.Row="1"
-                Padding="8,0,0,0"
-                Hint="Loation">
+            <inputLayout:SfTextInputLayout Padding="8,0,0,0" Hint="Loation">
                 <Entry
                     Keyboard="Text"
                     Text="{Binding ProductVM.Location}"
@@ -66,17 +40,11 @@
 
 
             <!--  Price  -->
-            <inputLayout:SfTextInputLayout Grid.Row="2" Hint="Price">
-                <input:SfNumericEntry
-                    Padding="10"
-                    CustomFormat="C2"
-                    Maximum="10000000"
-                    Minimum="0"
-                    Placeholder="Enter price"
-                    ShowClearButton="False"
-                    TextColor="{AppThemeBinding Dark={StaticResource White},
-                                                Light={StaticResource Black}}"
-                    Value="{Binding ProductVM.Price}" />
+            <inputLayout:SfTextInputLayout Padding="8,0,0,0" Hint="Price">
+                <Entry
+                    Keyboard="Numeric"
+                    Text="{Binding ProductVM.Price}"
+                    VerticalTextAlignment="Center" />
             </inputLayout:SfTextInputLayout>
 
             <!--  Capture Image Button  -->
@@ -92,7 +60,6 @@
 
             <!--  Image Preview  -->
             <Border
-                Grid.Row="4"
                 Margin="0,20,0,0"
                 BackgroundColor="#eee"
                 HeightRequest="300"
@@ -116,7 +83,7 @@
             </Border>
 
 
-        </Grid>
+        </VerticalStackLayout>
     </ScrollView>
 
 
