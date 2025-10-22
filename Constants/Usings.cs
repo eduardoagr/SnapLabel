@@ -19,8 +19,6 @@ global using SnapLabel.Services;
 global using SnapLabel.ViewModels;
 global using SnapLabel.Views;
 
-global using SQLite;
-
 global using Syncfusion.Maui.Core.Hosting;
 
 global using System.Collections.ObjectModel;

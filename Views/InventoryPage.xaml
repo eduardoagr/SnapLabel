@@ -8,9 +8,8 @@
     xmlns:effect="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:ffimageloading="clr-namespace:FFImageLoading.Maui;assembly=FFImageLoading.Maui"
     xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-    xmlns:models="clr-namespace:SnapLabel.Models"
+    xmlns:model="clr-namespace:SnapLabel.Models"
     xmlns:sfPopup="clr-namespace:Syncfusion.Maui.Popup;assembly=Syncfusion.Maui.Popup"
-    xmlns:shiny="clr-namespace:Shiny.BluetoothLE;assembly=Shiny.BluetoothLE"
     xmlns:vm="clr-namespace:SnapLabel.ViewModels"
     x:Name="Root"
     Title="Inventory"
@@ -32,7 +31,7 @@
 
 
     <Grid>
-        <sfPopup:SfPopup
+        <!--<sfPopup:SfPopup
             AnimationMode="None"
             AutoSizeMode="Both"
             IsOpen="{Binding IsDeviceConnectedPopupVisible}"
@@ -73,7 +72,7 @@
 
                 </DataTemplate>
             </sfPopup:SfPopup.ContentTemplate>
-        </sfPopup:SfPopup>
+        </sfPopup:SfPopup>-->
 
         <CollectionView
             HorizontalOptions="Start"
@@ -88,7 +87,7 @@
             </CollectionView.ItemsLayout>
 
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:Product">
+                <DataTemplate x:DataType="model:Product">
                     <Border StrokeThickness="0">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="12" />
@@ -203,11 +202,16 @@
                             </CollectionView.ItemsLayout>
 
                             <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="shiny:Peripheral">
+                                <DataTemplate x:DataType="model:BluetoothDevice">
                                     <Border Stroke="Transparent">
-                                        <VerticalStackLayout Margin="10">
-                                            <Label Text="{Binding Name}" />
-                                        </VerticalStackLayout>
+                                        <HorizontalStackLayout Margin="10" Spacing="10">
+                                            <Label
+                                                FontFamily="Mat"
+                                                FontSize="Medium"
+                                                Text="{Binding Icon}"
+                                                VerticalTextAlignment="Center" />
+                                            <Label Text="{Binding Name}" VerticalTextAlignment="Center" />
+                                        </HorizontalStackLayout>
                                         <Border.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding DeviceSelectedCommand, Source={x:RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}}}" CommandParameter="{Binding .}" />
                                         </Border.GestureRecognizers>

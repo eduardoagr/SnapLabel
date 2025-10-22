@@ -2,7 +2,7 @@
 namespace SnapLabel.ViewModels {
 
     public partial class InventoryPageViewModel(IShellService shellService,
-        DatabaseService databaseService, IBleManager bleManager) : ObservableObject {
+        IBleManager bleManager) : ObservableObject {
 
         private IDisposable? scanSub;
 
@@ -11,7 +11,7 @@ namespace SnapLabel.ViewModels {
         [ObservableProperty]
         public partial string? bluetoothIcon { get; set; } = FontsConstants.Bluetooth;
 
-        public ObservableCollection<IPeripheral> Devices { get; } = [];
+        public ObservableCollection<BluetoothDevice> Devices { get; } = [];
 
         public ObservableCollection<Product> Products { get; set; } = [];
 
@@ -32,13 +32,13 @@ namespace SnapLabel.ViewModels {
         #region Methods and Commands
         public async Task InitializeAsync() {
 
-            var items = await databaseService.GetItemsAsync();
+            ////var items = await databaseService.GetItemsAsync();
 
-            if(items.Count > 0) {
-                foreach(var item in items) {
-                    Products.Add(item);
-                }
-            }
+            ////if(items.Count > 0) {
+            ////    foreach(var item in items) {
+            ////        Products.Add(item);
+            ////    }
+            ////}
         }
 
         [RelayCommand]
@@ -81,8 +81,9 @@ namespace SnapLabel.ViewModels {
 
                 // Avoid duplicates
                 if(!Devices.Any(p => p.Uuid == peripheral.Uuid)) {
+                    var device = new BluetoothDevice(peripheral);
                     MainThread.BeginInvokeOnMainThread(() => {
-                        Devices.Add(peripheral);
+                        Devices.Add(device);
                     });
                 }
             });
@@ -100,7 +101,7 @@ namespace SnapLabel.ViewModels {
         [RelayCommand]
         async Task DeviceSelected(Peripheral peripheral) {
 
-            Debug.WriteLine(peripheral.Native);
+
 
         }
 

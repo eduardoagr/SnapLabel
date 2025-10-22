@@ -8,7 +8,7 @@
         private readonly string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         private readonly IMediaPicker mediaPicker;
         private readonly IShellService shellService;
-        private readonly DatabaseService databaseService;
+        //private readonly DatabaseService databaseService;
         #endregion
 
         public ProductViewModel ProductVM { get; }
@@ -17,11 +17,11 @@
         public IRelayCommand? SaveProductCommand { get; }
 
         #region Constructor
-        public NewProductPageViewModel(IMediaPicker mediaPicker, IShellService shellService,
-            DatabaseService databaseService) {
+        public NewProductPageViewModel(IMediaPicker mediaPicker, IShellService shellService
+            ) {
             this.mediaPicker = mediaPicker;
             this.shellService = shellService;
-            this.databaseService = databaseService;
+            //this.databaseService = databaseService;
 
 
             ProductVM = new ProductViewModel(new Product());
@@ -34,7 +34,6 @@
         private void ProductVM_ProductPropertiesChanged() {
 
             SaveProductCommand?.NotifyCanExecuteChanged();
-            UpdateIconColor();
         }
 
         private bool CanSaveProduct() => ProductVM.CanSave;
@@ -69,14 +68,14 @@
             var Product = ProductVM.GetProduct();
             Product.NormalizeName();
 
-            var productId = await databaseService.TryAddItemAsync(Product);
-            if(productId is null) {
+            //var productId = await databaseService.TryAddItemAsync(Product);
+            //if(productId is null) {
 
-                await shellService.DisplayAlertAsync("Duplicate Detected", "A product with the same name already exists.", "OK");
-                return;
-            }
+            //    await shellService.DisplayAlertAsync("Duplicate Detected", "A product with the same name already exists.", "OK");
+            //    return;
+            //}
 
-            Product.Id = productId.Value;
+            //Product.Id = productId.Value;
 
             // Save image immediately
             string folder = Path.Combine(sharedRoot, $"{Product.Name}_{timestamp}");
@@ -88,7 +87,7 @@
             Product.ImagePath = $"file://{imageFilePath}"; // ✅ ensures CachedImage loads instantly
 
             // Update DB with image path before navigating
-            await databaseService.UpdateItemAsync(Product);
+            //await databaseService.UpdateItemAsync(Product);
 
             // Navigate back ASAP
             await shellService.NavigateBackAsync();
@@ -113,7 +112,7 @@
                 Product.GeneratedDate = DateTime.Now.ToString("F");
                 Product.IsGenerated = true;
 
-                await databaseService.UpdateItemAsync(Product);
+                // await databaseService.UpdateItemAsync(Product);
             });
         }
         #endregion

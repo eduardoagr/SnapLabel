@@ -1,9 +1,11 @@
-﻿namespace SnapLabel.Models {
+﻿using Supabase.Postgrest.Attributes;
+
+namespace SnapLabel.Models {
 
     [Table("Products")]
     public class Product {
 
-        [PrimaryKey, AutoIncrement]
+        [PrimaryKey]
         [Column("Id")]
         public long Id { get; set; }
 
@@ -31,7 +33,6 @@
         [Column("Location")]
         public string? Location { get; set; }
 
-        [Ignore]
         public ImageSource? ImagePreview { get; set; }
 
         public byte[]? ImageBytes { get; set; }

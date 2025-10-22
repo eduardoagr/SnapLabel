@@ -39,7 +39,7 @@ public static class MauiProgram {
         builder.Services.AddSingleton<InventoryPage, InventoryPageViewModel>();
         builder.Services.AddSingleton(MediaPicker.Default);
         builder.Services.AddSingleton<IShellService, ShellService>();
-        builder.Services.AddSingleton<DatabaseService>();
+        //  builder.Services.AddSingleton<DatabaseService>();
         builder.Services.AddSingleton(provider =>
         new Client(Constants.Constants.SUPABASE_URL,
             Constants.Constants.SUPABASE_APIKEY, options));

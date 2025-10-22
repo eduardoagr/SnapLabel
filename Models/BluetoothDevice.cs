@@ -1,0 +1,44 @@
+﻿namespace SnapLabel.Models {
+    public class BluetoothDevice {
+
+        public IPeripheral Peripheral { get; }
+
+        public string Icon { get; }
+
+        public string Name => Peripheral.Name!;
+
+        public string Uuid => Peripheral.Uuid;
+
+        public BluetoothDevice(IPeripheral peripheral) {
+
+            Peripheral = peripheral;
+            Icon = GetIcon(Name);
+        }
+
+        public static string GetIcon(string name) {
+            name = name?.ToLowerInvariant() ?? "";
+
+            if(name.Contains("tv") || name.Contains("frame") || name.Contains("[av]") || name.Contains("av"))
+                return FontsConstants.Tv;
+
+            if(name.Contains("soundbar") || name.Contains("speaker"))
+                return FontsConstants.Speaker;
+
+            if(name.Contains("govee") || name.Contains("ihoment") || name.Contains("light"))
+                return FontsConstants.Lightbulb;
+
+            if(name.Contains("printer") || name.StartsWith("wwm") || name.Contains("epson"))
+                return FontsConstants.Print;
+
+            if(name.Contains("watch") || name.Contains("wear"))
+                return FontsConstants.Watch;
+
+            if(name.Contains("headset") || name.Contains("earbuds") || name.Contains("earbud") || name.Contains("headphones"))
+                return FontsConstants.Headphones;
+
+
+            return FontsConstants.Bluetooth;
+        }
+    }
+
+}

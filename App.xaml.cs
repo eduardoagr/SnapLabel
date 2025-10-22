@@ -17,5 +17,6 @@ namespace SnapLabel {
         protected override Window CreateWindow(IActivationState? activationState) {
             return new Window(AppShell);
         }
+
     }
 }
