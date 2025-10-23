@@ -1,4 +1,6 @@
-﻿using FFImageLoading.Maui;
+﻿using CommunityToolkit.Mvvm.Messaging;
+
+using FFImageLoading.Maui;
 
 using Shiny;
 
@@ -35,15 +37,27 @@ public static class MauiProgram {
         };
 
         builder.Services.AddSingleton<AppShell>();
-        builder.Services.AddTransient<NewProductPage, NewProductPageViewModel>();
-        builder.Services.AddSingleton<InventoryPage, InventoryPageViewModel>();
+
+        // Pages + ViewModels
+        builder.Services.AddTransient<NewProductPage>();
+        builder.Services.AddTransient<NewProductPageViewModel>();
+
+        builder.Services.AddSingleton<InventoryPage>();
+        builder.Services.AddSingleton<InventoryPageViewModel>();
+
+        // Messenger (MVVM Toolkit)
+        builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
+
+        // Other services
         builder.Services.AddSingleton(MediaPicker.Default);
         builder.Services.AddSingleton<IShellService, ShellService>();
-        //  builder.Services.AddSingleton<DatabaseService>();
+
         builder.Services.AddSingleton(provider =>
-        new Client(Constants.Constants.SUPABASE_URL,
-            Constants.Constants.SUPABASE_APIKEY, options));
+            new Client(Constants.Constants.SUPABASE_URL,
+                       Constants.Constants.SUPABASE_APIKEY, options));
+
         builder.Services.AddBluetoothLE();
+
 
         return builder.Build();
     }

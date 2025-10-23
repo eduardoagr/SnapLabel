@@ -18,7 +18,9 @@
         public static string GetIcon(string name) {
             name = name?.ToLowerInvariant() ?? "";
 
-            if(name.Contains("tv") || name.Contains("frame") || name.Contains("[av]") || name.Contains("av"))
+            if(name.Contains("tv") || name.Contains("frame") || name.Contains("[av]") ||
+                name.Contains("av") || name.Contains("qled") || name.Contains("hdtv") ||
+                name.Contains('″'))
                 return FontsConstants.Tv;
 
             if(name.Contains("soundbar") || name.Contains("speaker"))

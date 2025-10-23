@@ -14,7 +14,11 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Command="{Binding SaveProductCommand}">
             <ToolbarItem.IconImageSource>
-                <FontImageSource FontFamily="Mat" Glyph="{Static constant:FontsConstants.Save}" />
+                <FontImageSource
+                    FontFamily="Mat"
+                    Glyph="{Static constant:FontsConstants.Save}"
+                    Color="{AppThemeBinding Dark={StaticResource White},
+                                            Light={StaticResource Black}}" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
     </ContentPage.ToolbarItems>

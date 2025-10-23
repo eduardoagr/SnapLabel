@@ -460,7 +460,7 @@
         <!--  Layout & Sizing  -->
         <Setter Property="WidthRequest" Value="200" />
         <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="HeightRequest" Value="30"/>
+        <Setter Property="HeightRequest" Value="30" />
         <Setter Property="CornerRadius" Value="8" />
 
         <!--  Theme-aware colors  -->
