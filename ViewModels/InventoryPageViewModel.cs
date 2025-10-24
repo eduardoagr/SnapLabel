@@ -50,7 +50,7 @@ namespace SnapLabel.ViewModels {
         /// Initializes the view model and loads product data.
         /// </summary>
         public async Task InitializeAsync() {
-            // TODO: Load products from database
+            IsPrintingPopUoVisible = true;
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace SnapLabel.ViewModels {
                 case ConnectionState.Disconnected:
                     BluetoothIcon = FontsConstants.Bluetooth;
                     IsDeviceConnectedPopupVisible = false;
-                    await shellService.DisplayToastAsync($"Disconnected from {device?.Name}. Reason: {reason}");
+                    await shellService.DisplayToastAsync($"Disconnected Reason: {reason}");
                     Housekeeping();
                     userInitiatedDisconnect = false;
                     Device = null;
@@ -193,7 +193,7 @@ namespace SnapLabel.ViewModels {
 
                 case ConnectionState.Disconnecting:
                     BluetoothIcon = FontsConstants.Bluetooth;
-                    await shellService.DisplayToastAsync($"Disconnecting from {device?.Name}...");
+                    await shellService.DisplayToastAsync($"Disconnecting...");
                     break;
 
                 case ConnectionState.Connected:
@@ -224,6 +224,9 @@ namespace SnapLabel.ViewModels {
             }
 
             IsPrintingPopUoVisible = true;
+
+            Console.WriteLine($"Popup visibility set to: {IsPrintingPopUoVisible}");
+
 
             bool isFinished = await Printer.PrintTextAsync(Device.Peripheral, "Hello");
 

@@ -197,12 +197,12 @@
                         <CollectionView Grid.Row="2" ItemsSource="{Binding Devices}">
 
                             <CollectionView.ItemsLayout>
-                                <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
+                                <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
                             </CollectionView.ItemsLayout>
 
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="model:BluetoothDevice">
-                                    <Border Stroke="Transparent">
+                                    <Border Margin="5" Stroke="Transparent">
                                         <HorizontalStackLayout Margin="10" Spacing="10">
                                             <Label
                                                 FontFamily="Mat"
@@ -214,6 +214,9 @@
                                         <Border.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding ConnectToDeviceCommand, Source={x:RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}}}" CommandParameter="{Binding .}" />
                                         </Border.GestureRecognizers>
+                                        <Border.Behaviors>
+                                            <mct:TouchBehavior DefaultBackgroundColor="{AppThemeBinding Light='Transparent', Dark='Transparent'}" PressedBackgroundColor="{AppThemeBinding Light=#CCCCCC, Dark=#444444}" />
+                                        </Border.Behaviors>
                                     </Border>
 
                                 </DataTemplate>
@@ -246,9 +249,13 @@
 
             <sfPopup:SfPopup.ContentTemplate>
                 <DataTemplate>
-                    <VerticalStackLayout>
-                        <Label Text="Pleas wait" />
+                    <VerticalStackLayout Padding="10">
                         <Image IsAnimationPlaying="True" Source="wait.gif" />
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="Large"
+                            HorizontalTextAlignment="Center"
+                            Text="Pleas wait" />
                     </VerticalStackLayout>
                 </DataTemplate>
             </sfPopup:SfPopup.ContentTemplate>
