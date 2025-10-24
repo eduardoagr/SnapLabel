@@ -50,7 +50,7 @@
             </sfPopup:SfPopup.PopupStyle>
 
             <sfPopup:SfPopup.ContentTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="vm:InventoryPageViewModel">
                     <VerticalStackLayout Padding="20" Spacing="12">
 
                         <Label
@@ -212,7 +212,7 @@
                                             <Label Text="{Binding Name}" VerticalTextAlignment="Center" />
                                         </HorizontalStackLayout>
                                         <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding DeviceSelectedCommand, Source={x:RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}}}" CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{Binding ConnectToDeviceCommand, Source={x:RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}}}" CommandParameter="{Binding .}" />
                                         </Border.GestureRecognizers>
                                     </Border>
 
@@ -226,13 +226,39 @@
                             Command="{Binding CloseDevicesPopUpCommand}"
                             HorizontalOptions="End"
                             Style="{StaticResource RippleButtonStyle}"
-                            Text="{Binding DevicePopupBtonText}"
+                            Text="Close"
                             VerticalOptions="End" />
 
                     </Grid>
                 </DataTemplate>
             </sfPopup:SfPopup.ContentTemplate>
         </sfPopup:SfPopup>
+
+        <sfPopup:SfPopup
+            AnimationMode="None"
+            AutoSizeMode="Both"
+            IsOpen="{Binding IsPrintingPopUoVisible}"
+            ShowHeader="False">
+
+            <sfPopup:SfPopup.PopupStyle>
+                <sfPopup:PopupStyle CornerRadius="16" PopupBackground="{AppThemeBinding Dark='#232323', Light={StaticResource White}}" />
+            </sfPopup:SfPopup.PopupStyle>
+
+            <sfPopup:SfPopup.ContentTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout>
+                        <Label Text="Pleas wait" />
+                        <Image IsAnimationPlaying="True" Source="wait.gif" />
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </sfPopup:SfPopup.ContentTemplate>
+        </sfPopup:SfPopup>
+
+        <Button
+            Command="{Binding SendDataCommand}"
+            Text="Click me"
+            VerticalOptions="End" />
+
 
     </Grid>
 </ContentPage>

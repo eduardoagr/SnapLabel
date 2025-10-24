@@ -17,8 +17,7 @@
         public IRelayCommand? SaveProductCommand { get; }
 
         #region Constructor
-        public NewProductPageViewModel(IMediaPicker mediaPicker, IShellService shellService
-            ) {
+        public NewProductPageViewModel(IMediaPicker mediaPicker, IShellService shellService) {
             this.mediaPicker = mediaPicker;
             this.shellService = shellService;
             //this.databaseService = databaseService;
@@ -93,7 +92,7 @@
             await shellService.NavigateBackAsync();
 
             // Optional: QR generation can be deferred if needed
-            _ = Task.Run(async () => {
+            _ = Task.Run(() => {
 
                 var productJson = JsonSerializer.Serialize(new {
                     Product.Id,

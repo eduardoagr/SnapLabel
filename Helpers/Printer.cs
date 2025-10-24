@@ -49,7 +49,7 @@
             var (characteristic, service) = result.Value;
 
             var qrGen = new QRCodeGenerator();
-            var data = qrGen.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
+            var data = qrGen.CreateQrCode(content, QRCodeGenerator.ECCLevel.L);
             var qrCode = new PngByteQRCode(data);
             var pngBytes = qrCode.GetGraphic(20); // Adjust size, 20 = sharp
 
