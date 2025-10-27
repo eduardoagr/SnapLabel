@@ -12,7 +12,7 @@ namespace SnapLabel.ViewModels {
         private bool _isHandlingBluetooth;
 
         // Tracks whether disconnect was user-initiated
-        bool userInitiatedDisconnect = true;
+        bool userInitiatedDisconnect;
 
         #region Observable Properties
 
@@ -58,10 +58,12 @@ namespace SnapLabel.ViewModels {
         /// </summary>
         [RelayCommand]
         async Task DisconnectDevice() {
-            var deviceName = Device?.Name;
+
+            var device = Device;
 
             userInitiatedDisconnect = true;
             Device?.Peripheral.CancelConnection();
+            await UpdateDeviceConnectionState(ConnectionState.Disconnected, device);
             Housekeeping();
         }
 
@@ -160,6 +162,9 @@ namespace SnapLabel.ViewModels {
 
                 device.Peripheral.WhenStatusChanged().Subscribe(status => {
                     MainThread.BeginInvokeOnMainThread(async () => {
+                        if(device.Peripheral.Status == ConnectionState.Disconnected && userInitiatedDisconnect == true) {
+                            return;
+                        }
                         await UpdateDeviceConnectionState(status, device);
                     });
                 });
@@ -172,28 +177,25 @@ namespace SnapLabel.ViewModels {
         /// Updates UI and state based on connection status.
         /// </summary>
         private async Task UpdateDeviceConnectionState(ConnectionState state, BluetoothDevice? device) {
-            var reason = userInitiatedDisconnect
-                ? "Disconnected manually by user"
-                : device?.Peripheral.Status switch {
-                    ConnectionState.Disconnected => "Device powered off or out of range",
-                    ConnectionState.Connecting => "Connection interrupted",
-                    ConnectionState.Connected => "Unexpected disconnect",
-                    _ => "Unknown"
-                };
-
             switch(state) {
                 case ConnectionState.Disconnected:
                     BluetoothIcon = FontsConstants.Bluetooth;
                     IsDeviceConnectedPopupVisible = false;
+
+                    var reason = userInitiatedDisconnect
+                        ? "Disconnected manually by user"
+                        : "Device powered off or out of range";
+
                     await shellService.DisplayToastAsync($"Disconnected Reason: {reason}");
+
                     Housekeeping();
-                    userInitiatedDisconnect = false;
+                    userInitiatedDisconnect = false; // reset here
                     Device = null;
                     break;
 
                 case ConnectionState.Disconnecting:
                     BluetoothIcon = FontsConstants.Bluetooth;
-                    await shellService.DisplayToastAsync($"Disconnecting...");
+                    await shellService.DisplayToastAsync("Disconnecting...");
                     break;
 
                 case ConnectionState.Connected:
@@ -206,9 +208,6 @@ namespace SnapLabel.ViewModels {
                 case ConnectionState.Connecting:
                     BluetoothIcon = FontsConstants.Bluetooth;
                     await shellService.DisplayToastAsync($"Connecting to {device?.Name}...");
-                    break;
-
-                default:
                     break;
             }
         }

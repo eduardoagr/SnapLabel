@@ -38,37 +38,42 @@
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
     </ContentPage.ToolbarItems>
-    <Grid>
+
+    <Grid x:Name="Container">
+
         <sfPopup:SfPopup
+            Padding="5"
             AnimationMode="None"
             AutoSizeMode="Both"
             IsOpen="{Binding IsDeviceConnectedPopupVisible}"
+            RelativePosition="AlignTopRight"
+            RelativeView="{x:Reference Container}"
             ShowHeader="False">
 
             <sfPopup:SfPopup.PopupStyle>
-                <sfPopup:PopupStyle CornerRadius="16" PopupBackground="{AppThemeBinding Dark='#232323', Light={StaticResource White}}" />
+                <sfPopup:PopupStyle CornerRadius="0" PopupBackground="{AppThemeBinding Dark='#232323', Light={StaticResource White}}" />
             </sfPopup:SfPopup.PopupStyle>
 
             <sfPopup:SfPopup.ContentTemplate>
                 <DataTemplate x:DataType="vm:InventoryPageViewModel">
-                    <VerticalStackLayout Padding="20" Spacing="12">
-
+                    <VerticalStackLayout Padding="12" Spacing="6">
                         <Label
                             FontFamily="Mat"
-                            FontSize="32"
+                            FontSize="28"
                             HorizontalTextAlignment="Center"
                             Text="{Binding Device.Icon}" />
-
-                        <Label HorizontalTextAlignment="Center" Text="{Binding Device.Name}" />
-
+                        <Label
+                            FontSize="14"
+                            HorizontalTextAlignment="Center"
+                            Text="{Binding Device.Name}" />
                         <buttons:SfButton
                             Command="{Binding DisconnectDeviceCommand}"
+                            FontSize="14"
                             HorizontalOptions="Center"
                             Style="{StaticResource RippleButtonStyle}"
-                            Text="Disconnect" />
+                            Text="Disconnect"
+                            WidthRequest="120" />
                     </VerticalStackLayout>
-
-
                 </DataTemplate>
             </sfPopup:SfPopup.ContentTemplate>
         </sfPopup:SfPopup>
