@@ -27,27 +27,26 @@
         <VerticalStackLayout Padding="20">
 
             <!--  Name  -->
-            <inputLayout:SfTextInputLayout Padding="8,0,0,0" Hint="Name">
+            <inputLayout:SfTextInputLayout Hint="Name">
                 <Entry
                     Keyboard="Text"
                     Text="{Binding ProductVM.Name}"
                     VerticalTextAlignment="Center" />
             </inputLayout:SfTextInputLayout>
 
-            <!--  Location  -->
-            <inputLayout:SfTextInputLayout Padding="8,0,0,0" Hint="Loation">
-                <Entry
-                    Keyboard="Text"
-                    Text="{Binding ProductVM.Location}"
-                    VerticalTextAlignment="Center" />
-            </inputLayout:SfTextInputLayout>
-
-
             <!--  Price  -->
-            <inputLayout:SfTextInputLayout Padding="8,0,0,0" Hint="Price">
+            <inputLayout:SfTextInputLayout Hint="Price">
                 <Entry
                     Keyboard="Numeric"
                     Text="{Binding ProductVM.Price}"
+                    VerticalTextAlignment="Center" />
+            </inputLayout:SfTextInputLayout>
+
+            <!--  Location  -->
+            <inputLayout:SfTextInputLayout Hint="Loation">
+                <Entry
+                    Keyboard="Text"
+                    Text="{Binding ProductVM.Location}"
                     VerticalTextAlignment="Center" />
             </inputLayout:SfTextInputLayout>
 

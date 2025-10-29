@@ -10,7 +10,7 @@ public partial class InventoryPageViewModel(IShellService shellService, IBleMana
     private bool _isHandlingBluetooth;
 
     // Tracks whether disconnect was user-initiated
-    bool userInitiatedDisconnect;
+    private bool userInitiatedDisconnect;
 
     #region Observable Properties
 
