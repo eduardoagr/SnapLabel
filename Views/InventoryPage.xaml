@@ -15,7 +15,7 @@
     x:DataType="vm:InventoryPageViewModel">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem x:Name="BluetoothPicker" Command="{Binding HandleBluetoothCommand}">
+        <ToolbarItem Command="{Binding HandleBluetoothCommand}">
             <ToolbarItem.IconImageSource>
                 <FontImageSource
                     FontFamily="Mat"
@@ -42,7 +42,7 @@
     <Grid x:Name="Container">
 
         <sfPopup:SfPopup
-            Padding="5"
+            Padding="20"
             AnimationMode="None"
             AutoSizeMode="Both"
             IsOpen="{Binding IsDeviceConnectedPopupVisible}"
@@ -270,7 +270,6 @@
             Command="{Binding SendDataCommand}"
             Text="Click me"
             VerticalOptions="End" />
-
-
+        
     </Grid>
 </ContentPage>
