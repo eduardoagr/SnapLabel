@@ -1,14 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-
-using FFImageLoading.Maui;
-
-using Shiny;
-
-using Supabase;
-
-
-
-namespace SnapLabel;
+﻿namespace SnapLabel;
 
 public static class MauiProgram {
 

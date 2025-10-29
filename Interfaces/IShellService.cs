@@ -1,14 +1,13 @@
-﻿namespace SnapLabel.Interfaces {
+﻿namespace SnapLabel.Interfaces;
 
-    public interface IShellService {
+public interface IShellService {
 
-        Task DisplayAlertAsync(string title, string message, string cancel);
+    Task DisplayAlertAsync(string title, string message, string cancel);
 
-        Task DisplayToastAsync(string message, ToastDuration toastDuration = ToastDuration.Short,
-            double fontSize = 14);
+    Task DisplayToastAsync(string message, ToastDuration toastDuration = ToastDuration.Short,
+        double fontSize = 14);
 
-        Task NavigateBackAsync();
+    Task NavigateBackAsync();
 
-        Task NavigateToAsync(string route);
-    }
+    Task NavigateToAsync(string route);
 }

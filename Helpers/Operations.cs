@@ -1,33 +1,32 @@
-﻿namespace SnapLabel.Helpers {
+﻿namespace SnapLabel.Helpers;
 
-    public class Operations() {
+public class Operations() {
 
-        public static byte[]? CompressImage(byte[] originalBytes, int initialWidth = 1000,
-            int maxSizeKb = 20) {
-            int targetWidth = initialWidth;
-            float compressionQuality = 0.6f;
+    public static byte[]? CompressImage(byte[] originalBytes, int initialWidth = 1000,
+        int maxSizeKb = 20) {
+        int targetWidth = initialWidth;
+        float compressionQuality = 0.6f;
 
-            byte[] compressed;
+        byte[] compressed;
 
-            do {
-                using var inputStream = new MemoryStream(originalBytes);
-                var image = PlatformImage.FromStream(inputStream);
+        do {
+            using var inputStream = new MemoryStream(originalBytes);
+            var image = PlatformImage.FromStream(inputStream);
 
-                var resized = image.Downsize(targetWidth, true);
+            var resized = image.Downsize(targetWidth, true);
 
-                using var outputStream = new MemoryStream();
-                resized.Save(outputStream, ImageFormat.Jpeg, quality: compressionQuality);
-                compressed = outputStream.ToArray();
+            using var outputStream = new MemoryStream();
+            resized.Save(outputStream, ImageFormat.Jpeg, quality: compressionQuality);
+            compressed = outputStream.ToArray();
 
-                if(compressed.Length <= maxSizeKb * 1024)
-                    return compressed;
+            if(compressed.Length <= maxSizeKb * 1024)
+                return compressed;
 
-                compressionQuality -= 0.1f;
-                targetWidth -= 100;
+            compressionQuality -= 0.1f;
+            targetWidth -= 100;
 
-            } while(compressionQuality >= 0.3f && targetWidth >= 300);
+        } while(compressionQuality >= 0.3f && targetWidth >= 300);
 
-            return null;
-        }
+        return null;
     }
 }
