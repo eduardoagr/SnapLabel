@@ -1,15 +1,13 @@
 using System;
+
 using Microsoft.Maui;
 using Microsoft.Maui.Hosting;
 
-namespace SnapLabel
-{
-    internal class Program : MauiApplication
-    {
+namespace SnapLabel {
+    internal class Program : MauiApplication {
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 
-        static void Main(string[] args)
-        {
+        static void Main(string[] args) {
             var app = new Program();
             app.Run(args);
         }

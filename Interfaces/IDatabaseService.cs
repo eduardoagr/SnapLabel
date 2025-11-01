@@ -1,4 +1,5 @@
 ﻿namespace SnapLabel.Interfaces;
+
 public interface IDatabaseService {
 
     Task<Product?> TryAddProductAsync(Product product);
@@ -12,5 +13,4 @@ public interface IDatabaseService {
     Task<bool> UpdateProductAsync(Product product);
 
     Task<bool> DeleteProductAsync(long id);
-
 }

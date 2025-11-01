@@ -3,13 +3,15 @@
 public partial class NewProductPageViewModel : ObservableObject {
 
     #region Readonly and Static Fields
+
     private static readonly QRCodeGenerator qrGenerator = new();
     private readonly string sharedRoot = @"\\Ed-pc\E\SnapLabel.Images";
     private readonly string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
     private readonly IMediaPicker mediaPicker;
     private readonly IShellService shellService;
     //private readonly DatabaseService databaseService;
-    #endregion
+
+    #endregion Readonly and Static Fields
 
     public ProductViewModel ProductVM { get; }
 
@@ -17,27 +19,28 @@ public partial class NewProductPageViewModel : ObservableObject {
     public IRelayCommand? SaveProductCommand { get; }
 
     #region Constructor
+
     public NewProductPageViewModel(IMediaPicker mediaPicker, IShellService shellService) {
         this.mediaPicker = mediaPicker;
         this.shellService = shellService;
         //this.databaseService = databaseService;
-
 
         ProductVM = new ProductViewModel(new Product());
         ProductVM.ProductPropertiesChanged += ProductVM_ProductPropertiesChanged;
 
         SaveProductCommand = new RelayCommand(async () => await SaveProductAsync(), CanSaveProduct);
     }
-    #endregion
+
+    #endregion Constructor
 
     private void ProductVM_ProductPropertiesChanged() {
-
         SaveProductCommand?.NotifyCanExecuteChanged();
     }
 
     private bool CanSaveProduct() => ProductVM.CanSave;
 
     #region Command for picking/capturing images
+
     [RelayCommand]
     public async Task CaptureImageAsync() {
         if(!mediaPicker.IsCaptureSupported)
@@ -59,17 +62,17 @@ public partial class NewProductPageViewModel : ObservableObject {
         ProductVM.SaveToModel();
         Debug.WriteLine($"[Edu] => Model image length: {ProductVM.GetProduct().ImageBytes?.Length}");
     }
-    #endregion
+
+    #endregion Command for picking/capturing images
 
     #region Command for saving to database
-    public async Task SaveProductAsync() {
 
+    public async Task SaveProductAsync() {
         var Product = ProductVM.GetProduct();
         Product.NormalizeName();
 
         //var productId = await databaseService.TryAddItemAsync(Product);
         //if(productId is null) {
-
         //    await shellService.DisplayAlertAsync("Duplicate Detected", "A product with the same name already exists.", "OK");
         //    return;
         //}
@@ -93,7 +96,6 @@ public partial class NewProductPageViewModel : ObservableObject {
 
         // Optional: QR generation can be deferred if needed
         _ = Task.Run(() => {
-
             var productJson = JsonSerializer.Serialize(new {
                 Product.Id,
                 Product.Name,
@@ -114,14 +116,17 @@ public partial class NewProductPageViewModel : ObservableObject {
             // await databaseService.UpdateItemAsync(Product);
         });
     }
-    #endregion
+
+    #endregion Command for saving to database
 
     #region Method for generating QR code bytes
+
     public byte[] GenerateQrCodeBytes(string content) {
         var qrCodeData = qrGenerator.CreateQrCode
             (content, QRCodeGenerator.ECCLevel.Q);
         var qrCode = new PngByteQRCode(qrCodeData);
         return qrCode.GetGraphic(10);
     }
-    #endregion
+
+    #endregion Method for generating QR code bytes
 }

@@ -1,6 +1,6 @@
 ﻿namespace SnapLabel.Models;
-public class BluetoothDevice {
 
+public class BluetoothDevice {
     public IPeripheral Peripheral { get; }
 
     public string Icon { get; }
@@ -9,8 +9,9 @@ public class BluetoothDevice {
 
     public string Uuid => Peripheral.Uuid;
 
-    public BluetoothDevice(IPeripheral peripheral) {
 
+
+    public BluetoothDevice(IPeripheral peripheral) {
         Peripheral = peripheral;
         Icon = GetIcon(Name);
     }
@@ -40,6 +41,10 @@ public class BluetoothDevice {
 
         if(name.Contains("headset") || name.Contains("earbuds") || name.Contains("earbud") || name.Contains("headphones"))
             return FontsConstants.Headphones;
+
+        if(name.Contains("xbox") || name.Contains("controller")) {
+            return FontsConstants.Gamepad;
+        }
 
         return FontsConstants.Bluetooth;
     }

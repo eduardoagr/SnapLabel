@@ -388,7 +388,7 @@
 
     <!--
     <Style TargetType="TitleBar">
-        <Setter Property="MinimumHeightRequest" Value="32"/>
+        <Setter Property="MinimumHeightRequest" Value="32" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="TitleActiveStates">
@@ -492,7 +492,5 @@
                 </VisualStateGroupList>
             </Setter.Value>
         </Setter>
-
     </Style>
-
 </ResourceDictionary>

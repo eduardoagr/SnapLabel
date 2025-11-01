@@ -11,7 +11,7 @@
 	<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 	<uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-	
+
 	<!-- Required only if your app needs to access images or photos that other apps created -->
 	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 	<!-- Required only if your app needs to access videos that other apps created -->
@@ -24,5 +24,4 @@
 			<action android:name="android.media.action.IMAGE_CAPTURE" />
 		</intent>
 	</queries>
-	
 </manifest>

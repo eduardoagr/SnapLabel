@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 
 namespace SnapLabel.ViewModels;
-public partial class ProductViewModel : ObservableObject {
 
+public partial class ProductViewModel : ObservableObject {
     // Event to notify changes in properties
 
     public event Action? ProductPropertiesChanged;

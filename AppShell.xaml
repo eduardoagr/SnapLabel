@@ -2,14 +2,23 @@
     x:Class="SnapLabel.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:constant="clr-namespace:SnapLabel.Constants"
     xmlns:views="clr-namespace:SnapLabel.Views"
-    Title="SnapLabel"
-    FlyoutBehavior="Disabled">
+    Title="SnapLabel">
 
-    <ShellContent
-        Title="Inventory"
-        ContentTemplate="{DataTemplate views:InventoryPage}"
-        Route="InventoryPage" />
+    <TabBar>
+        <ShellContent
+            Title="Inventory"
+            ContentTemplate="{DataTemplate views:InventoryPage}"
+            Icon="{FontImageSource FontFamily=Mat,
+                                   Glyph={x:Static constant:FontsConstants.Inventory}}"
+            Route="InventoryPage" />
 
-
+        <ShellContent
+            Title="Draw"
+            ContentTemplate="{DataTemplate views:DrawingPage}"
+            Icon="{FontImageSource FontFamily=Mat,
+                                   Glyph={x:Static constant:FontsConstants.Draw}}"
+            Route="DrawingPage" />
+    </TabBar>
 </Shell>

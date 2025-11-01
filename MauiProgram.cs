@@ -3,6 +3,9 @@
 public static class MauiProgram {
 
     public static MauiApp CreateMauiApp() {
+
+        SyncfusionLicenseProvider.RegisterLicense(AppConstants.SYNCFUSION);
+
         var builder = MauiApp.CreateBuilder();
 
         builder
@@ -32,8 +35,12 @@ public static class MauiProgram {
         builder.Services.AddTransient<NewProductPage>();
         builder.Services.AddTransient<NewProductPageViewModel>();
 
+        builder.Services.AddSingleton<DrawingPage>();
+        builder.Services.AddTransient<DrawingPageViewModel>();
+
         builder.Services.AddSingleton<InventoryPage>();
         builder.Services.AddSingleton<InventoryPageViewModel>();
+
 
         // Messenger (MVVM Toolkit)
         builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
@@ -41,13 +48,13 @@ public static class MauiProgram {
         // Other services
         builder.Services.AddSingleton(MediaPicker.Default);
         builder.Services.AddSingleton<IShellService, ShellService>();
+        builder.Services.AddSingleton<IPrintingPopupService, PrintingPopupService>();
 
         builder.Services.AddSingleton(provider =>
-            new Client(Constants.Constants.SUPABASE_URL,
-                       Constants.Constants.SUPABASE_APIKEY, options));
+            new Client(AppConstants.SUPABASE_URL,
+                       AppConstants.SUPABASE_APIKEY, options));
 
         builder.Services.AddBluetoothLE();
-
 
         return builder.Build();
     }

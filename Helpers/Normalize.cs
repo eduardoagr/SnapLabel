@@ -1,9 +1,9 @@
 ﻿namespace SnapLabel.Helpers;
+
 public static class Normalize {
     private static readonly Regex _whitespaceRegex = new(@"\s+", RegexOptions.Compiled);
 
     public static string NormalizeStrings(string? input) {
-
         if(string.IsNullOrWhiteSpace(input)) {
             return string.Empty;
         }

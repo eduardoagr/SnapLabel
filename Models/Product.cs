@@ -1,6 +1,7 @@
 ﻿using Supabase.Postgrest.Attributes;
 
 namespace SnapLabel.Models;
+
 [Table("products")]
 public class Product {
 
@@ -37,6 +38,7 @@ public class Product {
 
     // UI-only properties — not stored in Supabase
     public ImageSource? ImagePreview { get; set; }
+
     public byte[]? ImageBytes { get; set; }
 
     public void NormalizeName() {

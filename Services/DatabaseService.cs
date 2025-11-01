@@ -1,6 +1,6 @@
 ﻿namespace SnapLabel.Services;
-//public class DatabaseService {
 
+//public class DatabaseService {
 //    // SemaphoreSlim is async-friendly and prevents race conditions
 //    private readonly SemaphoreSlim _initSemaphore = new(1, 1);
 
@@ -15,7 +15,6 @@
 //    /// Uses SemaphoreSlim for thread-safe async initialization.
 //    /// </summary>
 //    private async Task InitializeAsync() {
-
 //        if(_isInitialized) {
 //            return;
 //        }
@@ -43,7 +42,6 @@
 //    /// Retrieves all products from the database.
 //    /// </summary>
 //    public async Task<List<Product>> GetItemsAsync() {
-
 //        await InitializeAsync();
 
 //        var items = await _database!.Table<Product>().ToListAsync();
@@ -53,10 +51,9 @@
 
 //    /// <summary>
 //    /// Attempts to add a product if it doesn't already exist.
-//    /// Checks for uniqueness by ID, name, and image content.
+//    /// Checks for uniqueness by PeripheralID, name, and image content.
 //    /// </summary>
 //    public async Task<long?> TryAddItemAsync(Product product) {
-
 //        await InitializeAsync();
 
 //        var existing = await _database!.Table<Product>()
@@ -67,7 +64,6 @@
 //            // Duplicate found — do not insert
 //            return null;
 //        }
-
 
 //        await _database.InsertAsync(product);
 
@@ -83,7 +79,7 @@
 //    }
 
 //    /// <summary>
-//    /// Retrieves a product by its primary key ID.
+//    /// Retrieves a product by its primary key PeripheralID.
 //    /// </summary>
 //    public async Task<Product?> GetItemByIdAsync(int id) {
 //        await InitializeAsync();

@@ -64,6 +64,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiFont Remove="C:\Users\egome\.nuget\packages\syncfusion.maui.core\31.2.4\buildTransitive\..\buildTransitive\Resources\Fonts\MauiMaterialAssets.ttf" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="12.2.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="FFImageLoading.Maui" Version="1.3.2" />
@@ -77,6 +81,7 @@
 		<PackageReference Include="Syncfusion.Maui.Core" Version="31.2.4" />
 		<PackageReference Include="Syncfusion.Maui.Inputs" Version="31.2.4" />
 		<PackageReference Include="Syncfusion.Maui.Popup" Version="31.2.4" />
+		<PackageReference Include="Syncfusion.Maui.Toolbar" Version="31.2.4" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -86,6 +91,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Views\DrawingPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\InventoryPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

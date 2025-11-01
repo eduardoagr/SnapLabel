@@ -24,7 +24,6 @@ public class Operations() {
 
             compressionQuality -= 0.1f;
             targetWidth -= 100;
-
         } while(compressionQuality >= 0.3f && targetWidth >= 300);
 
         return null;

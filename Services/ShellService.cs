@@ -6,6 +6,10 @@ public class ShellService : IShellService {
         return Shell.Current.DisplayAlert(title, message, cancel);
     }
 
+    public Task<bool> DisplayConfirmAsync(string title, string message, string accept, string cancel) {
+        return Shell.Current.DisplayAlert(title, message, accept, cancel);
+    }
+
     public async Task DisplayToastAsync(string message, ToastDuration toastDuration, double fontSize = 14) {
         var cancellationTokenSource = new CancellationTokenSource();
         var toast = Toast.Make(message, toastDuration, fontSize);

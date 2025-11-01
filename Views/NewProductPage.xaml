@@ -24,35 +24,31 @@
     </ContentPage.ToolbarItems>
 
     <ScrollView>
-        <VerticalStackLayout Padding="20">
+        <VerticalStackLayout Padding="20" Spacing="10">
 
             <!--  Name  -->
-            <inputLayout:SfTextInputLayout Hint="Name">
-                <Entry
-                    Keyboard="Text"
-                    Text="{Binding ProductVM.Name}"
-                    VerticalTextAlignment="Center" />
-            </inputLayout:SfTextInputLayout>
+            <Entry
+                Keyboard="Text"
+                Placeholder="Name"
+                Text="{Binding ProductVM.Name}"
+                VerticalTextAlignment="Center" />
 
             <!--  Price  -->
-            <inputLayout:SfTextInputLayout Hint="Price">
-                <Entry
-                    Keyboard="Numeric"
-                    Text="{Binding ProductVM.Price}"
-                    VerticalTextAlignment="Center" />
-            </inputLayout:SfTextInputLayout>
+            <Entry
+                Placeholder="Price"
+                Keyboard="Numeric"
+                Text="{Binding ProductVM.Price}"
+                VerticalTextAlignment="Center" />
 
             <!--  Location  -->
-            <inputLayout:SfTextInputLayout Hint="Loation">
-                <Entry
-                    Keyboard="Text"
-                    Text="{Binding ProductVM.Location}"
-                    VerticalTextAlignment="Center" />
-            </inputLayout:SfTextInputLayout>
+            <Entry
+                Keyboard="Text"
+                Placeholder="Location"
+                Text="{Binding ProductVM.Location}"
+                VerticalTextAlignment="Center" />
 
             <!--  Capture Image Button  -->
             <Button
-                Grid.Row="3"
                 BackgroundColor="#2196F3"
                 Command="{Binding CaptureImageCommand}"
                 CornerRadius="8"
@@ -84,10 +80,6 @@
                         Offset="5,5" />
                 </Border.Shadow>
             </Border>
-
-
         </VerticalStackLayout>
     </ScrollView>
-
-
 </ContentPage>

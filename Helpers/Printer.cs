@@ -1,18 +1,16 @@
 ﻿namespace SnapLabel.Helpers;
-public static class Printer {
 
-    const int PaperWidth = 384; // 58mm paper
+public enum TextAlign {
+    Left,
+    Center,
+    Right
+}
+
+public static class Printer {
+    private const int PaperWidth = 384; // 58mm paper
 
     // ✅ Print Text (works fine as before)
-    public static async Task<bool> PrintTextAsync(IPeripheral peripheral, string text) {
-
-        var result = await GetWritablePrinterAsync(peripheral);
-        if(result == null || result.Value.characteristic == null)
-            return false;
-
-        var (characteristic, service) = result.Value;
-
-
+    public static async Task<bool> PrintTextAsync(IPeripheral peripheral, string text, TextAlign alignment = TextAlign.Left) {
         var fontSize = 20f;
         var lineSpacing = 8f;
         var padding = 20;
@@ -31,17 +29,29 @@ public static class Printer {
         for(int i = 0; i < lines.Count; i++) {
             var txt = lines[i];
             var w = font.MeasureText(txt);
-            var x = (PaperWidth - w) / 2;
+            float x = alignment switch {
+                TextAlign.Left => 20f,
+                TextAlign.Center => (PaperWidth - w) / 2,
+                TextAlign.Right => PaperWidth - w - 20f,
+                _ => 0f
+            };
+
             var y = padding + i * lineHeight + fontSize;
-            canvas.DrawText(txt, x, y, SKTextAlign.Left, font, paint);
+            canvas.DrawText(txt, x, y, font, paint);
         }
+
+        var result = await GetWritablePrinterAsync(peripheral);
+        if(result == null || result.Value.characteristic == null)
+            return false;
+
+        var (characteristic, service) = result.Value;
 
         return await SendBitmapAsync(peripheral, service.Uuid, characteristic!, bmp);
     }
 
+
     // ✅ Fixed QR Printing (No more cutoff!)
     public static async Task<bool> PrintQrAsync(IPeripheral peripheral, string content) {
-
         var result = await GetWritablePrinterAsync(peripheral);
         if(result == null || result.Value.characteristic == null)
             return false;
@@ -75,9 +85,30 @@ public static class Printer {
         return await SendBitmapAsync(peripheral, service.Uuid, characteristic!, bmp);
     }
 
-    // ✅ Send Bitmap → ESC/POS data
-    static async Task<bool> SendBitmapAsync(IPeripheral peripheral, string serviceUuid, BleCharacteristicInfo characteristic, SKBitmap bitmap) {
+    public static async Task<bool> PrintBitmapAsync(IPeripheral peripheral, SKBitmap original) {
+        var result = await GetWritablePrinterAsync(peripheral);
+        if(result == null || result.Value.characteristic == null)
+            return false;
 
+        var (characteristic, service) = result.Value;
+
+        // Center horizontally on 58mm paper
+        int paddingTop = 10;
+        int paddingBottom = 10;
+        int finalHeight = original.Height + paddingTop + paddingBottom;
+
+        var centered = new SKBitmap(PaperWidth, finalHeight);
+        using var canvas = new SKCanvas(centered);
+        canvas.Clear(SKColors.White);
+
+        int x = (PaperWidth - original.Width) / 2;
+        canvas.DrawBitmap(original, x, paddingTop);
+
+        return await SendBitmapAsync(peripheral, service.Uuid, characteristic!, centered);
+    }
+
+    // ✅ Send Bitmap → ESC/POS data
+    private static async Task<bool> SendBitmapAsync(IPeripheral peripheral, string serviceUuid, BleCharacteristicInfo characteristic, SKBitmap bitmap) {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         var escInit = new byte[] { 0x1B, 0x40 }; // ESC @
@@ -96,7 +127,7 @@ public static class Printer {
     }
 
     // ✅ Convert to 1-bit pixels
-    static byte[] ToMono(SKBitmap bmp) {
+    private static byte[] ToMono(SKBitmap bmp) {
         int wBytes = (bmp.Width + 7) / 8;
         int h = bmp.Height;
         var result = new byte[wBytes * h];
@@ -121,7 +152,7 @@ public static class Printer {
     }
 
     // ✅ Correct ESC/POS raster formatting
-    static byte[] BuildRaster(byte[] data, int widthPixels, int heightPixels) {
+    private static byte[] BuildRaster(byte[] data, int widthPixels, int heightPixels) {
         int widthBytes = (widthPixels + 7) / 8;
         byte wLow = (byte)(widthBytes & 0xFF);
         byte wHigh = (byte)((widthBytes >> 8) & 0xFF);
@@ -135,12 +166,12 @@ public static class Printer {
         }.Concat(data).ToArray();
     }
 
-    static IEnumerable<byte[]> Chunk(byte[] data, int size) {
+    private static IEnumerable<byte[]> Chunk(byte[] data, int size) {
         for(int i = 0; i < data.Length; i += size)
             yield return data.Skip(i).Take(size).ToArray();
     }
 
-    static List<string> WrapText(string text, float maxWidth, SKFont font) {
+    private static List<string> WrapText(string text, float maxWidth, SKFont font) {
         var lines = new List<string>();
         foreach(var paragraph in text.Split('\n')) {
             var words = paragraph.Split(' ');
