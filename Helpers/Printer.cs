@@ -7,37 +7,99 @@ public enum TextAlign {
 }
 
 public static class Printer {
-    private const int PaperWidth = 384; // 58mm paper
 
-    // ✅ Print Text (works fine as before)
-    public static async Task<bool> PrintTextAsync(IPeripheral peripheral, string text, TextAlign alignment = TextAlign.Left) {
-        var fontSize = 20f;
-        var lineSpacing = 8f;
-        var padding = 20;
-        var typeface = SKTypeface.Default;
-        var font = new SKFont(typeface, fontSize);
-        var paint = new SKPaint { Color = SKColors.Black, IsAntialias = true };
+    const int PaperWidth = 384; // 58mm paper
+    const float FontSize = 20f;
+    const float LineSpacing = 8f;
+    const int Padding = 20;
 
-        var lines = WrapText(text, PaperWidth - 40, font);
-        var lineHeight = fontSize + lineSpacing;
-        var totalHeight = (int)(lines.Count * lineHeight + padding * 2);
+    public static async Task<bool> PrintTextAsync(IPeripheral peripheral, string text, TextAlign defaultAlignment = TextAlign.Left) {
+
+        var baseTypeface = SKTypeface.Default;
+        float maxTextWidth = PaperWidth - Padding * 2;
+
+        var parsed = new List<(string Text, TextAlign Align, bool Bold, bool Italic, bool Underline)>();
+        foreach(var raw in text.Split('\n')) {
+            if(string.IsNullOrWhiteSpace(raw)) {
+                parsed.Add(("", defaultAlignment, false, false, false));
+                continue;
+            }
+
+            var line = raw.Trim();
+            var align = defaultAlignment;
+
+            if(line.StartsWith("<C>")) { align = TextAlign.Center; line = line[3..]; }
+            else if(line.StartsWith("<R>")) { align = TextAlign.Right; line = line[3..]; }
+            else if(line.StartsWith("<L>")) { align = TextAlign.Left; line = line[3..]; }
+
+            bool bold = line.Contains("<B>");
+            bool italic = line.Contains("<I>");
+            bool underline = line.Contains("<U>");
+
+            line = line
+                .Replace("<B>", "").Replace("</B>", "")
+                .Replace("<I>", "").Replace("</I>", "")
+                .Replace("<U>", "").Replace("</U>", "")
+                .Replace("<C>", "").Replace("</C>", "")
+                .Replace("<R>", "").Replace("</R>", "")
+                .Replace("<L>", "").Replace("</L>", "");
+
+            // Basic word wrap
+            using var measureFont = new SKFont(baseTypeface, FontSize);
+            var words = line.Split(' ');
+            var current = "";
+            foreach(var w in words) {
+                var test = string.IsNullOrEmpty(current) ? w : $"{current} {w}";
+                if(measureFont.MeasureText(test) > maxTextWidth) {
+                    if(!string.IsNullOrEmpty(current))
+                        parsed.Add((current, align, bold, italic, underline));
+                    current = w;
+                }
+                else
+                    current = test;
+            }
+            if(!string.IsNullOrEmpty(current))
+                parsed.Add((current, align, bold, italic, underline));
+        }
+
+        var lineHeight = FontSize + LineSpacing;
+        var totalHeight = (int)(parsed.Count * lineHeight + Padding * 2);
+        if(totalHeight < FontSize + Padding * 2)
+            totalHeight = (int)(FontSize + Padding * 2);
 
         var bmp = new SKBitmap(PaperWidth, totalHeight);
         using var canvas = new SKCanvas(bmp);
         canvas.Clear(SKColors.White);
 
-        for(int i = 0; i < lines.Count; i++) {
-            var txt = lines[i];
-            var w = font.MeasureText(txt);
-            float x = alignment switch {
-                TextAlign.Left => 20f,
-                TextAlign.Center => (PaperWidth - w) / 2,
-                TextAlign.Right => PaperWidth - w - 20f,
-                _ => 0f
+        float y = Padding + FontSize;
+        foreach(var (txt, align, bold, italic, underline) in parsed) {
+            SKFontStyle style = SKFontStyle.Normal;
+            if(bold && italic)
+                style = SKFontStyle.BoldItalic;
+            else if(bold)
+                style = SKFontStyle.Bold;
+            else if(italic)
+                style = SKFontStyle.Italic;
+
+            using var tf = SKTypeface.FromFamilyName(null, style);
+            using var font = new SKFont(tf, FontSize);
+            using var paint = new SKPaint { Color = SKColors.Black, IsAntialias = true };
+
+            var textWidth = font.MeasureText(txt);
+            float x = align switch {
+                TextAlign.Center => (PaperWidth - textWidth) / 2f,
+                TextAlign.Right => PaperWidth - textWidth - Padding,
+                _ => Padding
             };
 
-            var y = padding + i * lineHeight + fontSize;
             canvas.DrawText(txt, x, y, font, paint);
+
+            if(underline && !string.IsNullOrEmpty(txt)) {
+                float underlineY = y + 2;
+                canvas.DrawLine(x, underlineY, x + textWidth, underlineY, paint);
+            }
+
+            y += lineHeight;
         }
 
         var result = await GetWritablePrinterAsync(peripheral);
@@ -45,9 +107,9 @@ public static class Printer {
             return false;
 
         var (characteristic, service) = result.Value;
-
         return await SendBitmapAsync(peripheral, service.Uuid, characteristic!, bmp);
     }
+
 
 
     // ✅ Fixed QR Printing (No more cutoff!)
@@ -169,27 +231,6 @@ public static class Printer {
     private static IEnumerable<byte[]> Chunk(byte[] data, int size) {
         for(int i = 0; i < data.Length; i += size)
             yield return data.Skip(i).Take(size).ToArray();
-    }
-
-    private static List<string> WrapText(string text, float maxWidth, SKFont font) {
-        var lines = new List<string>();
-        foreach(var paragraph in text.Split('\n')) {
-            var words = paragraph.Split(' ');
-            var line = "";
-            foreach(var word in words) {
-                var testLine = string.IsNullOrEmpty(line) ? word : line + " " + word;
-                if(font.MeasureText(testLine) > maxWidth) {
-                    if(!string.IsNullOrEmpty(line))
-                        lines.Add(line);
-                    line = word;
-                }
-                else
-                    line = testLine;
-            }
-            if(!string.IsNullOrEmpty(line))
-                lines.Add(line);
-        }
-        return lines;
     }
 
     public static async Task<(BleCharacteristicInfo? characteristic, BleServiceInfo service)?> GetWritablePrinterAsync(IPeripheral peripheral) {
