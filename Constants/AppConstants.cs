@@ -10,6 +10,8 @@ public static class AppConstants {
 
     // App constant for reconnetng
 
-    public const string PERIPHERALID = "LastPeripheralId";
+    public const string PERIPHERALNAME = "PeripheralName";
     public const string AUTORECONNECT = "AutoReconnectEnabled";
+    public const string TABLE_NAME = "products";
+    public const string BUCKET_ACCESS_BASE = "https://llhbppzzolopeemngxrv.supabase.co/storage/v1/object/public/SnapLabel/";
 }

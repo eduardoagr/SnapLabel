@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace SnapLabel.ViewModels;
+﻿namespace SnapLabel.ViewModels;
 
 public partial class ProductViewModel : ObservableObject {
     // Event to notify changes in properties
@@ -15,7 +13,7 @@ public partial class ProductViewModel : ObservableObject {
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
-    public partial decimal? Price { get; set; }
+    public partial string? Price { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
@@ -25,13 +23,13 @@ public partial class ProductViewModel : ObservableObject {
     [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
     public partial string Location { get; set; }
 
-    [ObservableProperty]
-    public partial string ImageSize { get; set; } = string.Empty;
-
-    [ObservableProperty]
-    public partial ImageSource? ImagePreview { get; set; }
-
-    public string FormattedPrice => string.Format(CultureInfo.CurrentCulture, "{0:C}", Price);
+    public string FormattedPrice {
+        get {
+            if(decimal.TryParse(Price, NumberStyles.Any, CultureInfo.CurrentCulture, out var value))
+                return string.Format(CultureInfo.CurrentCulture, "{0:C}", value);
+            return Price ?? string.Empty;
+        }
+    }
 
     public ProductViewModel(Product product) {
         _product = product;
@@ -40,8 +38,6 @@ public partial class ProductViewModel : ObservableObject {
         Name = product.Name ?? string.Empty;
         Price = product.Price;
         ImageBytes = product.ImageBytes ?? [];
-        ImagePreview = product.ImagePreview;
-        ImageSize = product.ImageSize ?? string.Empty;
         Location = product.Location ?? string.Empty;
 
         // Listen for property changes
@@ -50,8 +46,8 @@ public partial class ProductViewModel : ObservableObject {
 
     public bool CanSave =>
         !string.IsNullOrWhiteSpace(Name)
-        && Price > 0
-        && ImageBytes.Length > 0
+        && !string.IsNullOrWhiteSpace(Price)
+        && (ImageBytes?.Length ?? 0) > 0
         && !string.IsNullOrWhiteSpace(Location);
 
     [RelayCommand(CanExecute = nameof(CanSave))]
@@ -59,8 +55,6 @@ public partial class ProductViewModel : ObservableObject {
         _product.Name = Name;
         _product.Price = Price;
         _product.ImageBytes = ImageBytes;
-        _product.ImagePreview = ImagePreview;
-        _product.ImageSize = ImageSize;
         _product.Location = Location;
     }
 
@@ -69,7 +63,7 @@ public partial class ProductViewModel : ObservableObject {
         return _product;
     }
 
-    partial void OnPriceChanged(decimal? value) {
+    partial void OnPriceChanged(string? value) {
         OnPropertyChanged(nameof(FormattedPrice));
     }
 }

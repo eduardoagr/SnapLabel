@@ -1,43 +1,63 @@
-﻿using DeviceInfo = Microsoft.Maui.Devices.DeviceInfo;
+﻿namespace SnapLabel;
+public partial class App : Application {
 
-namespace SnapLabel {
-    public partial class App : Application {
-        private readonly AppShell _appShell;
+    private readonly AppShell _appShell;
+    private readonly Client _supabase;
+    private readonly NoInternetPage _noInternetPage;
+    private readonly DesktopWarningPage _desktopWarningPage;
+    private readonly IConnectivity connectivity;
 
-        public App(AppShell appShell) {
-            _appShell = appShell;
-            InitializeComponent();
-        }
+    private bool _supabaseInitialized = false;
 
-        protected override Window CreateWindow(IActivationState? activationState) {
-            if(DeviceInfo.Idiom == DeviceIdiom.Desktop) {
-                var warningPage = new ContentPage {
-                    Content = new Label {
-                        Text = $"This application does not suppert {DeviceInfo.Idiom}",
-                        VerticalOptions = LayoutOptions.Center,
-                        HorizontalOptions = LayoutOptions.Center,
-                        FontSize = 18,
-                        HorizontalTextAlignment = TextAlignment.Center
-                    }
-                };
+    public App(AppShell appShell, Client supabase, IConnectivity _connectivity, NoInternetPage noInternetPage, DesktopWarningPage desktopWarning) {
 
-                var window = new Window(warningPage);
+        _appShell = appShell;
 
-                Task.Run(async () => {
-                    await Task.Delay(3000);
-                    QuitApp();
-                });
+        _supabase = supabase;
 
-                return window;
-            }
+        connectivity = _connectivity;
 
-            return new Window(_appShell);
-        }
+        _noInternetPage = noInternetPage;
 
-        private void QuitApp() {
-#if WINDOWS || MACCATALYST
-            Environment.Exit(0);
-#endif
+        _desktopWarningPage = desktopWarning;
+
+
+        InitializeComponent();
+
+    }
+
+
+    protected override Window CreateWindow(IActivationState? activationState) {
+
+        //#if WINDOWS
+
+        //        return new Window(_desktopWarningPage);
+
+        //#endif
+
+        var initialPage = connectivity.NetworkAccess == NetworkAccess.Internet ? (Page)_appShell : _noInternetPage;
+
+        return new Window(initialPage);
+    }
+
+    protected override void OnStart() {
+
+        base.OnStart();
+
+        if(connectivity.NetworkAccess == NetworkAccess.Internet) {
+            _ = InitializeSupabaseAsync();
         }
     }
+
+    private async Task InitializeSupabaseAsync() {
+
+        if(_supabaseInitialized)
+            return;
+
+        await _supabase.InitializeAsync();
+
+        _supabaseInitialized = true;
+    }
+
+
 }

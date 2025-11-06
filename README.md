@@ -3,7 +3,7 @@ A cross-platform mobile application that discovers nearby Bluetooth-enabled prin
 
 🔧 **Key Features**
 - 🔍 Bluetooth device discovery with native scan lifecycle
-- 📱 MAUI-based UI optimized for Android, iOS, Windows, and macOS
+- 📱 MAUI-based UI optimized for Android and iOS
 - 🖨️ QR code generation and transmission to selected printer
 - ⚡ Fast pairing and minimal setup for instant printing
 - 🧩 Modular architecture for future extensibility

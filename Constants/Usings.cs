@@ -16,6 +16,7 @@ global using Shiny;
 global using Shiny.BluetoothLE;
 
 global using SkiaSharp;
+global using SkiaSharp.Views.Maui.Controls.Hosting;
 
 global using SnapLabel.Constants;
 global using SnapLabel.Helpers;
@@ -26,12 +27,15 @@ global using SnapLabel.ViewModels;
 global using SnapLabel.Views;
 
 global using Supabase;
+global using Supabase.Postgrest.Attributes;
+global using Supabase.Postgrest.Models;
 
 global using Syncfusion.Licensing;
 global using Syncfusion.Maui.Core.Hosting;
 
 global using System.Collections.ObjectModel;
 global using System.Diagnostics;
+global using System.Globalization;
 global using System.Reactive.Linq;
 global using System.Text;
 global using System.Text.Json;

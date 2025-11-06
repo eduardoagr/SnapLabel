@@ -1,47 +1,34 @@
-﻿using Supabase.Postgrest.Attributes;
+﻿
 
 namespace SnapLabel.Models;
 
 [Table("products")]
-public class Product {
+public class Product : BaseModel {
 
-    [PrimaryKey]
-    [Column("id")]
+    [PrimaryKey("id", false)]
     public long Id { get; set; }
 
     [Column("name")]
     public string? Name { get; set; }
 
     [Column("price")]
-    public decimal? Price { get; set; }
-
-    [Column("imagepath")]
-    public string? ImagePath { get; set; }
-
-    [Column("qr")]
-    public string? QrCode { get; set; }
-
-    [Column("qrpath")]
-    public string? QrPath { get; set; }
-
-    [Column("size")]
-    public string? ImageSize { get; set; }
+    public string? Price { get; set; }
 
     [Column("location")]
     public string? Location { get; set; }
 
-    [Column("hasqr")]
-    public bool IsGenerated { get; set; }
-
-    [Column("createddate")]
-    public string? GeneratedDate { get; set; }
-
-    // UI-only properties — not stored in Supabase
-    public ImageSource? ImagePreview { get; set; }
-
+    [Column("imagebytes")]
     public byte[]? ImageBytes { get; set; }
 
-    public void NormalizeName() {
+    [Column("createddate")]
+    public string GeneratedDate { get; set; } = DateTime.Now.ToString("f");
+
+    [Column("store_id")]
+    public long Store_id { get; set; }
+
+
+    public void NormalizeValues() {
         Name = Normalize.NormalizeStrings(Name);
+        Location = Normalize.NormalizeStrings(Location);
     }
 }

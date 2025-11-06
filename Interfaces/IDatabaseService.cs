@@ -2,7 +2,12 @@
 
 public interface IDatabaseService {
 
-    Task<Product?> TryAddProductAsync(Product product);
+    // Ping the database to check connectivity
+    Task<bool> IsSupabaseReachableAsync();
+
+    Task<bool> HasProductDataAsync();
+
+    Task<long> TryAddProductAsync(Product product);
 
     Task<List<Product>> GetAllProductsAsync();
 
@@ -10,7 +15,7 @@ public interface IDatabaseService {
 
     Task<Product?> GetProductByNameAsync(string name);
 
-    Task<bool> UpdateProductAsync(Product product);
+    Task UpdateProductAsync(Product product);
 
-    Task<bool> DeleteProductAsync(long id);
+    Task DeleteProductAsync(long id);
 }

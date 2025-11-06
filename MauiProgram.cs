@@ -12,6 +12,7 @@ public static class MauiProgram {
             .UseMauiApp<App>()
             .UseFFImageLoading()
             .UseShiny()
+            .UseSkiaSharp()
             .ConfigureSyncfusionCore()
             .ConfigureFonts(fonts => {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -41,6 +42,11 @@ public static class MauiProgram {
         builder.Services.AddSingleton<InventoryPage>();
         builder.Services.AddSingleton<InventoryPageViewModel>();
 
+        builder.Services.AddSingleton<NoInternetPage>();
+
+        builder.Services.AddSingleton<DesktopWarningPage>();
+        builder.Services.AddSingleton<DesktopWarningPageViewModel>();
+
 
         // Messenger (MVVM Toolkit)
         builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
@@ -49,12 +55,17 @@ public static class MauiProgram {
         builder.Services.AddSingleton(MediaPicker.Default);
         builder.Services.AddSingleton<IShellService, ShellService>();
         builder.Services.AddSingleton<IPrintingPopupService, PrintingPopupService>();
-
+        builder.Services.AddSingleton<IDatabaseService, DatabaseService>();
+        builder.Services.AddSingleton(Connectivity.Current);
         builder.Services.AddSingleton(provider =>
             new Client(AppConstants.SUPABASE_URL,
-                       AppConstants.SUPABASE_APIKEY, options));
+                       AppConstants.SUPABASE_APIKEY, options)
+            );
 
         builder.Services.AddBluetoothLE();
+
+
+
 
         return builder.Build();
     }

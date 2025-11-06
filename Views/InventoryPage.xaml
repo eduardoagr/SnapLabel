@@ -122,7 +122,7 @@
                                         FadeAnimationDuration="400"
                                         FadeAnimationEnabled="true"
                                         LoadingPlaceholder="out.gif"
-                                        Source="{Binding ImagePath}" />
+                                        Source="{Binding ImageBytes, Converter={StaticResource ByteToImageConverter}}" />
 
                                     <Button
                                         Margin="10"
@@ -237,7 +237,33 @@
             </sfPopup:SfPopup.ContentTemplate>
         </sfPopup:SfPopup>
 
-        <Button Command="{Binding SendDataCommand}" Text="frfe" />
+        <sfPopup:SfPopup
+            AnimationMode="Zoom"
+            AutoSizeMode="Both"
+            IsOpen="true"
+            ShowHeader="False">
+
+            <sfPopup:SfPopup.PopupStyle>
+                <sfPopup:PopupStyle CornerRadius="0" PopupBackground="{AppThemeBinding Dark='#232323', Light={StaticResource White}}" />
+            </sfPopup:SfPopup.PopupStyle>
+
+            <sfPopup:SfPopup.ContentTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout>
+                        <Label
+                            FontFamily="Mat"
+                            FontSize="28"
+                            HorizontalTextAlignment="Center"
+                            Text="{Binding Device.Icon}" />
+                        <Label
+                            FontSize="14"
+                            HorizontalTextAlignment="Center"
+                            Text="{Binding Device.Name}" />
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </sfPopup:SfPopup.ContentTemplate>
+        </sfPopup:SfPopup>
+
 
     </Grid>
 </ContentPage>

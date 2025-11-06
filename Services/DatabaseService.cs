@@ -1,97 +1,117 @@
 ﻿namespace SnapLabel.Services;
 
-//public class DatabaseService {
-//    // SemaphoreSlim is async-friendly and prevents race conditions
-//    private readonly SemaphoreSlim _initSemaphore = new(1, 1);
+public class DatabaseService(Supabase.Client client, IShellService shellService) : IDatabaseService {
 
-//    // Flag to ensure initialization only happens once
-//    private bool _isInitialized = false;
+    public async Task DeleteProductAsync(long id) {
 
-//    // SQLite connection instance
-//    private SQLiteAsyncConnection? _database;
+        await client.From<Product>().Where(p => p.Id == id).Delete();
+    }
 
-//    /// <summary>
-//    /// Initializes the SQLite connection and ensures the Product table exists.
-//    /// Uses SemaphoreSlim for thread-safe async initialization.
-//    /// </summary>
-//    private async Task InitializeAsync() {
-//        if(_isInitialized) {
-//            return;
-//        }
+    public async Task<List<Product>> GetAllProductsAsync() {
 
-//        await _initSemaphore.WaitAsync();
-//        try {
-//            if(_isInitialized) {
-//                return;
-//            }
+        var response = await client.From<Product>().Get();
 
-//            Debug.WriteLine($"📂 SQLite DB Path: {DBConstants.DatabasePath}");
+        return response.Models;
+    }
 
-//            _database = new SQLiteAsyncConnection(
-//                DBConstants.DatabasePath,
-//                DBConstants.Flags);
+    public async Task<Product?> GetProductByIdAsync(long id) {
 
-//            await _database.CreateTableAsync<Product>();
-//            _isInitialized = true;
-//        } finally {
-//            _initSemaphore.Release();
-//        }
-//    }
+        var response = await client.From<Product>().Where(p => p.Id == id).Get();
 
-//    /// <summary>
-//    /// Retrieves all products from the database.
-//    /// </summary>
-//    public async Task<List<Product>> GetItemsAsync() {
-//        await InitializeAsync();
+        return response.Models.FirstOrDefault();
+    }
 
-//        var items = await _database!.Table<Product>().ToListAsync();
+    public async Task<Product?> GetProductByNameAsync(string name) {
 
-//        return items;
-//    }
+        var response = await client.From<Product>().Where(p => p.Name == name).Get();
 
-//    /// <summary>
-//    /// Attempts to add a product if it doesn't already exist.
-//    /// Checks for uniqueness by PeripheralID, name, and image content.
-//    /// </summary>
-//    public async Task<long?> TryAddItemAsync(Product product) {
-//        await InitializeAsync();
+        return response.Models.FirstOrDefault();
+    }
 
-//        var existing = await _database!.Table<Product>()
-//                  .Where(p => p.Name == product.Name)
-//                  .FirstOrDefaultAsync();
+    public async Task<bool> HasProductDataAsync() {
+        var response = await client.From<Product>().Get();
+        return response.Models.Count != 0;
+    }
 
-//        if(existing is not null) {
-//            // Duplicate found — do not insert
-//            return null;
-//        }
+    public async Task<bool> IsSupabaseReachableAsync() {
+        try {
+            var response = await client.From<Product>().Get();
+            return true;
+        } catch {
+            return false;
+        }
+    }
 
-//        await _database.InsertAsync(product);
+    public async Task<long> TryAddProductAsync(Product product) {
 
-//        return product.Id;
-//    }
+        //product.NormalizeValues();
 
-//    /// <summary>
-//    /// Deletes a product from the database.
-//    /// </summary>
-//    public async Task<int> DeleteItemAsync(Product product) {
-//        await InitializeAsync();
-//        return await _database!.DeleteAsync(product);
-//    }
+        //var existingProduct = await GetProductByNameAsync(product.Name!);
+        //if(existingProduct != null) {
+        //    await shellService.DisplayAlertAsync("Duplicate Product", "A product with this name already exists.", "OK");
+        //    return 0;
+        //}
 
-//    /// <summary>
-//    /// Retrieves a product by its primary key PeripheralID.
-//    /// </summary>
-//    public async Task<Product?> GetItemByIdAsync(int id) {
-//        await InitializeAsync();
-//        return await _database!.FindAsync<Product>(id);
-//    }
+        // Insert test product
+        var cc = new Product {
+            Name = "Test Product",
+            Price = "9.99",
+            Location = "Warehouse A",
+            ImageBytes = [1, 2, 3, 4]
+        };
 
-//    /// <summary>
-//    /// Update product from the database, by passing it
-//    /// </summary>
-//    public async Task<int> UpdateItemAsync(Product product) {
-//        await InitializeAsync();
-//        return await _database!.UpdateAsync(product);
-//    }
+        await client.From<Product>().Insert(cc);
 
-//}
+        // Fetch back
+        var result = await client.From<Product>().Select("*").Get();
+        var fetched = result.Models.First();
+
+        Console.WriteLine($"ImageBytes: {BitConverter.ToString(fetched.ImageBytes)}");
+
+        await client.From<Product>().Insert(product);
+
+        // 2️⃣ Immediately get the latest inserted product
+        var inserted = (await client
+            .From<Product>()
+            .Order("id", Supabase.Postgrest.Constants.Ordering.Descending)
+            .Limit(1)
+            .Get())
+            .Models
+            .FirstOrDefault();
+
+        if(inserted == null)
+            return 0;
+
+        // Now update its ImagePath using the ID
+        product.Id = inserted.Id;
+
+
+        await client
+            .From<Product>()
+            .Where(p => p.Id == inserted.Id)
+            .Update(inserted);
+
+        return inserted.Id;
+    }
+
+
+
+    public async Task UpdateProductAsync(Product product) {
+
+        product.NormalizeValues();
+
+        var conflict = await GetProductByNameAsync(product.Name!);
+
+        if(conflict != null && conflict.Id != product.Id) {
+
+            await shellService.DisplayAlertAsync("Duplicate Product", "A product with this name already exists.", "OK");
+
+            return;
+        }
+
+        var response = await client
+            .From<Product>()
+            .Where(p => p.Id == product.Id)
+            .Update(product);
+    }
+}

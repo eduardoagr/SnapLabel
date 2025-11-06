@@ -1,14 +1,13 @@
-﻿namespace SnapLabel.ViewModels;
+﻿
+namespace SnapLabel.ViewModels;
 
 public partial class NewProductPageViewModel : ObservableObject {
 
     #region Readonly and Static Fields
-
-    private static readonly QRCodeGenerator qrGenerator = new();
-    private readonly string sharedRoot = @"\\Ed-pc\E\SnapLabel.Images";
-    private readonly string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-    private readonly IMediaPicker mediaPicker;
-    private readonly IShellService shellService;
+    private readonly IMediaPicker _mediaPicker;
+    private readonly IShellService _shellService;
+    private readonly IDatabaseService _databaseService;
+    private readonly Client _supabaseClient;
     //private readonly DatabaseService databaseService;
 
     #endregion Readonly and Static Fields
@@ -16,25 +15,28 @@ public partial class NewProductPageViewModel : ObservableObject {
     public ProductViewModel ProductVM { get; }
 
     // Explicit command
-    public IRelayCommand? SaveProductCommand { get; }
+    public AsyncRelayCommand SaveProductAsyncCommand { get; set; }
 
     #region Constructor
 
-    public NewProductPageViewModel(IMediaPicker mediaPicker, IShellService shellService) {
-        this.mediaPicker = mediaPicker;
-        this.shellService = shellService;
-        //this.databaseService = databaseService;
+    public NewProductPageViewModel(IMediaPicker mediaPicker, IShellService shellService,
+        IDatabaseService databaseService, Client supabaseClient) {
+
+        _mediaPicker = mediaPicker;
+        _shellService = shellService;
+        _databaseService = databaseService;
+        _supabaseClient = supabaseClient;
 
         ProductVM = new ProductViewModel(new Product());
         ProductVM.ProductPropertiesChanged += ProductVM_ProductPropertiesChanged;
-
-        SaveProductCommand = new RelayCommand(async () => await SaveProductAsync(), CanSaveProduct);
+        SaveProductAsyncCommand = new AsyncRelayCommand(SaveProductAsync, CanSaveProduct);
     }
 
     #endregion Constructor
 
     private void ProductVM_ProductPropertiesChanged() {
-        SaveProductCommand?.NotifyCanExecuteChanged();
+
+        SaveProductAsyncCommand?.NotifyCanExecuteChanged();
     }
 
     private bool CanSaveProduct() => ProductVM.CanSave;
@@ -43,10 +45,10 @@ public partial class NewProductPageViewModel : ObservableObject {
 
     [RelayCommand]
     public async Task CaptureImageAsync() {
-        if(!mediaPicker.IsCaptureSupported)
+        if(!_mediaPicker.IsCaptureSupported)
             return;
 
-        var photo = await mediaPicker.CapturePhotoAsync();
+        var photo = await _mediaPicker.CapturePhotoAsync();
         if(photo is null)
             return;
 
@@ -54,79 +56,22 @@ public partial class NewProductPageViewModel : ObservableObject {
         using var ms = new MemoryStream();
         await stream.CopyToAsync(ms);
 
-        var compressed = Operations.CompressImage(ms.ToArray());
-        ProductVM.ImagePreview = ImageSource.FromStream(() => new MemoryStream(compressed!));
-        ProductVM.ImageSize = $"{compressed!.Length / 1024.0:F2} KB";
-        ProductVM.ImageBytes = compressed;
-        Debug.WriteLine($"[Edu] Compressed image length: {compressed?.Length}");
-        ProductVM.SaveToModel();
-        Debug.WriteLine($"[Edu] => Model image length: {ProductVM.GetProduct().ImageBytes?.Length}");
+        ProductVM.ImageBytes = Operations.CompressImage(ms.ToArray())!;
     }
 
     #endregion Command for picking/capturing images
 
-    #region Command for saving to database
+    private async Task SaveProductAsync() {
 
-    public async Task SaveProductAsync() {
-        var Product = ProductVM.GetProduct();
-        Product.NormalizeName();
+        ProductVM.SaveToModel();
+        var product = ProductVM.GetProduct();
+        var id = await _databaseService.TryAddProductAsync(product);
+        if(id > 0) {
+            //Convert everythin to json and Create from product
+            var qr = Operations.GenerateProdutQrCode(product);
 
-        //var productId = await databaseService.TryAddItemAsync(Product);
-        //if(productId is null) {
-        //    await shellService.DisplayAlertAsync("Duplicate Detected", "A product with the same name already exists.", "OK");
-        //    return;
-        //}
+            await _shellService.NavigateBackAsync();
 
-        //Product.Id = productId.Value;
-
-        // Save image immediately
-        string folder = Path.Combine(sharedRoot, $"{Product.Name}_{timestamp}");
-        Directory.CreateDirectory(folder);
-
-        string imageFileName = $"{Product.Name}_image.jpg";
-        string imageFilePath = Path.Combine(folder, imageFileName);
-        File.WriteAllBytes(imageFilePath, Product.ImageBytes!);
-        Product.ImagePath = $"file://{imageFilePath}"; // ✅ ensures CachedImage loads instantly
-
-        // Update DB with image path before navigating
-        //await databaseService.UpdateItemAsync(Product);
-
-        // Navigate back ASAP
-        await shellService.NavigateBackAsync();
-
-        // Optional: QR generation can be deferred if needed
-        _ = Task.Run(() => {
-            var productJson = JsonSerializer.Serialize(new {
-                Product.Id,
-                Product.Name,
-                Product.Price,
-                Product.ImagePath,
-                Product.Location
-            });
-
-            byte[] qrBytes = GenerateQrCodeBytes(productJson);
-            string qrFileName = $"{Product.Name}_qr.png";
-            string qrFullPath = Path.Combine(folder, qrFileName);
-            File.WriteAllBytes(qrFullPath, qrBytes);
-
-            Product.QrCode = qrFullPath;
-            Product.GeneratedDate = DateTime.Now.ToString("F");
-            Product.IsGenerated = true;
-
-            // await databaseService.UpdateItemAsync(Product);
-        });
+        }
     }
-
-    #endregion Command for saving to database
-
-    #region Method for generating QR code bytes
-
-    public byte[] GenerateQrCodeBytes(string content) {
-        var qrCodeData = qrGenerator.CreateQrCode
-            (content, QRCodeGenerator.ECCLevel.Q);
-        var qrCode = new PngByteQRCode(qrCodeData);
-        return qrCode.GetGraphic(10);
-    }
-
-    #endregion Method for generating QR code bytes
 }

@@ -6,6 +6,10 @@
     xmlns:views="clr-namespace:SnapLabel.Views"
     Title="SnapLabel">
 
+    <ShellContent
+        ContentTemplate="{DataTemplate views:AuthenticationPage}"
+        Route="AuthenticationPage" />
+    
     <TabBar>
         <ShellContent
             Title="Inventory"

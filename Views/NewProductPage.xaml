@@ -12,7 +12,7 @@
     x:DataType="vm:NewProductPageViewModel">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Command="{Binding SaveProductCommand}">
+        <ToolbarItem Command="{Binding SaveProductAsyncCommand}">
             <ToolbarItem.IconImageSource>
                 <FontImageSource
                     FontFamily="Mat"
@@ -35,8 +35,8 @@
 
             <!--  Price  -->
             <Entry
-                Placeholder="Price"
                 Keyboard="Numeric"
+                Placeholder="Price"
                 Text="{Binding ProductVM.Price}"
                 VerticalTextAlignment="Center" />
 
@@ -67,7 +67,7 @@
                 <Image
                     Margin="10"
                     Aspect="AspectFill"
-                    Source="{Binding ProductVM.ImagePreview}" />
+                    Source="{Binding ProductVM.ImageBytes, Converter={StaticResource ByteToImageConverter}}" />
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="8" />
                 </Border.StrokeShape>

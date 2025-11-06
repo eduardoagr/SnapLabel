@@ -1,9 +1,19 @@
-﻿namespace SnapLabel.Helpers;
+﻿using SnapLabel.Dtos;
 
-public class Operations() {
+namespace SnapLabel.Helpers;
 
-    public static byte[]? CompressImage(byte[] originalBytes, int initialWidth = 1000,
-        int maxSizeKb = 20) {
+/// <summary>
+/// Provides utility methods for image compression, QR code generation, and cloud storage operations.
+/// </summary>
+public class Operations {
+    /// <summary>
+    /// Compresses an image by resizing and reducing quality until it meets the specified maximum size.
+    /// </summary>
+    /// <param name="originalBytes">The original image as a byte array.</param>
+    /// <param name="initialWidth">The starting width for resizing. Default is 1000 pixels.</param>
+    /// <param name="maxSizeKb">The maximum allowed size in kilobytes. Default is 20 KB.</param>
+    /// <returns>The compressed image as a byte array, or null if compression fails to meet the size constraint.</returns>
+    public static byte[]? CompressImage(byte[] originalBytes, int initialWidth = 1000, int maxSizeKb = 20) {
         int targetWidth = initialWidth;
         float compressionQuality = 0.6f;
 
@@ -24,8 +34,42 @@ public class Operations() {
 
             compressionQuality -= 0.1f;
             targetWidth -= 100;
-        } while(compressionQuality >= 0.3f && targetWidth >= 300);
+        }
+        while(compressionQuality >= 0.3f && targetWidth >= 300);
 
         return null;
+    }
+
+    /// <summary>
+    /// Generates a QR code image from the specified content string.
+    /// </summary>
+    /// <param name="content">The content to encode in the QR code.</param>
+    /// <returns>A PNG image of the QR code as a byte array.</returns>
+    public static byte[] GenerateQrCode(string content) {
+        var qrGen = new QRCodeGenerator();
+        var data = qrGen.CreateQrCode(content, QRCodeGenerator.ECCLevel.L);
+        var qrCode = new PngByteQRCode(data);
+        var pngBytes = qrCode.GetGraphic(20); // scale = 20 → sharp detail
+        return pngBytes;
+    }
+
+    /// <summary>
+    /// Generates a QR code from a serialized product object.
+    /// </summary>
+    /// <param name="product">The product object containing details to encode.</param>
+    /// <returns>A PNG image of the QR code as a byte array.</returns>
+    public static byte[] GenerateProdutQrCode(Product product) {
+        var Obj = new ProductDto {
+            Id = product.Id,
+            Name = product.Name,
+            Price = product.Price,
+            Location = product.Location,
+            ImageBytes = product.ImageBytes,
+            GeneratedDate = product.GeneratedDate,
+        };
+
+        var json = JsonSerializer.Serialize(Obj);
+
+        return GenerateQrCode(json);
     }
 }

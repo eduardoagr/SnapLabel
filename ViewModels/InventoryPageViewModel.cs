@@ -5,7 +5,8 @@
 /// connection handling, and product printing logic.
 /// </summary>
 public partial class InventoryPageViewModel(IShellService shellService,
-    IBleManager bleManager, IMessenger messenger, IPrintingPopupService printingPopup) : ObservableObject {
+    IBleManager bleManager, IMessenger messenger,
+    IPrintingPopupService printingPopup, IDatabaseService databaseService) : ObservableObject {
 
     #region 🔧 Internal State
     // --------------------------------------------------------------------
@@ -27,7 +28,6 @@ public partial class InventoryPageViewModel(IShellService shellService,
     // Ensures InitializeAsync() runs only once.
     private bool _isInitialized;
     #endregion
-
 
     #region 📦 Observable Properties (UI-bound)
     // --------------------------------------------------------------------
@@ -57,7 +57,6 @@ public partial class InventoryPageViewModel(IShellService shellService,
     public partial string? BluetoothIcon { get; set; } = FontsConstants.Bluetooth;
     #endregion
 
-
     #region ⚙️ Initialization & Auto-Reconnect
     // --------------------------------------------------------------------
     // Initializes the ViewModel and attempts to restore last Bluetooth session
@@ -67,41 +66,49 @@ public partial class InventoryPageViewModel(IShellService shellService,
     /// Initializes the ViewModel, optionally auto-reconnecting to the last known device.
     /// </summary>
     public async Task InitializeAsync() {
-
-        // Prevent double initialization
-        if(_isInitialized)
+        if(_isInitialized) {
             return;
+        }
 
         _isInitialized = true;
 
-        // Retrieve last connected device ID and auto-reconnect setting
-        var lastPeripheralId = Preferences.Get(AppConstants.PERIPHERALID, string.Empty);
+        var peripheralName = Preferences.Get(AppConstants.PERIPHERALNAME, string.Empty);
         var autoReconnectEnabled = Preferences.Get(AppConstants.AUTORECONNECT, false);
 
-        // If auto-reconnect is enabled and we have a previous device
-        if(!string.IsNullOrEmpty(lastPeripheralId) && autoReconnectEnabled) {
-            try {
-                // Try to find that device during a quick scan
-                var scan = await bleManager.Scan()
-                    .Timeout(TimeSpan.FromSeconds(5))
-                    .FirstOrDefaultAsync(s => s.Peripheral.Uuid.ToString() == lastPeripheralId);
+        var access = await bleManager.RequestAccessAsync();
 
-                if(scan?.Peripheral != null) {
-                    // Attempt reconnect
-                    await scan.Peripheral.ConnectAsync(new ConnectionConfig { AutoConnect = false });
-                    await UpdateDeviceConnectionState(ConnectionState.Connected, new BluetoothDevice(scan.Peripheral));
-                }
-                else {
-                    await shellService.DisplayToastAsync("Device not found — skipping reconnect.");
-                }
-            } catch(Exception ex) {
-                await shellService.DisplayToastAsync($"Auto-connect failed: {ex.Message}");
+        if(!string.IsNullOrEmpty(peripheralName) && autoReconnectEnabled && access == AccessState.Available) {
+
+            var scan = await bleManager.Scan()
+                         .TakeUntil(Observable.Timer(TimeSpan.FromSeconds(5)))
+                         .FirstOrDefaultAsync(s => s.Peripheral.Uuid.ToString() == peripheralName);
+
+            if(scan?.Peripheral != null) {
+                await scan.Peripheral.ConnectAsync(new ConnectionConfig { AutoConnect = false });
+                await UpdateDeviceConnectionState(ConnectionState.Connected, new BluetoothDevice(scan.Peripheral));
             }
         }
     }
     #endregion
 
+    public async Task FetchData() {
 
+        var hasData = await databaseService.HasProductDataAsync();
+
+        if(!hasData) {
+            return;
+        }
+
+        Products.Clear();
+
+        var data = await databaseService.GetAllProductsAsync();
+
+        foreach(var item in data) {
+
+            Products.Add(item);
+        }
+
+    }
     #region 🔌 Bluetooth Management
     // --------------------------------------------------------------------
     // Handles Bluetooth scanning, connection, and disconnection
@@ -138,8 +145,7 @@ public partial class InventoryPageViewModel(IShellService shellService,
             }
             else {
                 // Request Bluetooth access permission from OS
-                var access = await bleManager.RequestAccessAsync();
-                if(access != Shiny.AccessState.Available) {
+                if(await bleManager.RequestAccessAsync() != AccessState.Available) {
                     await shellService.DisplayAlertAsync("Error", "Bluetooth is not available. Please enable it.", "OK");
                     return;
                 }
@@ -309,7 +315,7 @@ public partial class InventoryPageViewModel(IShellService shellService,
         );
 
         if(answer) {
-            Preferences.Set(AppConstants.PERIPHERALID, device.Uuid.ToString());
+            Preferences.Set(AppConstants.PERIPHERALNAME, device.Name);
             Preferences.Set(AppConstants.AUTORECONNECT, true);
         }
         else {
@@ -317,7 +323,6 @@ public partial class InventoryPageViewModel(IShellService shellService,
         }
     }
     #endregion
-
 
     #region 🖨️ Printing
     // --------------------------------------------------------------------
@@ -347,7 +352,6 @@ public partial class InventoryPageViewModel(IShellService shellService,
 
     }
     #endregion
-
 
     #region 🧹 Cleanup
     // --------------------------------------------------------------------
