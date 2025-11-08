@@ -13,7 +13,7 @@ public partial class ProductViewModel : ObservableObject {
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
-    public partial string? Price { get; set; } = string.Empty;
+    public partial decimal? Price { get; set; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
@@ -23,21 +23,13 @@ public partial class ProductViewModel : ObservableObject {
     [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
     public partial string Location { get; set; }
 
-    public string FormattedPrice {
-        get {
-            if(decimal.TryParse(Price, NumberStyles.Any, CultureInfo.CurrentCulture, out var value))
-                return string.Format(CultureInfo.CurrentCulture, "{0:C}", value);
-            return Price ?? string.Empty;
-        }
-    }
-
     public ProductViewModel(Product product) {
         _product = product;
 
         // Copy model data to ViewModel
         Name = product.Name ?? string.Empty;
         Price = product.Price;
-        ImageBytes = product.ImageBytes ?? [];
+        ImageBytes = ImageBytes;
         Location = product.Location ?? string.Empty;
 
         // Listen for property changes
@@ -46,7 +38,6 @@ public partial class ProductViewModel : ObservableObject {
 
     public bool CanSave =>
         !string.IsNullOrWhiteSpace(Name)
-        && !string.IsNullOrWhiteSpace(Price)
         && (ImageBytes?.Length ?? 0) > 0
         && !string.IsNullOrWhiteSpace(Location);
 
@@ -54,16 +45,11 @@ public partial class ProductViewModel : ObservableObject {
     public void SaveToModel() {
         _product.Name = Name;
         _product.Price = Price;
-        _product.ImageBytes = ImageBytes;
         _product.Location = Location;
     }
 
     public Product GetProduct() {
         SaveToModel();
         return _product;
-    }
-
-    partial void OnPriceChanged(string? value) {
-        OnPropertyChanged(nameof(FormattedPrice));
     }
 }

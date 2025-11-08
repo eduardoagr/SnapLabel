@@ -6,7 +6,7 @@ public partial class NewProductPageViewModel : ObservableObject {
     #region Readonly and Static Fields
     private readonly IMediaPicker _mediaPicker;
     private readonly IShellService _shellService;
-    private readonly IDatabaseService _databaseService;
+    private readonly IDatabaseService<Product> _databaseService;
     private readonly Client _supabaseClient;
     //private readonly DatabaseService databaseService;
 
@@ -20,7 +20,7 @@ public partial class NewProductPageViewModel : ObservableObject {
     #region Constructor
 
     public NewProductPageViewModel(IMediaPicker mediaPicker, IShellService shellService,
-        IDatabaseService databaseService, Client supabaseClient) {
+        IDatabaseService<Product> databaseService, Client supabaseClient) {
 
         _mediaPicker = mediaPicker;
         _shellService = shellService;
@@ -63,15 +63,15 @@ public partial class NewProductPageViewModel : ObservableObject {
 
     private async Task SaveProductAsync() {
 
-        ProductVM.SaveToModel();
-        var product = ProductVM.GetProduct();
-        var id = await _databaseService.TryAddProductAsync(product);
-        if(id > 0) {
-            //Convert everythin to json and Create from product
-            var qr = Operations.GenerateProdutQrCode(product);
+        //ProductVM.SaveToModel();
+        //var product = ProductVM.GetProduct();
+        //var id = await _databaseService.TryAddProductAsync(product);
+        //if(id > 0) {
+        //    //Convert everythin to json and Create from product
+        //    //var qr = Operations.GenerateProdutQrCode(product);
 
-            await _shellService.NavigateBackAsync();
+        //    //await _shellService.NavigateBackAsync();
 
-        }
+        //}
     }
 }

@@ -1,20 +1,25 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
     x:Class="SnapLabel.Views.NoInternetPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:constant="clr-namespace:SnapLabel.Constants"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
-    Title="NoInternet"
     NavigationPage.HasNavigationBar="False">
 
-    <Grid>
-        <skia:SKLottieView
-            HorizontalOptions="Center"
-            RepeatCount="-1"
-            RepeatMode="Reverse"
-            Source="nointernet.json"
-            VerticalOptions="Center" />
-    </Grid>
+
+    <VerticalStackLayout Spacing="20" VerticalOptions="Center">
+        <Label
+            FontFamily="Mat"
+            FontSize="100"
+            HorizontalTextAlignment="Center"
+            Text="{Static constant:FontsConstants.Error}"
+            TextColor="Red" />
+
+        <Label
+            FontSize="18"
+            HorizontalTextAlignment="Center"
+            Text="No internet connection" />
+    </VerticalStackLayout>
+
 
 
 

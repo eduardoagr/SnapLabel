@@ -1,0 +1,144 @@
+<ContentPage
+    x:Class="SnapLabel.Views.DashboardPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:constant="clr-namespace:SnapLabel.Constants"
+    xmlns:vm="clr-namespace:SnapLabel.ViewModels"
+    x:DataType="vm:DashboardPageViewModel"
+    NavigationPage.HasNavigationBar="False">
+
+    <Grid Padding="24" RowDefinitions="Auto,*">
+
+        <!--  🧑‍💼 Header at the top  -->
+        <Label
+            Grid.Row="0"
+            FontAttributes="Bold"
+            FontSize="Medium"
+            Text="Welcome Eduardo"
+            TextColor="{AppThemeBinding Light=Black,
+                                        Dark=White}" />
+
+        <!--  📊 Centered content  -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="24" VerticalOptions="Center">
+
+                <!--  Dashboard Tiles  -->
+                <Grid
+                    ColumnDefinitions="*,*"
+                    ColumnSpacing="16"
+                    RowDefinitions="Auto"
+                    RowSpacing="16">
+                    <Border
+                        Background="#2882D1"
+                        HeightRequest="140"
+                        StrokeShape="RoundRectangle 16">
+                        <Grid>
+                            <VerticalStackLayout
+                                HorizontalOptions="Center"
+                                Spacing="8"
+                                VerticalOptions="Center">
+                                <Image HeightRequest="40" Source="stores.png" />
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="20"
+                                    HorizontalOptions="Center"
+                                    Text="Stores" />
+                                <Label FontSize="Medium" Text="Tap to open" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{x:Binding GoToManageStoresCommand}" />
+                        </Border.GestureRecognizers>
+                    </Border>
+
+                    <Border
+                        Grid.Column="1"
+                        Background="#388E3C"
+                        HeightRequest="140"
+                        StrokeShape="RoundRectangle 16">
+                        <Grid>
+                            <VerticalStackLayout
+                                HorizontalOptions="Center"
+                                Spacing="8"
+                                VerticalOptions="Center">
+                                <Image HeightRequest="40" Source="products.png" />
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="20"
+                                    HorizontalOptions="Center"
+                                    Text="Inventory"
+                                    TextColor="White" />
+                                <Label FontSize="Medium" Text="Tap to open" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer />
+                        </Border.GestureRecognizers>
+                    </Border>
+                </Grid>
+
+                <!--  Quick Stats  -->
+                <Grid
+                    ColumnDefinitions="*,*"
+                    ColumnSpacing="16"
+                    RowSpacing="12">
+                    <Border
+                        Padding="16"
+                        Background="{AppThemeBinding Light=#FFFFFF,
+                                                     Dark=#2C2C2C}"
+                        StrokeShape="RoundRectangle 12">
+                        <VerticalStackLayout>
+                            <Label
+                                FontSize="14"
+                                Text="Total Stores"
+                                TextColor="Gray" />
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="22"
+                                Text="12" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Padding="16"
+                        Background="{AppThemeBinding Light=#FFFFFF,
+                                                     Dark=#2C2C2C}"
+                        StrokeShape="RoundRectangle 12">
+                        <VerticalStackLayout>
+                            <Label
+                                FontSize="14"
+                                Text="Stores"
+                                TextColor="Gray" />
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="22"
+                                Text="2" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border
+                        Padding="16"
+                        Background="{AppThemeBinding Light=#FFFFFF,
+                                                     Dark=#2C2C2C}"
+                        StrokeShape="RoundRectangle 12">
+                        <VerticalStackLayout>
+                            <Label
+                                FontSize="14"
+                                Text="Inventory Items"
+                                TextColor="Gray" />
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="22"
+                                Text="248" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+
+</ContentPage>

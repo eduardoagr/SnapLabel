@@ -5,7 +5,6 @@
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:constant="clr-namespace:SnapLabel.Constants"
     xmlns:controls="clr-namespace:SnapLabel.Controls"
-    xmlns:effect="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:ffimageloading="clr-namespace:FFImageLoading.Maui;assembly=FFImageLoading.Maui"
     xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:model="clr-namespace:SnapLabel.Models"
@@ -128,13 +127,15 @@
                                         Margin="10"
                                         BackgroundColor="{AppThemeBinding Light=#E0E0E0,
                                                                           Dark=#2A2A2A}"
-                                        Command="{Binding SendDataCommand, Source={RelativeSource AncestorType={Type vm:InventoryPageViewModel}}}"
+                                        Command="{x:Binding SendDataCommand,
+                                                            Source={RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}},
+                                                            x:DataType=vm:InventoryPageViewModel}"
                                         CommandParameter="{Binding .}"
                                         CornerRadius="60"
                                         FontFamily="Mat"
                                         FontSize="Large"
                                         HorizontalOptions="End"
-                                        IsVisible="{Binding IsRadyToPrint, Source={RelativeSource AncestorType={Type vm:InventoryPageViewModel}}}"
+                                        IsVisible="{Binding IsRadyToPrint, Source={RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}}, x:DataType=vm:InventoryPageViewModel}"
                                         Text="{Static constant:FontsConstants.Print}"
                                         TextColor="{AppThemeBinding Dark={StaticResource White},
                                                                     Light={StaticResource Black}}"
@@ -146,10 +147,10 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-
         <sfPopup:SfPopup
             Padding="{OnIdiom Phone=20,
                               Desktop=0}"
+            x:DataType="vm:InventoryPageViewModel"
             AnimationMode="Zoom"
             HeaderHeight="26"
             HeightRequest="{OnIdiom Desktop=500}"
@@ -158,8 +159,9 @@
             IsOpen="{Binding IsDevicesPopupVisible}"
             StaysOpen="True"
             WidthRequest="{OnIdiom Desktop=500}">
+
             <sfPopup:SfPopup.HeaderTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="vm:InventoryPageViewModel">
                     <Grid BackgroundColor="{AppThemeBinding Dark={StaticResource Black}, Light={StaticResource White}}">
                         <Label
                             Margin="5"
@@ -170,6 +172,7 @@
                     </Grid>
                 </DataTemplate>
             </sfPopup:SfPopup.HeaderTemplate>
+
             <sfPopup:SfPopup.PopupStyle>
                 <sfPopup:PopupStyle
                     CornerRadius="8"
@@ -180,8 +183,9 @@
                                              Dark='#20FFFFFF'}"
                     StrokeThickness="4" />
             </sfPopup:SfPopup.PopupStyle>
+
             <sfPopup:SfPopup.ContentTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="vm:InventoryPageViewModel">
                     <Grid
                         BackgroundColor="{AppThemeBinding Dark={StaticResource PrimaryDarkText},
                                                           Light={StaticResource White}}"
@@ -197,7 +201,6 @@
                             Text="Make sure your device is turned on and discoverable. Select a device below to connect." />
 
                         <CollectionView Grid.Row="2" ItemsSource="{Binding Devices}">
-
                             <CollectionView.ItemsLayout>
                                 <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
                             </CollectionView.ItemsLayout>
@@ -213,9 +216,11 @@
                                                 VerticalTextAlignment="Center" />
                                             <Label Text="{Binding Name}" VerticalTextAlignment="Center" />
                                         </HorizontalStackLayout>
+
                                         <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding ConnectToDeviceCommand, Source={x:RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}}}" CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{x:Binding ConnectToDeviceCommand, Source={RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}}, x:DataType=vm:InventoryPageViewModel}" CommandParameter="{Binding .}" />
                                         </Border.GestureRecognizers>
+
                                         <Border.Behaviors>
                                             <mct:TouchBehavior DefaultBackgroundColor="{AppThemeBinding Light='Transparent', Dark='Transparent'}" PressedBackgroundColor="{AppThemeBinding Light=#CCCCCC, Dark=#444444}" />
                                         </Border.Behaviors>
@@ -227,7 +232,7 @@
                         <buttons:SfButton
                             Grid.Row="3"
                             Margin="10"
-                            Command="{Binding CloseDevicesPopUpCommand}"
+                            Command="{Binding CloseDevicesPopUpCommand, x:DataType=vm:InventoryPageViewModel}"
                             HorizontalOptions="End"
                             Style="{StaticResource RippleButtonStyle}"
                             Text="Close"
@@ -248,7 +253,7 @@
             </sfPopup:SfPopup.PopupStyle>
 
             <sfPopup:SfPopup.ContentTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="vm:InventoryPageViewModel">
                     <VerticalStackLayout>
                         <Label
                             FontFamily="Mat"

@@ -457,19 +457,18 @@
     </Style>
 
     <Style x:Key="RippleButtonStyle" TargetType="buttons:SfButton">
-
         <!--  Layout & Sizing  -->
         <Setter Property="WidthRequest" Value="200" />
-        <Setter Property="StrokeThickness" Value="1" />
         <Setter Property="HeightRequest" Value="30" />
         <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="StrokeThickness" Value="1" />
 
         <!--  Theme-aware colors  -->
         <Setter Property="Background" Value="{AppThemeBinding Light=#E0E0E0, Dark=#2A2A2A}" />
         <Setter Property="Stroke" Value="{AppThemeBinding Light=#E0E0E0, Dark=#2A2A2A}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light=Black, Dark=White}" />
 
-        <!--  Ripple effect  -->
+        <!--  Ripple effect and visual states  -->
         <Setter Property="VisualStateManager.VisualStateGroups">
             <Setter.Value>
                 <VisualStateGroupList>
@@ -479,13 +478,25 @@
                                 <Setter Property="Background" Value="{AppThemeBinding Light=#E0E0E0, Dark=#2A2A2A}" />
                                 <Setter Property="Stroke" Value="{AppThemeBinding Light=#E0E0E0, Dark=#2A2A2A}" />
                                 <Setter Property="StrokeThickness" Value="1" />
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light=Black, Dark=White}" />
+                                <Setter Property="Opacity" Value="1" />
                             </VisualState.Setters>
                         </VisualState>
+
                         <VisualState x:Name="Pressed">
                             <VisualState.Setters>
                                 <Setter Property="Background" Value="{AppThemeBinding Light=#CCCCCC, Dark=#444444}" />
                                 <Setter Property="Stroke" Value="{AppThemeBinding Light=#888888, Dark=#AAAAAA}" />
                                 <Setter Property="Scale" Value="0.98" />
+                            </VisualState.Setters>
+                        </VisualState>
+
+                        <VisualState x:Name="Disabled">
+                            <VisualState.Setters>
+                                <Setter Property="Background" Value="{AppThemeBinding Light=#F0F0F0, Dark=#1E1E1E}" />
+                                <Setter Property="Stroke" Value="{AppThemeBinding Light=#CCCCCC, Dark=#444444}" />
+                                <Setter Property="TextColor" Value="Gray" />
+                                <Setter Property="Opacity" Value="0.6" />
                             </VisualState.Setters>
                         </VisualState>
                     </VisualStateGroup>

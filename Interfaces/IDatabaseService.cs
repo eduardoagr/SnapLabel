@@ -1,21 +1,20 @@
 ﻿namespace SnapLabel.Interfaces;
 
-public interface IDatabaseService {
+public interface IDatabaseService<T> where T : BaseModel, new() {
 
-    // Ping the database to check connectivity
-    Task<bool> IsSupabaseReachableAsync();
+    Task<bool> HasDataAsync();
 
-    Task<bool> HasProductDataAsync();
+    Task<long> TryAddAsync(T entity);
 
-    Task<long> TryAddProductAsync(Product product);
+    Task<List<T>> GetAllAsync();
 
-    Task<List<Product>> GetAllProductsAsync();
+    Task<T?> GetByIdAsync(long id);
 
-    Task<Product?> GetProductByIdAsync(long id);
+    Task<T?> GetByNameAsync(string name); // Optional: only if T has Name
 
-    Task<Product?> GetProductByNameAsync(string name);
+    Task UpdateAsync(T entity);
 
-    Task UpdateProductAsync(Product product);
+    Task DeleteAsync(long id);
 
-    Task DeleteProductAsync(long id);
+
 }

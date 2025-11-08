@@ -1,9 +1,10 @@
 namespace SnapLabel.Views;
 
-public partial class AuthenticationPage : ContentPage
-{
-	public AuthenticationPage()
-	{
-		InitializeComponent();
-	}
+public partial class AuthenticationPage : ContentPage {
+
+    public AuthenticationPage(AuthenticationPageViewModel authenticationPageViewModel) {
+        InitializeComponent();
+
+        BindingContext = authenticationPageViewModel;
+    }
 }

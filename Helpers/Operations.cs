@@ -1,6 +1,4 @@
-﻿using SnapLabel.Dtos;
-
-namespace SnapLabel.Helpers;
+﻿namespace SnapLabel.Helpers;
 
 /// <summary>
 /// Provides utility methods for image compression, QR code generation, and cloud storage operations.
@@ -58,18 +56,18 @@ public class Operations {
     /// </summary>
     /// <param name="product">The product object containing details to encode.</param>
     /// <returns>A PNG image of the QR code as a byte array.</returns>
-    public static byte[] GenerateProdutQrCode(Product product) {
-        var Obj = new ProductDto {
-            Id = product.Id,
-            Name = product.Name,
-            Price = product.Price,
-            Location = product.Location,
-            ImageBytes = product.ImageBytes,
-            GeneratedDate = product.GeneratedDate,
-        };
+    //public static byte[] GenerateProdutQrCode(Product product) {
+    //    var Obj = new ProductDto {
+    //        Id = product.Id,
+    //        Name = product.Name,
+    //        Price = product.Price,
+    //        Location = product.Location,
+    //        ImageBytes = product.ImageBytes,
+    //        GeneratedDate = product.GeneratedDate,
+    //    };
 
-        var json = JsonSerializer.Serialize(Obj);
+    //    var json = JsonSerializer.Serialize(Obj);
 
-        return GenerateQrCode(json);
-    }
+    //    return GenerateQrCode(json);
 }
+

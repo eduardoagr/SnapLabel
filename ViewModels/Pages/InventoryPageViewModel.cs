@@ -6,7 +6,7 @@
 /// </summary>
 public partial class InventoryPageViewModel(IShellService shellService,
     IBleManager bleManager, IMessenger messenger,
-    IPrintingPopupService printingPopup, IDatabaseService databaseService) : ObservableObject {
+    IPrintingPopupService printingPopup, IDatabaseService<Product> databaseService) : ObservableObject {
 
     #region 🔧 Internal State
     // --------------------------------------------------------------------
@@ -91,24 +91,6 @@ public partial class InventoryPageViewModel(IShellService shellService,
     }
     #endregion
 
-    public async Task FetchData() {
-
-        var hasData = await databaseService.HasProductDataAsync();
-
-        if(!hasData) {
-            return;
-        }
-
-        Products.Clear();
-
-        var data = await databaseService.GetAllProductsAsync();
-
-        foreach(var item in data) {
-
-            Products.Add(item);
-        }
-
-    }
     #region 🔌 Bluetooth Management
     // --------------------------------------------------------------------
     // Handles Bluetooth scanning, connection, and disconnection
