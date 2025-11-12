@@ -1,27 +1,24 @@
 ﻿namespace SnapLabel.Models;
 
-
 [Table("stores")]
-public class Store : BaseModel {
+public class Store : BaseModel, IHasId {
 
     [PrimaryKey("id")]
-    public long Id { get; set; }
+    public Guid id { get; set; }
 
-    [Column("store_name")]
-    public string? StoreName { get; set; }
+    public string? name { get; set; }
 
-    [Column("owner_email")]
-    public string? OwnerEmail { get; set; }
+    public Guid user_id { get; set; }
 
-    [Column("address")]
-    public string? Address { get; set; }
+    public decimal total_revenue { get; set; }
 
-    [Column("location")]
-    public string? Location { get; set; }
+    public decimal total_sales { get; set; }
 
-    [Column("created_date")]
-    public DateTime CreatedDate { get; set; }
+    public DateTime created_at { get; set; }
 
-    [Column("is_active")]
-    public bool IsActive { get; set; }
+    public DateTime? updated_at { get; set; }
+
+
 }
+
+

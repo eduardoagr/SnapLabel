@@ -27,6 +27,7 @@ global using SnapLabel.ViewModels;
 global using SnapLabel.Views;
 
 global using Supabase;
+global using Supabase.Postgrest;
 global using Supabase.Postgrest.Attributes;
 global using Supabase.Postgrest.Models;
 
@@ -35,12 +36,13 @@ global using Syncfusion.Maui.Core.Hosting;
 
 global using System.Collections.ObjectModel;
 global using System.Diagnostics;
-global using System.Globalization;
 global using System.Numerics;
 global using System.Reactive.Linq;
+global using System.Security.Cryptography;
 global using System.Text;
+global using System.Text.Json;
 global using System.Text.Json.Serialization;
-global using System.Text.RegularExpressions;
 global using System.Threading;
+global using System.Xml.Serialization;
 
 global using Client = Supabase.Client;

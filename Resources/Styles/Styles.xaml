@@ -504,4 +504,37 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style x:Key="LoginButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="#2882D1" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="HeightRequest" Value="50" />
+        <Setter Property="WidthRequest" Value="250" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <Setter.Value>
+                <VisualStateGroupList>
+                    <VisualStateGroup>
+                        <VisualState x:Name="Normal" />
+                        <VisualState x:Name="Pressed">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="#1A6BB5" />
+                                <Setter Property="Scale" Value="0.98" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Disabled">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="#CCCCCC" />
+                                <Setter Property="TextColor" Value="Gray" />
+                                <Setter Property="Opacity" Value="0.6" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

@@ -1,6 +1,6 @@
 ﻿namespace SnapLabel.Interfaces;
 
-public interface IPrintingPopupService {
+public interface ICustomDialogService {
 
     Task ShowAsync(string message, string imageSource);
 

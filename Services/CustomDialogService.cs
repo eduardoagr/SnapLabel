@@ -1,14 +1,12 @@
-﻿
-
-using Syncfusion.Maui.Popup;
+﻿using Syncfusion.Maui.Popup;
 
 namespace SnapLabel.Services;
 
-public class PrintingPopupService : IPrintingPopupService {
+public class CustomDialogService : ICustomDialogService {
 
     SfPopup popup;
 
-    public PrintingPopupService() {
+    public CustomDialogService() {
 
         popup = new SfPopup {
             AnimationMode = PopupAnimationMode.None,
@@ -25,15 +23,12 @@ public class PrintingPopupService : IPrintingPopupService {
 
     public Task HideAsync() {
 
-        Debug.WriteLine($"[Popup] Dismissing from: {popup.Parent?.GetType().Name}");
         popup.Dismiss();
         return Task.CompletedTask;
     }
 
     public Task ShowAsync(string message, string imageSource) {
 
-        Debug.WriteLine($"[Popup] Showing on: {popup.Parent?.GetType().Name}");
-        Debug.WriteLine($"[Popup] IsOpen: {popup.IsOpen}");
 
         // Update background based on current theme
         popup.PopupStyle.PopupBackground = Application.Current!.RequestedTheme == AppTheme.Dark
@@ -47,7 +42,7 @@ public class PrintingPopupService : IPrintingPopupService {
                 Padding = 10,
                 Children =
                 {
-                    new Image { Source = "wait.gif", IsAnimationPlaying = true },
+                    new Image { Source = imageSource, IsAnimationPlaying = true },
                     new Label
                     {
                         Text = message,

@@ -1,24 +1,19 @@
 ﻿namespace SnapLabel.Models;
 
 [Table("users")]
-public class User : BaseModel {
+public class User : BaseModel, IHasId {
+
 
     [PrimaryKey("id")]
-    public long Id { get; set; }
+    public Guid id { get; set; }
 
-    [Column("name")]
-    public string? Name { get; set; }
+    public string? name { get; set; }
 
-    [Column("email")]
-    public string? Email { get; set; }
+    public string? email { get; set; }
 
-    [Column("role")]
-    public string Role { get; set; } = "viewer"; // viewer, manager, admin
+    public string? store_id { get; set; }
 
-    [Column("created_date")]
-    public DateTime CreatedDate { get; set; }
+    public DateTime created_at { get; set; }
 
-    [Column("store_id")]
-    public long StoreId { get; set; }
-
+    public DateTime? updated_at { get; set; }
 }
