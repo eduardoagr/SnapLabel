@@ -1,46 +1,20 @@
 ﻿namespace SnapLabel.ViewModels;
 
-public partial class UserViewModel : ObservableObject {
-
-    public event Action? UserPropertiesChanged;
-
-    private readonly User _user;
+public partial class UserViewModel(User user, IMessenger messenger) : ObservableObject {
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
-    public partial string Name { get; set; } = string.Empty;
+    public partial string Name { get; set; } = user.name ?? string.Empty;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
-    public partial string Email { get; set; } = string.Empty;
+    public partial string Email { get; set; } = user.email ?? string.Empty;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SaveToModelCommand))]
-    public partial string Password { get; set; } = string.Empty; // Only used for transmission
+    public partial string Password { get; set; } = string.Empty;
 
-    public UserViewModel(User user) {
-        _user = user;
+    partial void OnNameChanged(string value) => messenger.Send(new FieldsChangedMessage());
 
-        Name = user.Name ?? string.Empty;
-        Email = user.Email ?? string.Empty;
+    partial void OnEmailChanged(string value) => messenger.Send(new FieldsChangedMessage());
 
-        PropertyChanged += (s, e) => UserPropertiesChanged?.Invoke();
-    }
-
-    public bool CanSave =>
-        !string.IsNullOrWhiteSpace(Name)
-        && !string.IsNullOrWhiteSpace(Email)
-        && !string.IsNullOrWhiteSpace(Password); // Required for transmission, not storage
-
-    [RelayCommand(CanExecute = nameof(CanSave))]
-    public void SaveToModel() {
-        _user.Name = Name;
-        _user.Email = Email;
-    }
-
-    public User GetUser() {
-        SaveToModel();
-        return _user;
-    }
+    partial void OnPasswordChanged(string value) => messenger.Send(new FieldsChangedMessage());
 
 }

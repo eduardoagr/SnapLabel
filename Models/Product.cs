@@ -1,32 +1,20 @@
-﻿
-
-namespace SnapLabel.Models;
+﻿namespace SnapLabel.Models;
 
 [Table("products")]
 public class Product : BaseModel {
 
     [PrimaryKey("id")]
-    public long Id { get; set; }
+    public Guid id { get; set; }
 
-    [Column("name")]
-    public string? Name { get; set; }
+    public string? name { get; set; }
 
-    [Column("price")]
-    public decimal? Price { get; set; }
+    public decimal price { get; set; }
 
-    [Column("location")]
-    public string? Location { get; set; }
+    public string? image_url { get; set; }
 
-    [Column("image_url")]
-    public string? ImageUrl { get; set; }
+    public Guid store_id { get; set; }
 
-    [Column("store_id")]
-    public long StoreId { get; set; }
+    public DateTime created_at { get; set; }
 
-
-
-    public void NormalizeValues() {
-        Name = Normalize.NormalizeStrings(Name);
-        Location = Normalize.NormalizeStrings(Location);
-    }
+    public DateTime updated_at { get; set; }
 }

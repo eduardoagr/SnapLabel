@@ -4,21 +4,20 @@
         public static string GetErrorMessage(string errorCode) {
 
             return errorCode switch {
+
                 "weak_password" => "Password should be at least 6 characters.",
                 "user_already_registered" => "This email is already registered.",
-                "validation_failed" => "Invalid email format.",
-                "email_address_invalid" => "The email you entered is invalid, please enter new one",
+                "validation_failed" => "missing email",
+                "email_address_invalid" => "The email you entered is invalid, please enter a new one.",
                 "rate_limit_exceeded" => "Too many requests. Please try again later.",
                 "invalid_login_credentials" => "Incorrect email or password.",
                 "email_not_confirmed" => "Please confirm your email before logging in.",
                 "user_not_found" => "No account found with this email.",
+                "invalid_credentials" => "Invalid login credentials.",
                 "email_signup_disabled" => "Email signups are currently disabled.",
                 "provider_not_allowed" => "This authentication provider is not allowed.",
                 _ => "An unexpected error occurred."
-
             };
         }
-
-
     }
 }

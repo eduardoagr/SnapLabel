@@ -5,6 +5,7 @@ global using CommunityToolkit.Maui.Core.Views;
 global using CommunityToolkit.Mvvm.ComponentModel;
 global using CommunityToolkit.Mvvm.Input;
 global using CommunityToolkit.Mvvm.Messaging;
+global using CommunityToolkit.Mvvm.Messaging.Messages;
 
 global using FFImageLoading.Maui;
 
@@ -35,12 +36,14 @@ global using Syncfusion.Maui.Core.Hosting;
 
 global using System.Collections.ObjectModel;
 global using System.Diagnostics;
-global using System.Globalization;
 global using System.Numerics;
 global using System.Reactive.Linq;
+global using System.Security.Cryptography;
 global using System.Text;
+global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Threading;
+global using System.Xml.Serialization;
 
 global using Client = Supabase.Client;

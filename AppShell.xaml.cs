@@ -5,7 +5,7 @@
             InitializeComponent();
 
             Routing.RegisterRoute(nameof(NewProductPage), typeof(NewProductPage));
-            Routing.RegisterRoute(nameof(ManageStoresPage), typeof(ManageStoresPage));
+            Routing.RegisterRoute(nameof(StoresPage), typeof(StoresPage));
             Routing.RegisterRoute(nameof(NoInternetPage), typeof(NoInternetPage));
 
         }

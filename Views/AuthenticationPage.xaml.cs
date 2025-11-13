@@ -7,4 +7,14 @@ public partial class AuthenticationPage : ContentPage {
 
         BindingContext = authenticationPageViewModel;
     }
+
+    protected override async void OnNavigatedTo(NavigatedToEventArgs args) {
+        base.OnNavigatedTo(args);
+
+        if(BindingContext is AuthenticationPageViewModel vm) {
+
+            // await vm.CheckAuth();
+
+        }
+    }
 }

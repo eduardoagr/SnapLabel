@@ -29,8 +29,8 @@ public static class MauiProgram {
         builder.Services.AddSingleton<NoInternetPage>();
         builder.Services.AddSingleton<AuthenticationPage>();
         builder.Services.AddSingleton<AuthenticationPageViewModel>();
-        builder.Services.AddSingleton<ManageStoresPage>();
-        builder.Services.AddSingleton<ManageStoresViewModel>();
+        builder.Services.AddSingleton<StoresPage>();
+        builder.Services.AddSingleton<StoresViewModel>();
         builder.Services.AddSingleton<DashboardPage>();
         builder.Services.AddSingleton<DashboardPageViewModel>();
         // Messenger (MVVM Toolkit)
@@ -39,7 +39,7 @@ public static class MauiProgram {
         builder.Services.AddSingleton(SecureStorage.Default);
         builder.Services.AddSingleton(MediaPicker.Default);
         builder.Services.AddSingleton<IShellService, ShellService>();
-        builder.Services.AddSingleton<IPrintingPopupService, PrintingPopupService>();
+        builder.Services.AddSingleton<ICustomDialogService, CustomDialogService>();
         builder.Services.AddSingleton(typeof(IDatabaseService<>), typeof(DatabaseService<>));
         builder.Services.AddSingleton(Connectivity.Current);
         builder.Services.AddSingleton(provider => new Client(AppConstants.SUPABASE_URL, AppConstants.SUPABASE_APIKEY, options));

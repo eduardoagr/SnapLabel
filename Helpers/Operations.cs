@@ -11,7 +11,7 @@ public class Operations {
     /// <param name="initialWidth">The starting width for resizing. Default is 1000 pixels.</param>
     /// <param name="maxSizeKb">The maximum allowed size in kilobytes. Default is 20 KB.</param>
     /// <returns>The compressed image as a byte array, or null if compression fails to meet the size constraint.</returns>
-    public static byte[]? CompressImage(byte[] originalBytes, int initialWidth = 1000, int maxSizeKb = 20) {
+    public static byte[]? CompressImage(byte[] originalBytes, int initialWidth = 1000, int maxSizeKb = 10) {
         int targetWidth = initialWidth;
         float compressionQuality = 0.6f;
 
@@ -69,5 +69,8 @@ public class Operations {
     //    var json = JsonSerializer.Serialize(Obj);
 
     //    return GenerateQrCode(json);
+
+
+
 }
 

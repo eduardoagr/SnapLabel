@@ -6,7 +6,7 @@
 /// </summary>
 public partial class InventoryPageViewModel(IShellService shellService,
     IBleManager bleManager, IMessenger messenger,
-    IPrintingPopupService printingPopup, IDatabaseService<Product> databaseService) : ObservableObject {
+    ICustomDialogService customDialogService, IDatabaseService<Product> databaseService) : ObservableObject {
 
     #region 🔧 Internal State
     // --------------------------------------------------------------------
@@ -321,7 +321,7 @@ public partial class InventoryPageViewModel(IShellService shellService,
             return;
         }
 
-        await printingPopup.ShowAsync("Printing...", "wait.gif");
+        await customDialogService.ShowAsync("Printing...", "wait.gif");
 
         // Example print job (replace with actual printer command)
         bool isFinished = await Printer.PrintTextAsync(Device.Peripheral, "Hello");
@@ -329,7 +329,7 @@ public partial class InventoryPageViewModel(IShellService shellService,
         if(isFinished) {
             Debug.WriteLine("[Popup] Dismissing...");
 
-            await printingPopup.HideAsync();
+            await customDialogService.HideAsync();
         }
 
     }

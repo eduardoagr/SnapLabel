@@ -28,7 +28,7 @@ public partial class NewProductPageViewModel : ObservableObject {
         _supabaseClient = supabaseClient;
 
         ProductVM = new ProductViewModel(new Product());
-        ProductVM.ProductPropertiesChanged += ProductVM_ProductPropertiesChanged;
+        //ProductVM.ProductPropertiesChanged += ProductVM_ProductPropertiesChanged;
         SaveProductAsyncCommand = new AsyncRelayCommand(SaveProductAsync, CanSaveProduct);
     }
 

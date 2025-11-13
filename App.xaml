@@ -9,7 +9,6 @@
         <ResourceDictionary>
 
             <!--  Global Converters  -->
-            <helpers:ByteArrayToImageSourceConverter x:Key="ByteToImageConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
