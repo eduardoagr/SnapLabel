@@ -5,7 +5,6 @@ global using CommunityToolkit.Maui.Core.Views;
 global using CommunityToolkit.Mvvm.ComponentModel;
 global using CommunityToolkit.Mvvm.Input;
 global using CommunityToolkit.Mvvm.Messaging;
-global using CommunityToolkit.Mvvm.Messaging.Messages;
 
 global using FFImageLoading.Maui;
 
