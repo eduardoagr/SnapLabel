@@ -1,4 +1,6 @@
-﻿namespace SnapLabel.Helpers;
+﻿using Cryptography;
+
+namespace SnapLabel.Helpers;
 
 public class CredentialVault {
 

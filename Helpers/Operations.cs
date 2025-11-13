@@ -9,7 +9,7 @@ public class Operations {
     /// </summary>
     /// <param name="originalBytes">The original image as a byte array.</param>
     /// <param name="initialWidth">The starting width for resizing. Default is 1000 pixels.</param>
-    /// <param name="maxSizeKb">The maximum allowed size in kilobytes. Default is 20 KB.</param>
+    /// <param name="maxSizeKb">The maximum allowed size in kilobytes. Default is 5 KB.</param>
     /// <returns>The compressed image as a byte array, or null if compression fails to meet the size constraint.</returns>
     public static byte[]? CompressImage(byte[] originalBytes, int initialWidth = 1000, int maxSizeKb = 10) {
         int targetWidth = initialWidth;
@@ -33,7 +33,7 @@ public class Operations {
             compressionQuality -= 0.1f;
             targetWidth -= 100;
         }
-        while(compressionQuality >= 0.3f && targetWidth >= 300);
+        while(compressionQuality >= 0.1f && targetWidth >= 100);
 
         return null;
     }

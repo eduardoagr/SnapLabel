@@ -1,41 +1,118 @@
 ﻿namespace SnapLabel.Services;
-public class DatabaseService<T> : IDatabaseService<T> where T : BaseModel, new() {
-    private readonly IShellService _shellService;
+public class DatabaseService<T>(Client _client, IShellService shell) : IDatabaseService<T> where T : BaseModel,
+    IHasId, new() {
 
-    public DatabaseService(IShellService shellService) {
-        _shellService = shellService;
+    public async Task<bool> DeleteAsync(Guid id) {
+
+        try {
+            await _client
+                .From<T>()
+                .Where(x => x.id == id)
+                .Delete();
+
+            return true;
+
+        } catch(Exception ex) {
+
+            await DisplayErrorAsync(ex);
+
+            return false;
+        }
+    }
+
+
+
+    public async Task<IEnumerable<T>> GetAllAsync() {
+
+        try {
+
+            var result = await _client.From<T>().Get();
+            var objs = result.Models;
+
+            return objs;
+
+
+        } catch(Exception ex) {
+
+            await DisplayErrorAsync(ex);
+
+            return [];
+        }
+    }
+
+    public async Task<T?> GetByIdAsync(Guid id) {
+
+        try {
+
+            var data = await _client
+                .From<T>()
+                .Where(x => x.id == id)
+                .Get();
+
+            return data.Models.FirstOrDefault();
+
+
+        } catch(Exception ex) {
+
+            await DisplayErrorAsync(ex);
+
+            return null;
+        }
+
     }
 
     public async Task<bool> HasDataAsync() {
-        // Your logic here
-        return false;
+
+        try {
+
+            var response = await _client.From<T>().Limit(1).Get();
+
+            var data = response.Models.Count != 0;
+
+            return data;
+
+        } catch(Exception ex) {
+
+            await DisplayErrorAsync(ex);
+            return false;
+        }
     }
 
-    public async Task<long> TryAddAsync(T entity) {
-        // Your logic here
-        return 0;
+    public async Task<bool> InsertAsync(T entity) {
+
+        try {
+            var response = await _client
+                .From<T>()
+                .Insert(entity, new QueryOptions {
+                    Returning = QueryOptions.ReturnType.Representation
+                });
+
+            return response.Models.Count != 0;
+        } catch(Exception ex) {
+            await DisplayErrorAsync(ex);
+            return false;
+        }
+
     }
 
-    public async Task<List<T>> GetAllAsync() {
-        // Your logic here
-        return new List<T>();
+    public async Task<bool> UpdateAsync(T entity) {
+
+        try {
+            var response = await _client
+                .From<T>()
+                .Update(entity);
+
+            return response.Models.Count != 0;
+
+        } catch(Exception ex) {
+
+            await DisplayErrorAsync(ex);
+
+            return false;
+        }
     }
 
-    public async Task<T?> GetByIdAsync(long id) {
-        // Your logic here
-        return null;
-    }
-
-    public async Task<T?> GetByNameAsync(string name) {
-        // Optional logic if T has a Name property
-        return null;
-    }
-
-    public async Task UpdateAsync(T entity) {
-        // Your logic here
-    }
-
-    public async Task DeleteAsync(long id) {
-        // Your logic here
+    private async Task DisplayErrorAsync(Exception ex) {
+        await shell.DisplayAlertAsync("Error", ex.Message, "OK");
     }
 }

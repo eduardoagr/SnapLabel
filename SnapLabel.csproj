@@ -87,6 +87,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Views\StoresPage.xaml.cs">
+	    <DependentUpon>StoresPage.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Views\NewProductPage.xaml.cs">
 	    <DependentUpon>NewProductPage.xaml</DependentUpon>
 	  </Compile>
@@ -108,7 +111,10 @@
 	  <MauiXaml Update="Views\InventoryPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\ManageStoresPage.xaml">
+	  <MauiXaml Update="Views\NewStorePage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\StoresPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\NewProductPage.xaml">

@@ -78,7 +78,7 @@ public partial class AuthenticationPageViewModel : ObservableObject {
                     name = UserVM.Name
                 };
 
-                await _databaseService.TryAddAsync(user);
+                await _databaseService.InsertAsync(user);
 
                 await _shellService.NavigateToAsync($"//{AppConstants.HOME}");
             }
@@ -108,6 +108,19 @@ public partial class AuthenticationPageViewModel : ObservableObject {
                 await _shellService.NavigateToAsync($"//{AppConstants.HOME}");
 
                 await _customDialogService.HideAsync();
+
+                if(!Guid.TryParse(session.User.Id, out Guid parsedId))
+                    throw new Exception("Invalid Auth UID format");
+
+                User user = new() {
+
+                    id = parsedId,
+                    email = session.User.Email,
+                    name = UserVM.Name,
+                    created_at = DateTime.UtcNow
+                };
+
+                await _databaseService.InsertAsync(user);
 
                 await _secureStorage.SetAsync(AppConstants.EMAIL, session?.User?.Email ?? string.Empty);
                 await CredentialVault.StorePasswordAsync(UserVM.Password);

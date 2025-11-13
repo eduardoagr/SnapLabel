@@ -1,7 +1,7 @@
 ﻿namespace SnapLabel.Models;
 
 [Table("store_users")]
-public class StoreUser : BaseModel {
+public class StoreUser : BaseModel, IHasId {
 
     [PrimaryKey("id")]
     public Guid id { get; set; }
