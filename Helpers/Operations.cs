@@ -38,18 +38,6 @@ public class Operations {
         return null;
     }
 
-    /// <summary>
-    /// Generates a QR code image from the specified content string.
-    /// </summary>
-    /// <param name="content">The content to encode in the QR code.</param>
-    /// <returns>A PNG image of the QR code as a byte array.</returns>
-    public static byte[] GenerateQrCode(string content) {
-        var qrGen = new QRCodeGenerator();
-        var data = qrGen.CreateQrCode(content, QRCodeGenerator.ECCLevel.L);
-        var qrCode = new PngByteQRCode(data);
-        var pngBytes = qrCode.GetGraphic(20); // scale = 20 → sharp detail
-        return pngBytes;
-    }
 
     /// <summary>
     /// Generates a QR code from a serialized product object.

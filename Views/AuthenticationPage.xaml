@@ -65,6 +65,9 @@
             <sfPopup:SfPopup
                 AnimationMode="Zoom"
                 AutoSizeMode="Both"
+                IsFullScreen="False"
+                Margin="20"
+                Padding="20"
                 IsOpen="{x:Binding IsCreatingAccountPopUpOpen,
                                    x:DataType=vm:AuthenticationPageViewModel}"
                 ShowHeader="False"
@@ -95,12 +98,14 @@
                                     Command="{x:Binding CreateAccountCommand,
                                                         x:DataType=vm:AuthenticationPageViewModel}"
                                     Style="{StaticResource RippleButtonStyle}"
-                                    Text="Create Account" />
+                                    Text="Create Account"
+                                    WidthRequest="150"/>
                                 <buttons:SfButton
                                     Command="{x:Binding CancelCommand,
                                                         x:DataType=vm:AuthenticationPageViewModel}"
                                     Style="{StaticResource RippleButtonStyle}"
-                                    Text="Cancel" />
+                                    Text="Cancel"
+                                    WidthRequest="150"/>
                             </HorizontalStackLayout>
 
                         </VerticalStackLayout>

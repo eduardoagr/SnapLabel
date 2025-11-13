@@ -11,8 +11,6 @@ global using FFImageLoading.Maui;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Maui.Graphics.Platform;
 
-global using QRCoder;
-
 global using Shiny;
 global using Shiny.BluetoothLE;
 
