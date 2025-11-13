@@ -1,4 +1,6 @@
-﻿namespace SnapLabel;
+﻿using DeviceInfo = Microsoft.Maui.Devices.DeviceInfo;
+
+namespace SnapLabel;
 
 public partial class App : Application {
 
@@ -25,12 +27,30 @@ public partial class App : Application {
     }
 
     protected override Window CreateWindow(IActivationState? activationState) {
-        var window = new Window(_appShell);
+        Window window = new(_appShell);
 
-        // Initialize app once the window is created
-        MainThread.BeginInvokeOnMainThread(async () => await InitAppAsync());
+        if(DeviceInfo.Idiom == DeviceIdiom.Desktop) {
+            // Subscribe to the window's Created event
+            window.Created += OnWindowCreated;
+        }
+        else {
+            // Mobile: start initialization immediately
+            MainThread.BeginInvokeOnMainThread(async () => await InitAppAsync());
+        }
 
         return window;
+    }
+
+    private async void OnWindowCreated(object? sender, EventArgs e) {
+        if(sender is Window window)
+            window.Created -= OnWindowCreated;
+
+        // Wait until the Shell has a valid XamlRoot (ensures no flash)
+        while(_appShell.Handler?.PlatformView == null)
+            await Task.Delay(10);
+
+        // Now safely initialize
+        await InitAppAsync();
     }
 
     /// <summary>
@@ -59,7 +79,7 @@ public partial class App : Application {
     /// </summary>
     private async Task HandleConnectivityAsync(ConnectivityChangedEventArgs e) {
 
-        var modalStack = _appShell.Navigation.ModalStack;
+        IReadOnlyList<Page> modalStack = _appShell.Navigation.ModalStack;
         bool hasNoInternetModal = modalStack.OfType<NoInternetPage>().Any();
 
         if(e.NetworkAccess != NetworkAccess.Internet) {

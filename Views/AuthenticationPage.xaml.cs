@@ -11,6 +11,7 @@ public partial class AuthenticationPage : ContentPage {
 
             if(BindingContext is AuthenticationPageViewModel vm) {
 
+                //await vm.CheckAuth();
             }
         };
     }

@@ -33,24 +33,24 @@ public partial class AuthenticationPageViewModel : ObservableObject {
         _databaseService = databaseService;
     }
 
-    //public async Task CheckAuth() {
+    public async Task CheckAuth() {
 
-    //    var email = await _secureStorage.GetAsync(AppConstants.EMAIL);
-    //    var password = await CredentialVault.RetrievePasswordAsync();
+        string? email = await _secureStorage.GetAsync(AppConstants.EMAIL);
+        string? password = await CredentialVault.RetrievePasswordAsync();
 
-    //    if(!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password)) {
-    //        try {
+        if(!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password)) {
+            try {
 
-    //            var auth = await _client.Auth.SignIn(email, password);
+                var auth = await _client.Auth.SignIn(email, password);
 
-    //            await _shellService.NavigateToAsync($"//{AppConstants.HOME}");
+                await _shellService.NavigateToAsync($"//{AppConstants.HOME}");
 
-    //        } catch(Exception ex) {
+            } catch(Exception ex) {
 
-    //            await SupabaseErrorHelper.HandleAsync(ex, _shellService);
-    //        }
-    //    }
-    //}
+                await SupabaseErrorHelper.HandleAsync(ex, _shellService);
+            }
+        }
+    }
 
     [RelayCommand]
     void OpenCreateAccountPopUp() {
