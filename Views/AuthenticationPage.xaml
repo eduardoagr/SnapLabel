@@ -12,7 +12,7 @@
     NavigationPage.HasNavigationBar="False">
 
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="150,*">
 
         <Image
             Margin="0,40,0,20"

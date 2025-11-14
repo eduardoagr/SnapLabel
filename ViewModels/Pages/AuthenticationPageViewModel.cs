@@ -15,6 +15,7 @@ public partial class AuthenticationPageViewModel : ObservableObject {
     [ObservableProperty]
     public partial bool IsCreatingAccountPopUpOpen { get; set; }
 
+
     public AuthenticationPageViewModel(Client client, IShellService shellService,
         ISecureStorage secureStorage, IMessenger messenger, ICustomDialogService customDialogService, IDatabaseService<User> databaseService) {
 
@@ -41,7 +42,7 @@ public partial class AuthenticationPageViewModel : ObservableObject {
         if(!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password)) {
             try {
 
-                var auth = await _client.Auth.SignIn(email, password);
+                Supabase.Gotrue.Session? auth = await _client.Auth.SignIn(email, password);
 
                 await _shellService.NavigateToAsync($"//{AppConstants.HOME}");
 
@@ -64,7 +65,7 @@ public partial class AuthenticationPageViewModel : ObservableObject {
 
             await _customDialogService.ShowAsync("Please wait", "loading.gif");
 
-            var auth = await _client.Auth.SignIn(UserVM.Email, UserVM.Password);
+            Supabase.Gotrue.Session? auth = await _client.Auth.SignIn(UserVM.Email, UserVM.Password);
 
             if(auth?.User is not null) {
                 await _secureStorage.SetAsync(AppConstants.EMAIL, UserVM.Email);
@@ -101,7 +102,7 @@ public partial class AuthenticationPageViewModel : ObservableObject {
 
             await _customDialogService.ShowAsync("Please wait", "loading.gif");
 
-            var session = await _client.Auth.SignUp(UserVM.Email, UserVM.Password);
+            Supabase.Gotrue.Session? session = await _client.Auth.SignUp(UserVM.Email, UserVM.Password);
 
             if(session?.User?.Id is not null) {
                 IsCreatingAccountPopUpOpen = false;
