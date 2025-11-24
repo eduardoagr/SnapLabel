@@ -1,20 +1,18 @@
 ﻿namespace SnapLabel.Models;
 
-[Table("users")]
-public class User : BaseModel, IHasId {
 
+public class User : IFirebaseEntity {
 
-    [PrimaryKey("id")]
-    public Guid id { get; set; }
+    public string? Id { get; set; }
 
-    public string? name { get; set; }
+    public string? Username { get; set; }
 
-    public string? email { get; set; }
+    public string? Email { get; set; }
 
-    public Guid store_id { get; set; }
+    public string? StoreId { get; set; }
 
-    public DateTime created_at { get; set; }
+    public string? CreatedAt { get; set; }
 
-    public DateTime updated_at { get; set; }
+    public string? UpdatedAt { get; set; }
 }
 

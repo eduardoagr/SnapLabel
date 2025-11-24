@@ -1,6 +1,6 @@
 ﻿namespace SnapLabel.ViewModels;
 
-public partial class StoresViewModel(Client client) : ObservableObject {
+public partial class StoresViewModel : ObservableObject {
 
 
 }

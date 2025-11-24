@@ -1,10 +1,8 @@
-﻿using Syncfusion.Maui.Popup;
-
-namespace SnapLabel.Services;
+﻿namespace SnapLabel.Services;
 
 public class CustomDialogService : ICustomDialogService {
 
-    SfPopup popup;
+    private SfPopup popup;
 
     public CustomDialogService() {
 
@@ -20,6 +18,7 @@ public class CustomDialogService : ICustomDialogService {
             }
         };
     }
+
 
     public Task HideAsync() {
 
@@ -37,19 +36,22 @@ public class CustomDialogService : ICustomDialogService {
 
         // Update content with custom message and image
 
+        Image img = new() { Source = imageSource, IsAnimationPlaying = true };
+        if(DeviceInfo.Idiom == DeviceIdiom.Desktop) {
+            img.HeightRequest = 100; // Modify the width and height as your need.
+            img.WidthRequest = 100;
+        }
+
         popup.ContentTemplate = new DataTemplate(() => {
             return new VerticalStackLayout {
                 Padding = 10,
-                Children =
-                {
-                    new Image { Source = imageSource, IsAnimationPlaying = true },
-                    new Label
-                    {
-                        Text = message,
-                        FontAttributes = FontAttributes.Bold,
-                        FontSize = 18,
-                        HorizontalTextAlignment = TextAlignment.Center
-                    }
+                Children = {
+                img,
+                new Label {
+                Text = message,
+                FontAttributes = FontAttributes.Bold,
+                FontSize = 18,
+                HorizontalTextAlignment = TextAlignment.Center }
                 }
             };
         });

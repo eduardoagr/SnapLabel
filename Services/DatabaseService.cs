@@ -1,118 +1,45 @@
-﻿namespace SnapLabel.Services;
-public class DatabaseService<T>(Client _client, IShellService shell) : IDatabaseService<T> where T : BaseModel,
-    IHasId, new() {
+﻿using Firebase.Database;
+using Firebase.Database.Query;
 
-    public async Task<bool> DeleteAsync(Guid id) {
+namespace SnapLabel.Services;
 
-        try {
-            await _client
-                .From<T>()
-                .Where(x => x.id == id)
-                .Delete();
+public class DatabaseService<T>(FirebaseClient _client) : IDatabaseService<T> where T : IFirebaseEntity {
 
-            return true;
+    private readonly string _collectionName = $"{typeof(T).Name}s";
 
-        } catch(Exception ex) {
+    public async Task<string> InsertAsync(T entity) {
 
-            await DisplayErrorAsync(ex);
+        var result = await _client
+        .Child(_collectionName)
+        .PostAsync(entity);
 
-            return false;
-        }
-    }
+        entity.Id = result.Key;
+        return entity.Id;
 
-
-
-    public async Task<IEnumerable<T>> GetAllAsync() {
-
-        try {
-
-            var result = await _client.From<T>().Get();
-            var objs = result.Models;
-
-            return objs;
-
-
-        } catch(Exception ex) {
-
-            await DisplayErrorAsync(ex);
-
-            return [];
-        }
-    }
-
-    public async Task<T?> GetByIdAsync(Guid id) {
-
-        try {
-
-            var data = await _client
-                .From<T>()
-                .Where(x => x.id == id)
-                .Get();
-
-            return data.Models.FirstOrDefault();
-
-
-        } catch(Exception ex) {
-
-            await DisplayErrorAsync(ex);
-
-            return null;
-        }
 
     }
 
-    public async Task<bool> HasDataAsync() {
-
-        try {
-
-            var response = await _client.From<T>().Limit(1).Get();
-
-            var data = response.Models.Count != 0;
-
-            return data;
-
-        } catch(Exception ex) {
-
-            await DisplayErrorAsync(ex);
-            return false;
-        }
+    public Task<T?> GetByIdAsync(string id) {
+        throw new NotImplementedException();
     }
 
-    public async Task<bool> InsertAsync(T entity) {
+    public Task<IEnumerable<T>> GetAllAsync() {
+        throw new NotImplementedException();
+    }
 
-        try {
-            var response = await _client
-                .From<T>()
-                .Insert(entity, new QueryOptions {
-                    Returning = QueryOptions.ReturnType.Representation
-                });
+    public async Task UpdateAsync(T entity) {
 
-            return response.Models.Count != 0;
-        } catch(Exception ex) {
-            await DisplayErrorAsync(ex);
-            return false;
-        }
+        if(string.IsNullOrEmpty(entity.Id))
+            throw new InvalidOperationException("Entity must have an Id to update.");
+
+        await _client
+            .Child(_collectionName)
+            .Child(entity.Id)   // use the generated key
+            .PutAsync(entity);  // overwrite with updated object
 
     }
 
-    public async Task<bool> UpdateAsync(T entity) {
-
-        try {
-            var response = await _client
-                .From<T>()
-                .Update(entity);
-
-            return response.Models.Count != 0;
-
-        } catch(Exception ex) {
-
-            await DisplayErrorAsync(ex);
-
-            return false;
-        }
-    }
-
-    private async Task DisplayErrorAsync(Exception ex) {
-        await shell.DisplayAlertAsync("Error", ex.Message, "OK");
+    public Task DeleteAsync(string id) {
+        throw new NotImplementedException();
     }
 }

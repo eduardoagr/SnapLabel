@@ -7,8 +7,6 @@ public partial class NewProductPageViewModel : ObservableObject {
     private readonly IMediaPicker _mediaPicker;
     private readonly IShellService _shellService;
     private readonly IDatabaseService<Product> _databaseService;
-    private readonly Client _supabaseClient;
-    //private readonly DatabaseService databaseService;
 
     #endregion Readonly and Static Fields
 
@@ -20,24 +18,17 @@ public partial class NewProductPageViewModel : ObservableObject {
     #region Constructor
 
     public NewProductPageViewModel(IMediaPicker mediaPicker, IShellService shellService,
-        IDatabaseService<Product> databaseService, Client supabaseClient) {
+        IDatabaseService<Product> databaseService) {
 
         _mediaPicker = mediaPicker;
         _shellService = shellService;
         _databaseService = databaseService;
-        _supabaseClient = supabaseClient;
 
         ProductVM = new ProductViewModel(new Product());
-        //ProductVM.ProductPropertiesChanged += ProductVM_ProductPropertiesChanged;
         SaveProductAsyncCommand = new AsyncRelayCommand(SaveProductAsync, CanSaveProduct);
     }
 
     #endregion Constructor
-
-    private void ProductVM_ProductPropertiesChanged() {
-
-        SaveProductAsyncCommand?.NotifyCanExecuteChanged();
-    }
 
     private bool CanSaveProduct() => ProductVM.CanSave;
 

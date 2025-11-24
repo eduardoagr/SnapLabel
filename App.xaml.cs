@@ -4,17 +4,15 @@ public partial class App : Application {
 
     private readonly AppShell _appShell;
     private readonly IConnectivity _connectivity;
-    private readonly Client _supabase;
     private readonly NoInternetPage _noInternetPage;
     private readonly IShellService _shellService;
 
-    public App(AppShell appShell, Client supabase, IConnectivity connectivity, NoInternetPage noInternetPage,
+    public App(AppShell appShell, IConnectivity connectivity, NoInternetPage noInternetPage,
         IShellService shellService) {
 
         InitializeComponent();
 
         _appShell = appShell;
-        _supabase = supabase;
         _connectivity = connectivity;
         _noInternetPage = noInternetPage;
         _shellService = shellService;
@@ -50,8 +48,6 @@ public partial class App : Application {
             return;
         }
 
-        await InitializeSupabaseAsync();
-
     }
 
     /// <summary>
@@ -70,22 +66,6 @@ public partial class App : Application {
         else {
             if(hasNoInternetModal)
                 await _appShell.Navigation.PopModalAsync();
-
-            await InitializeSupabaseAsync();
-        }
-    }
-
-    /// <summary>
-    /// Initializes Supabase connection and handles exceptions.
-    /// </summary>
-    private async Task InitializeSupabaseAsync() {
-        if(_supabase == null)
-            return;
-
-        try {
-            await _supabase.InitializeAsync();
-        } catch(Exception ex) {
-            await _shellService.DisplayToastAsync($"Supabase init failed: {ex.Message}");
         }
     }
 }

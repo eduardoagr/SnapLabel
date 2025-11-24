@@ -2,9 +2,8 @@
 
 public partial class AuthenticationPageViewModel : ObservableObject {
 
-    private readonly Client _client;
+    private readonly IFirebaseAuthClient firebaseAuthClient;
     private readonly IShellService _shellService;
-    private readonly ISecureStorage _secureStorage;
     private readonly IMessenger _messenger;
     private readonly ICustomDialogService _customDialogService;
     private readonly IDatabaseService<User> _databaseService;
@@ -16,12 +15,11 @@ public partial class AuthenticationPageViewModel : ObservableObject {
     public partial bool IsCreatingAccountPopUpOpen { get; set; }
 
 
-    public AuthenticationPageViewModel(Client client, IShellService shellService,
-        ISecureStorage secureStorage, IMessenger messenger, ICustomDialogService customDialogService, IDatabaseService<User> databaseService) {
+    public AuthenticationPageViewModel(IFirebaseAuthClient authClient, IShellService shellService,
+        IMessenger messenger, ICustomDialogService customDialogService, IDatabaseService<User> databaseService) {
 
-        _client = client;
+        firebaseAuthClient = authClient;
         _shellService = shellService;
-        _secureStorage = secureStorage;
         _messenger = messenger;
         _customDialogService = customDialogService;
 
@@ -34,22 +32,13 @@ public partial class AuthenticationPageViewModel : ObservableObject {
         _databaseService = databaseService;
     }
 
-    public async Task CheckAuth() {
+    [RelayCommand]
+    async Task CheckAuth() {
 
-        string? email = await _secureStorage.GetAsync(AppConstants.EMAIL);
-        string? password = await CredentialVault.RetrievePasswordAsync();
+        if(firebaseAuthClient.User is not null) {
 
-        if(!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password)) {
-            try {
-
-                Supabase.Gotrue.Session? auth = await _client.Auth.SignIn(email, password);
-
-                await _shellService.NavigateToAsync($"//{AppConstants.HOME}");
-
-            } catch(Exception ex) {
-
-                await SupabaseErrorHelper.HandleAsync(ex, _shellService);
-            }
+            await Task.Delay(100);
+            await _shellService.NavigateToAsync($"//{AppConstants.HOME}");
         }
     }
 
@@ -61,34 +50,24 @@ public partial class AuthenticationPageViewModel : ObservableObject {
 
     [RelayCommand(CanExecute = nameof(CanLogin))]
     async Task Login() {
+
+        await _customDialogService.ShowAsync("Creating your account", "loading.gif");
+
         try {
 
-            await _customDialogService.ShowAsync("Please wait", "loading.gif");
+            await firebaseAuthClient.SignInWithEmailAndPasswordAsync(UserVM.Email, UserVM.Password);
 
-            Supabase.Gotrue.Session? auth = await _client.Auth.SignIn(UserVM.Email, UserVM.Password);
-
-            if(auth?.User is not null) {
-                await _secureStorage.SetAsync(AppConstants.EMAIL, UserVM.Email);
-                await CredentialVault.StorePasswordAsync(UserVM.Password);
-
-                await _customDialogService.HideAsync();
-
-                User user = new() {
-                    id = Guid.Parse(auth.User.Id!), // ✅ Explicit conversion
-                    email = auth.User.Email,
-                    name = UserVM.Name
-                };
-
-                await _databaseService.InsertAsync(user);
-
-                await _shellService.NavigateToAsync($"//{AppConstants.HOME}");
-            }
-        } catch(Exception ex) {
+            await _shellService.NavigateToAsync($"//{AppConstants.HOME}");
 
             await _customDialogService.HideAsync();
 
-            await SupabaseErrorHelper.HandleAsync(ex, _shellService);
+        } catch(FirebaseAuthException ex) {
+
+            await DisplayErrorAsync(ex);
+
+            await _customDialogService.HideAsync();
         }
+
     }
 
     [RelayCommand]
@@ -98,39 +77,36 @@ public partial class AuthenticationPageViewModel : ObservableObject {
 
     [RelayCommand(CanExecute = nameof(CanCreateAccount))]
     async Task CreateAccount() {
+        await _customDialogService.ShowAsync("Creating your account", "loading.gif");
+
         try {
 
-            await _customDialogService.ShowAsync("Please wait", "loading.gif");
+            await firebaseAuthClient.CreateUserWithEmailAndPasswordAsync(UserVM.Email, UserVM.Password, UserVM.Username);
 
-            Supabase.Gotrue.Session? session = await _client.Auth.SignUp(UserVM.Email, UserVM.Password);
+            var user = new User {
 
-            if(session?.User?.Id is not null) {
-                IsCreatingAccountPopUpOpen = false;
-                await _shellService.NavigateToAsync($"//{AppConstants.HOME}");
+                Email = UserVM.Email,
+                CreatedAt = DateTime.Now.ToString("f"),
+                UpdatedAt = DateTime.Now.ToString("f"),
+                StoreId = string.Empty,
+                Id = string.Empty,
+            };
 
-                await _customDialogService.HideAsync();
+            var id = await _databaseService.InsertAsync(user);
 
-                if(!Guid.TryParse(session.User.Id, out Guid parsedId))
-                    throw new Exception("Invalid Auth UID format");
+            await _databaseService.UpdateAsync(user);
 
-                User user = new() {
-
-                    id = parsedId,
-                    email = session.User.Email,
-                    name = UserVM.Name,
-                    created_at = DateTime.UtcNow
-                };
-
-                await _databaseService.InsertAsync(user);
-
-                await _secureStorage.SetAsync(AppConstants.EMAIL, session?.User?.Email ?? string.Empty);
-                await CredentialVault.StorePasswordAsync(UserVM.Password);
-            }
-        } catch(Exception ex) {
             await _customDialogService.HideAsync();
 
-            await SupabaseErrorHelper.HandleAsync(ex, _shellService);
+            await _shellService.NavigateToAsync($"//{AppConstants.HOME}");
+
+        } catch(FirebaseAuthException ex) {
+
+            await DisplayErrorAsync(ex);
+
+            await _customDialogService.HideAsync();
         }
+
     }
 
     private bool CanLogin() =>
@@ -140,5 +116,94 @@ public partial class AuthenticationPageViewModel : ObservableObject {
     private bool CanCreateAccount =>
         !string.IsNullOrWhiteSpace(UserVM.Email) &&
         !string.IsNullOrWhiteSpace(UserVM.Password) &&
-        !string.IsNullOrWhiteSpace(UserVM.Name);
+        !string.IsNullOrWhiteSpace(UserVM.Username);
+
+    private async Task DisplayErrorAsync(FirebaseAuthException ex) {
+
+        switch(ex.Reason) {
+
+            case AuthErrorReason.Undefined:
+            await _shellService.DisplayAlertAsync("Error", "An undefined error occurred.", "OK");
+            break;
+            case AuthErrorReason.Unknown:
+            await _shellService.DisplayAlertAsync("Error", "An unknown error occurred. Please try again.", "OK");
+            break;
+            case AuthErrorReason.OperationNotAllowed:
+            await _shellService.DisplayAlertAsync("Error", "This operation is not allowed. Check your Firebase settings.", "OK");
+            break;
+            case AuthErrorReason.UserDisabled:
+            await _shellService.DisplayAlertAsync("Account Disabled", "This user account has been disabled.", "OK");
+            break;
+            case AuthErrorReason.UserNotFound:
+            await _shellService.DisplayAlertAsync("User Not Found", "No account found with this email.", "OK");
+            break;
+            case AuthErrorReason.InvalidProviderID:
+            await _shellService.DisplayAlertAsync("Error", "Invalid provider ID specified.", "OK");
+            break;
+            case AuthErrorReason.InvalidAccessToken:
+            await _shellService.DisplayAlertAsync("Access Denied", "Invalid access token. Please sign in again.", "OK");
+            break;
+            case AuthErrorReason.LoginCredentialsTooOld:
+            await _shellService.DisplayAlertAsync("Session Expired", "Your login credentials are outdated. Please reauthenticate.", "OK");
+            break;
+            case AuthErrorReason.MissingRequestURI:
+            await _shellService.DisplayAlertAsync("Error", "Missing request URI. Please check your configuration.", "OK");
+            break;
+            case AuthErrorReason.SystemError:
+            await _shellService.DisplayAlertAsync("System Error", "A system error occurred. Try again later.", "OK");
+            break;
+            case AuthErrorReason.InvalidEmailAddress:
+            await _shellService.DisplayAlertAsync("Invalid Email", "The email address format is invalid.", "OK");
+            break;
+            case AuthErrorReason.MissingPassword:
+            await _shellService.DisplayAlertAsync("Missing Password", "Please enter a password.", "OK");
+            break;
+            case AuthErrorReason.WeakPassword:
+            await _shellService.DisplayAlertAsync("Weak Password", "Password is too weak. Use at least 6 characters.", "OK");
+            break;
+            case AuthErrorReason.EmailExists:
+            await _shellService.DisplayAlertAsync("Email Exists", "An account with this email already exists.", "OK");
+            break;
+            case AuthErrorReason.MissingEmail:
+            await _shellService.DisplayAlertAsync("Missing Email", "Please enter an email address.", "OK");
+            break;
+            case AuthErrorReason.UnknownEmailAddress:
+            await _shellService.DisplayAlertAsync("Unknown Email", "This email address is not recognized.", "OK");
+            break;
+            case AuthErrorReason.WrongPassword:
+            await _shellService.DisplayAlertAsync("Wrong Password", "The password entered is incorrect.", "OK");
+            break;
+            case AuthErrorReason.TooManyAttemptsTryLater:
+            await _shellService.DisplayAlertAsync("Too Many Attempts", "Too many failed attempts. Please try again later.", "OK");
+            break;
+            case AuthErrorReason.MissingRequestType:
+            await _shellService.DisplayAlertAsync("Error", "Missing request type. Please check your request.", "OK");
+            break;
+            case AuthErrorReason.ResetPasswordExceedLimit:
+            await _shellService.DisplayAlertAsync("Limit Exceeded", "Password reset limit exceeded. Try again later.", "OK");
+            break;
+            case AuthErrorReason.InvalidIDToken:
+            await _shellService.DisplayAlertAsync("Invalid Token", "Your ID token is invalid or expired.", "OK");
+            break;
+            case AuthErrorReason.MissingIdentifier:
+            await _shellService.DisplayAlertAsync("Missing Identifier", "Missing user identifier. Please check your request.", "OK");
+            break;
+            case AuthErrorReason.InvalidIdentifier:
+            await _shellService.DisplayAlertAsync("Invalid Identifier", "The user identifier is invalid.", "OK");
+            break;
+            case AuthErrorReason.AlreadyLinked:
+            await _shellService.DisplayAlertAsync("Already Linked", "This account is already linked to another credential.", "OK");
+            break;
+            case AuthErrorReason.InvalidApiKey:
+            await _shellService.DisplayAlertAsync("Invalid API Key", "The API key is invalid. Check your Firebase config.", "OK");
+            break;
+            case AuthErrorReason.AccountExistsWithDifferentCredential:
+            await _shellService.DisplayAlertAsync("Credential Conflict", "An account already exists with a different credential.", "OK");
+            break;
+            default:
+            await _shellService.DisplayAlertAsync("Error", $"Unexpected error: {ex.Reason}", "OK");
+            break;
+
+        }
+    }
 }

@@ -13,9 +13,4 @@
     <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" Route="DashboardPage" />
 
 
-    <ShellContent ContentTemplate="{DataTemplate views:InventoryPage}" Route="InventoryPage" />
-
-
-    <ShellContent ContentTemplate="{DataTemplate views:DrawingPage}" Route="DrawingPage" />
-
 </Shell>

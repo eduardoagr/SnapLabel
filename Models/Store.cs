@@ -1,20 +1,20 @@
 ﻿namespace SnapLabel.Models;
 
-[Table("stores")]
-public class Store : BaseModel, IHasId {
 
-    [PrimaryKey("id")]
-    public Guid id { get; set; }
+public class Store : IFirebaseEntity {
 
-    public string? name { get; set; }
+    public string? Id { get; set; }
 
-    public Guid user_id { get; set; }
+    public string? Name { get; set; }
 
-    public decimal total_revenue { get; set; }
+    public string? UserId { get; set; }
 
-    public decimal total_sales { get; set; }
+    public decimal TotalRevenue { get; set; }
 
-    public DateTime created_at { get; set; }
+    public decimal TotalSales { get; set; }
 
-    public DateTime updated_at { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
 }
+

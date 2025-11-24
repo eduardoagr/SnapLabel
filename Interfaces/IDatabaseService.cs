@@ -1,16 +1,15 @@
 ﻿namespace SnapLabel.Interfaces;
 
-public interface IDatabaseService<T> where T : BaseModel, IHasId, new() {
+public interface IDatabaseService<T> where T : IFirebaseEntity {
+
+    Task<string> InsertAsync(T entity);
+
+    Task<T?> GetByIdAsync(string id);
 
     Task<IEnumerable<T>> GetAllAsync();
 
-    Task<T?> GetByIdAsync(Guid id);
+    Task UpdateAsync(T entity);
 
-    Task<bool> InsertAsync(T entity);
-
-    Task<bool> UpdateAsync(T entity);
-
-    Task<bool> DeleteAsync(Guid id);
-
-    Task<bool> HasDataAsync();
+    Task DeleteAsync(string id);
 }
+
