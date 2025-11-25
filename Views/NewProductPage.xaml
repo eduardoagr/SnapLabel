@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:constant="clr-namespace:SnapLabel.Constants"
-    xmlns:helpers="clr-namespace:SnapLabel.Helpers"
     xmlns:sync="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:vm="clr-namespace:SnapLabel.ViewModels"
     Title="New Product"
@@ -25,26 +24,26 @@
         <VerticalStackLayout Padding="20" Spacing="10">
 
             <!--  Name  -->
-            <Entry
-                Keyboard="Text"
-                Placeholder="Name"
-                Text="{Binding ProductVM.Name}"
-                VerticalTextAlignment="Center" />
-
+            <sync:SfTextInputLayout Hint="Name">
+                <Entry
+                    Keyboard="Text"
+                    Text="{Binding ProductVM.Name}"
+                    VerticalTextAlignment="Center" />
+            </sync:SfTextInputLayout>
             <!--  Price  -->
-            <Entry
-                Keyboard="Numeric"
-                Placeholder="Price"
-                Text="{Binding ProductVM.Price}"
-                VerticalTextAlignment="Center" />
-
+            <sync:SfTextInputLayout Hint="Price">
+                <Entry
+                    Keyboard="Numeric"
+                    Text="{Binding ProductVM.Price}"
+                    VerticalTextAlignment="Center" />
+            </sync:SfTextInputLayout>
             <!--  Location  -->
-            <Entry
-                Keyboard="Text"
-                Placeholder="Location"
-                Text="{Binding ProductVM.Location}"
-                VerticalTextAlignment="Center" />
-
+            <sync:SfTextInputLayout Hint="Location">
+                <Entry
+                    Keyboard="Text"
+                    Text="{Binding ProductVM.Location}"
+                    VerticalTextAlignment="Center" />
+            </sync:SfTextInputLayout>
             <!--  Capture Image Button  -->
             <Button
                 BackgroundColor="#2196F3"

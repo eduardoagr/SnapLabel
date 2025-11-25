@@ -1,6 +1,5 @@
 ﻿namespace SnapLabel.Models;
 
-
 public class Store : IFirebaseEntity {
 
     public string? Id { get; set; }
@@ -17,8 +16,8 @@ public class Store : IFirebaseEntity {
 
     public string? Phones { get; set; }
 
-    public string? CreatedAt { get; set; } = DateTime.Now.ToString("f");
+    public string? CreatedAt { get; set; }
 
-    public string? UpdatedAt { get; set; } = DateTime.Now.ToString("f");
+    public string? UpdatedAt { get; set; }
 }
 

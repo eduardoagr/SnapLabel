@@ -4,10 +4,12 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:constant="clr-namespace:SnapLabel.Constants"
-    Title="Your stores">
+    xmlns:vm="clr-namespace:SnapLabel.ViewModels"
+    Title="Your stores"
+    x:DataType="vm:StoresPageViewModel">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem>
+        <ToolbarItem Command="{Binding AddStoreCommand}">
             <ToolbarItem.IconImageSource>
                 <FontImageSource
                     FontFamily="Mat"

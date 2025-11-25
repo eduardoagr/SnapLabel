@@ -43,7 +43,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<AuthenticationPageViewModel>();
 
         builder.Services.AddTransient<StoresPage>();
-        builder.Services.AddTransient<StoresViewModel>();
+        builder.Services.AddTransient<StoresPageViewModel>();
 
         builder.Services.AddTransient<DashboardPage>();
         builder.Services.AddTransient<DashboardPageViewModel>();

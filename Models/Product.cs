@@ -15,7 +15,7 @@ public partial class Product : IFirebaseEntity {
 
     public string? StoreId { get; set; }
 
-    public string? CreatedAt { get; set; } = DateTime.Now.ToString("f");
+    public string? CreatedAt { get; set; }
 
-    public string? UpdatedAt { get; set; } = DateTime.Now.ToString("f");
+    public string? UpdatedAt { get; set; }
 }
