@@ -442,7 +442,7 @@
         <Setter Property="ContainerType" Value="Outlined" />
         <Setter Property="LeadingViewPosition" Value="Inside" />
         <Setter Property="OutlineCornerRadius" Value="8" />
-        <!--<Setter Property="Padding" Value="8,0,0,0"/>-->
+        <Setter Property="Padding" Value="8,0,0,0"/>
         <Setter Property="InputViewPadding" Value="5,5,5,5" />
         <Setter Property="HintLabelStyle">
             <Setter.Value>

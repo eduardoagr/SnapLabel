@@ -51,7 +51,7 @@ public partial class AuthenticationPageViewModel : ObservableObject {
     [RelayCommand(CanExecute = nameof(CanLogin))]
     async Task Login() {
 
-        await _customDialogService.ShowAsync("Creating your account", "loading.gif");
+        await _customDialogService.ShowAsync("Please wait", "loading.gif");
 
         try {
 

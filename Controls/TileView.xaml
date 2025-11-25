@@ -25,9 +25,11 @@
                 FontAttributes="Bold"
                 FontSize="Title"
                 HorizontalTextAlignment="Center"
-                Text="{Binding Title, Source={x:Reference TileControl}}" />
+                Text="{Binding Title, Source={x:Reference TileControl}}"
+                TextColor="White" />
             <Label
-                FontSize="Small"
+                FontSize="Small" 
+                TextColor="White"
                 HorizontalTextAlignment="Center"
                 Text="{Binding Subtitle, Source={x:Reference TileControl}}" />
         </VerticalStackLayout>
