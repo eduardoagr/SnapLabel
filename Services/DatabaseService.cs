@@ -15,17 +15,23 @@ public class DatabaseService<T>(FirebaseClient _client) : IDatabaseService<T> wh
 
         entity.Id = result.Key;
         return entity.Id;
-
-
     }
 
     public Task<T?> GetByIdAsync(string id) {
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<T>> GetAllAsync() {
-        throw new NotImplementedException();
+
+    public async Task<IEnumerable<T>> GetAllAsync<T>(string node) {
+
+        var items = await _client
+            .Child(node)
+            .OrderByKey()
+            .OnceAsync<T>();
+
+        return items.Select(item => item.Object);
     }
+
 
     public async Task UpdateAsync(T entity) {
 

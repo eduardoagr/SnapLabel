@@ -31,6 +31,9 @@ public static class MauiProgram {
         builder.Services.AddTransient<NewProductPage>();
         builder.Services.AddTransient<NewProductPageViewModel>();
 
+        builder.Services.AddTransient<NewStorePage>();
+        builder.Services.AddTransient<NewStorePageViewModel>();
+
         builder.Services.AddTransient<DrawingPage>();
         builder.Services.AddTransient<DrawingPageViewModel>();
 

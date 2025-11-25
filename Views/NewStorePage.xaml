@@ -2,8 +2,34 @@
     x:Class="SnapLabel.Views.NewStorePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:editors="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
     xmlns:sync="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
-    Title="Create a store">      
+    xmlns:vm="clr-namespace:SnapLabel.ViewModels"
+    Title="Create a store">
     
-    <VerticalStackLayout />
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="10">
+            <!--  Manager  -->
+            <sync:SfTextInputLayout Hint="Manager">
+                <editors:SfComboBox
+                    DisplayMemberPath="Name"
+                    IsEditable="false"
+                    ItemsSource="{Binding SocialMedias}"
+                    TextMemberPath="Name" />
+            </sync:SfTextInputLayout>
+            <!--  Name  -->
+            <sync:SfTextInputLayout Hint="Name">
+                <Entry Text="{Binding ProductVM.Name}" VerticalTextAlignment="Center" />
+            </sync:SfTextInputLayout>
+            <!--  Address  -->
+            <sync:SfTextInputLayout Hint="Address">
+                <Entry Text="{Binding ProductVM.Location}" VerticalTextAlignment="Center" />
+            </sync:SfTextInputLayout>
+            <!--  Phones  -->
+            <sync:SfTextInputLayout Hint="Phones">
+                <Entry Text="{Binding ProductVM.Location}" VerticalTextAlignment="Center" />
+            </sync:SfTextInputLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

@@ -9,6 +9,7 @@
             Routing.RegisterRoute(nameof(InventoryPage), typeof(InventoryPage));
             Routing.RegisterRoute(nameof(NoInternetPage), typeof(NoInternetPage));
             Routing.RegisterRoute(nameof(DrawingPage), typeof(DrawingPage));
+            Routing.RegisterRoute(nameof(NewStorePage), typeof(NewStorePage));
 
 
         }
