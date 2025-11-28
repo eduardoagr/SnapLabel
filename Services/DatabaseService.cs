@@ -1,5 +1,4 @@
-﻿using Firebase.Database;
-using Firebase.Database.Query;
+﻿using Firebase.Database.Query;
 
 namespace SnapLabel.Services;
 
@@ -14,15 +13,26 @@ public class DatabaseService<T>(FirebaseClient _client) : IDatabaseService<T> wh
         .PostAsync(entity);
 
         entity.Id = result.Key;
-        return entity.Id;
+
+        await UpdateAsync(entity);
+
+        return result.Key;
     }
 
-    public Task<T?> GetByIdAsync(string id) {
-        throw new NotImplementedException();
+    public async Task<T?> GetByIdAsync(string id, string node) {
+
+        if(string.IsNullOrEmpty(id))
+            throw new InvalidOperationException("Please provide id");
+
+        var items = await _client
+            .Child(node)
+            .OrderByKey()
+            .OnceAsync<T>();
+
+        return items.Select(item => item.Object).FirstOrDefault();
     }
 
-
-    public async Task<IEnumerable<T>> GetAllAsync<T>(string node) {
+    public async Task<IEnumerable<T>> GetAllAsync(string node) {
 
         var items = await _client
             .Child(node)
@@ -32,7 +42,6 @@ public class DatabaseService<T>(FirebaseClient _client) : IDatabaseService<T> wh
         return items.Select(item => item.Object);
     }
 
-
     public async Task UpdateAsync(T entity) {
 
         if(string.IsNullOrEmpty(entity.Id))
@@ -40,12 +49,13 @@ public class DatabaseService<T>(FirebaseClient _client) : IDatabaseService<T> wh
 
         await _client
             .Child(_collectionName)
-            .Child(entity.Id)   // use the generated key
-            .PutAsync(entity);  // overwrite with updated object
+            .Child(entity.Id)
+            .PutAsync(entity);
 
     }
 
     public Task DeleteAsync(string id) {
         throw new NotImplementedException();
     }
+
 }

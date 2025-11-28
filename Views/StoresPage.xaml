@@ -4,19 +4,67 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:constant="clr-namespace:SnapLabel.Constants"
+    xmlns:models="clr-namespace:SnapLabel.Models"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:SnapLabel.ViewModels"
+    x:Name="storePage"
     Title="Your stores"
-    x:DataType="vm:StoresPageViewModel">
+    x:DataType="vm:StoresPageViewMode">
 
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            BindingContext="{Binding Path=BindingContext, Source={x:Reference storePage}, x:DataType=ContentPage}"
+            Command="{Binding GetStoresCommand}"
+            EventName="NavigatedTo" />
+
+    </ContentPage.Behaviors>
     <ContentPage.ToolbarItems>
         <ToolbarItem Command="{Binding AddStoreCommand}">
             <ToolbarItem.IconImageSource>
                 <FontImageSource
                     FontFamily="Mat"
-                    Glyph="{Static constant:FontsConstants.Add}"
-                    Color="{AppThemeBinding Dark={StaticResource White},
-                                            Light={StaticResource Black}}" />
+                    Glyph="{x:Static constant:FontsConstants.Add}"
+                    Color="{x:AppThemeBinding Dark={StaticResource White},
+                                              Light={StaticResource Black}}" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
     </ContentPage.ToolbarItems>
+
+    <CollectionView Margin="10" ItemsSource="{x:Binding Stores}">
+        <CollectionView.ItemsLayout>
+            <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
+        </CollectionView.ItemsLayout>
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="models:Store">
+                <Border
+                    Margin="10"
+                    Padding="15"
+                    BackgroundColor="{x:AppThemeBinding Dark={StaticResource DarkGray},
+                                                        Light={StaticResource LightGray}}">
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="*,*">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="16"
+                            Text="{x:Binding Name}" />
+                        <Label
+                            Grid.Row="1"
+                            FontSize="14"
+                            Text="{x:Binding Address}" />
+                        <Label
+                            Grid.RowSpan="2"
+                            Grid.Column="1"
+                            FontFamily="Mat"
+                            FontSize="Large"
+                            HorizontalTextAlignment="End"
+                            Text="{x:Static constant:FontsConstants.Read_more}"
+                            VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8" />
+                    </Border.StrokeShape>
+                </Border>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
 </ContentPage>

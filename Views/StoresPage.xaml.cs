@@ -2,7 +2,7 @@ namespace SnapLabel.Views;
 
 public partial class StoresPage : ContentPage {
 
-    public StoresPage(StoresPageViewModel manageStoresViewModel) {
+    public StoresPage(StoresPageViewMode manageStoresViewModel) {
         InitializeComponent();
 
         BindingContext = manageStoresViewModel;

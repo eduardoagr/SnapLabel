@@ -5,7 +5,6 @@
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:constant="clr-namespace:SnapLabel.Constants"
     xmlns:controls="clr-namespace:SnapLabel.Controls"
-    xmlns:ffimageloading="clr-namespace:FFImageLoading.Maui;assembly=FFImageLoading.Maui"
     xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:model="clr-namespace:SnapLabel.Models"
     xmlns:sfPopup="clr-namespace:Syncfusion.Maui.Popup;assembly=Syncfusion.Maui.Popup"
@@ -14,56 +13,58 @@
     x:DataType="vm:InventoryPageViewModel">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Command="{Binding HandleBluetoothCommand}">
+        <ToolbarItem controls:ToolbarItemExtensions.IsVisible="{x:OnIdiom Desktop=False, Phone=True, Tablet=True}" Command="{x:Binding HandleBluetoothCommand}">
             <ToolbarItem.IconImageSource>
                 <FontImageSource
                     FontFamily="Mat"
-                    Glyph="{Binding BluetoothIcon}"
-                    Color="{AppThemeBinding Dark={StaticResource White},
-                                            Light={StaticResource Black}}" />
+                    Glyph="{x:Binding BluetoothIcon}"
+                    Color="{x:AppThemeBinding Dark={x:StaticResource White},
+                                              Light={x:StaticResource Black}}" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
 
-        <ToolbarItem Command="{Binding AddProductCommand}">
+        <ToolbarItem controls:ToolbarItemExtensions.IsVisible="True" Command="{x:Binding AddProductCommand}">
             <ToolbarItem.IconImageSource>
                 <FontImageSource
                     FontFamily="Mat"
-                    Glyph="{Static constant:FontsConstants.Add}"
-                    Color="{AppThemeBinding Dark={StaticResource White},
-                                            Light={StaticResource Black}}" />
+                    Glyph="{x:Static constant:FontsConstants.Add}"
+                    Color="{x:AppThemeBinding Dark={StaticResource White},
+                                              Light={StaticResource Black}}" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
     </ContentPage.ToolbarItems>
 
     <Grid x:Name="Container">
-        <sfPopup:SfPopup Padding="20"
-                         AnimationMode="None"
-                         AutoSizeMode="Both"
-                         IsOpen="{Binding IsDeviceConnectedPopupVisible}"
-                         RelativePosition="AlignTopRight"
-                         RelativeView="{x:Reference Container}"
-                         ShowHeader="False">
+        <sfPopup:SfPopup
+            Padding="20"
+            AnimationMode="None"
+            AutoSizeMode="Both"
+            IsOpen="{x:Binding IsDeviceConnectedPopupVisible}"
+            RelativePosition="AlignTopRight"
+            RelativeView="{x:Reference Container}"
+            ShowHeader="False">
             <sfPopup:SfPopup.PopupStyle>
-                <sfPopup:PopupStyle CornerRadius="0"
-                                    PopupBackground="{AppThemeBinding Dark='#232323', Light={StaticResource White}}" />
+                <sfPopup:PopupStyle CornerRadius="0" PopupBackground="{x:AppThemeBinding Dark='#232323', Light={x:StaticResource White}}" />
             </sfPopup:SfPopup.PopupStyle>
             <sfPopup:SfPopup.ContentTemplate>
                 <DataTemplate x:DataType="vm:InventoryPageViewModel">
-                    <VerticalStackLayout Padding="12"
-                                         Spacing="6">
-                        <Label FontFamily="Mat"
-                               FontSize="28"
-                               HorizontalTextAlignment="Center"
-                               Text="{Binding Device.Icon}" />
-                        <Label FontSize="14"
-                               HorizontalTextAlignment="Center"
-                               Text="{Binding Device.Name}" />
-                        <buttons:SfButton Command="{Binding DisconnectDeviceCommand}"
-                                          FontSize="14"
-                                          HorizontalOptions="Center"
-                                          Style="{StaticResource RippleButtonStyle}"
-                                          Text="Disconnect"
-                                          WidthRequest="120" />
+                    <VerticalStackLayout Padding="12" Spacing="6">
+                        <Label
+                            FontFamily="Mat"
+                            FontSize="28"
+                            HorizontalTextAlignment="Center"
+                            Text="{x:Binding Device.Icon}" />
+                        <Label
+                            FontSize="14"
+                            HorizontalTextAlignment="Center"
+                            Text="{x:Binding Device.Name}" />
+                        <buttons:SfButton
+                            Command="{x:Binding DisconnectDeviceCommand}"
+                            FontSize="14"
+                            HorizontalOptions="Center"
+                            Style="{x:StaticResource RippleButtonStyle}"
+                            Text="Disconnect"
+                            WidthRequest="120" />
                     </VerticalStackLayout>
                 </DataTemplate>
             </sfPopup:SfPopup.ContentTemplate>
@@ -71,7 +72,7 @@
         <CollectionView
             HorizontalOptions="Start"
             ItemSizingStrategy="MeasureAllItems"
-            ItemsSource="{Binding Products}"
+            ItemsSource="{x:Binding Products}"
             SelectionMode="None"
             VerticalScrollBarVisibility="Never"
             WidthRequest="400">
@@ -91,16 +92,17 @@
                                 Margin="6,0,0,0"
                                 FontAttributes="Bold"
                                 FontSize="18"
-                                Text="{Binding Name}" />
+                                Text="{x:Binding Name}" />
                             <Label
                                 Grid.Row="1"
                                 Margin="6,0,0,0"
-                                Text="{Binding Price, StringFormat='{}{0:C}'}" />
+                                Text="{x:Binding Price,
+                                                 StringFormat='{}{0:C}'}" />
                             <Border Grid.Row="2">
                                 <Border.Shadow>
                                     <Shadow
-                                        Brush="{AppThemeBinding Dark={StaticResource White},
-                                                                Light={StaticResource Black}}"
+                                        Brush="{x:AppThemeBinding Dark={StaticResource White},
+                                                                  Light={StaticResource Black}}"
                                         Opacity="0.4"
                                         Radius="3"
                                         Offset="5,5" />
@@ -109,30 +111,29 @@
                                     <RoundRectangle CornerRadius="16" />
                                 </Border.StrokeShape>
                                 <Grid>
-                                    <ffimageloading:CachedImage
+                                    <controls:PlaceholderImage
                                         Aspect="AspectFill"
-                                        CacheDuration="30"
-                                        FadeAnimationDuration="400"
-                                        FadeAnimationEnabled="true"
-                                        LoadingPlaceholder="out.gif"
-                                        Source="{Binding ImageBytes, Converter={StaticResource ByteToImageConverter}}" />
-
+                                        IsAnimationPlaying="True"
+                                        Placeholder="out.gif"
+                                        Source="{x:Binding ImageUrl}" />
                                     <Button
                                         Margin="10"
-                                        BackgroundColor="{AppThemeBinding Light=#E0E0E0,
-                                                                          Dark=#2A2A2A}"
+                                        BackgroundColor="{x:AppThemeBinding Light=#E0E0E0,
+                                                                            Dark=#2A2A2A}"
                                         Command="{x:Binding SendDataCommand,
-                                                            Source={RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}},
+                                                            Source={x:RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}},
                                                             x:DataType=vm:InventoryPageViewModel}"
-                                        CommandParameter="{Binding .}"
+                                        CommandParameter="{x:Binding .}"
                                         CornerRadius="60"
                                         FontFamily="Mat"
                                         FontSize="Large"
                                         HorizontalOptions="End"
-                                        IsVisible="{Binding IsRadyToPrint, Source={RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}}, x:DataType=vm:InventoryPageViewModel}"
-                                        Text="{Static constant:FontsConstants.Print}"
-                                        TextColor="{AppThemeBinding Dark={StaticResource White},
-                                                                    Light={StaticResource Black}}"
+                                        IsVisible="{x:Binding IsRadyToPrint,
+                                                              Source={RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}},
+                                                              x:DataType=vm:InventoryPageViewModel}"
+                                        Text="{x:Static constant:FontsConstants.Print}"
+                                        TextColor="{x:AppThemeBinding Dark={StaticResource White},
+                                                                      Light={StaticResource Black}}"
                                         VerticalOptions="End" />
                                 </Grid>
                             </Border>
@@ -141,86 +142,87 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-        <sfPopup:SfPopup Padding="{OnIdiom Phone=20,
-                              Desktop=0}"
-                         x:DataType="vm:InventoryPageViewModel"
-                         AnimationMode="Zoom"
-                         HeaderHeight="26"
-                         HeightRequest="{OnIdiom Desktop=500}"
-                         IsFullScreen="{OnIdiom Phone=True,
-                                   Desktop=False}"
-                         IsOpen="{Binding IsDevicesPopupVisible}"
-                         StaysOpen="True"
-                         WidthRequest="{OnIdiom Desktop=500}">
+        <sfPopup:SfPopup
+            Padding="{x:OnIdiom Phone=20,
+                                Desktop=0}"
+            x:DataType="vm:InventoryPageViewModel"
+            AnimationMode="Zoom"
+            HeaderHeight="26"
+            HeightRequest="{x:OnIdiom Desktop=500}"
+            IsFullScreen="{x:OnIdiom Phone=True,
+                                     Desktop=False}"
+            IsOpen="{x:Binding IsDevicesPopupVisible}"
+            StaysOpen="True"
+            WidthRequest="{x:OnIdiom Desktop=500}">
             <sfPopup:SfPopup.HeaderTemplate>
                 <DataTemplate x:DataType="vm:InventoryPageViewModel">
-                    <Grid BackgroundColor="{AppThemeBinding Dark={StaticResource Black}, Light={StaticResource White}}">
-                        <Label Margin="5"
-                               FontSize="10"
-                               HorizontalTextAlignment="Start"
-                               Text="Add a device"
-                               VerticalOptions="Center" />
+                    <Grid BackgroundColor="{x:AppThemeBinding Dark={StaticResource Black}, Light={StaticResource White}}">
+                        <Label
+                            Margin="5"
+                            FontSize="10"
+                            HorizontalTextAlignment="Start"
+                            Text="Add a device"
+                            VerticalOptions="Center" />
                     </Grid>
                 </DataTemplate>
             </sfPopup:SfPopup.HeaderTemplate>
             <sfPopup:SfPopup.PopupStyle>
-                <sfPopup:PopupStyle CornerRadius="8"
-                                    HasShadow="True"
-                                    PopupBackground="{AppThemeBinding Dark={StaticResource Gray950},
-                                                      Light={StaticResource White}}"
-                                    Stroke="{AppThemeBinding Light='#20000000',
-                                             Dark='#20FFFFFF'}"
-                                    StrokeThickness="4" />
+                <sfPopup:PopupStyle
+                    CornerRadius="8"
+                    HasShadow="True"
+                    PopupBackground="{x:AppThemeBinding Dark={StaticResource Gray950},
+                                                        Light={StaticResource White}}"
+                    Stroke="{x:AppThemeBinding Light='#20000000',
+                                               Dark='#20FFFFFF'}"
+                    StrokeThickness="4" />
             </sfPopup:SfPopup.PopupStyle>
             <sfPopup:SfPopup.ContentTemplate>
                 <DataTemplate x:DataType="vm:InventoryPageViewModel">
-                    <Grid BackgroundColor="{AppThemeBinding Dark={StaticResource PrimaryDarkText},
-                                                          Light={StaticResource White}}"
-                          RowDefinitions="4,Auto,*,Auto"
-                          RowSpacing="12">
+                    <Grid
+                        BackgroundColor="{x:AppThemeBinding Dark={StaticResource PrimaryDarkText},
+                                                            Light={StaticResource White}}"
+                        RowDefinitions="4,Auto,*,Auto"
+                        RowSpacing="12">
                         <controls:InfiniteProgressBar />
-                        <Label Grid.Row="1"
-                               Margin="5"
-                               FontSize="14"
-                               Text="Make sure your device is turned on and discoverable. Select a device below to connect." />
-                        <CollectionView Grid.Row="2"
-                                        ItemsSource="{Binding Devices}">
+                        <Label
+                            Grid.Row="1"
+                            Margin="5"
+                            FontSize="14"
+                            Text="Make sure your device is turned on and discoverable. Select a device below to connect." />
+                        <CollectionView Grid.Row="2" ItemsSource="{x:Binding Devices}">
                             <CollectionView.ItemsLayout>
-                                <LinearItemsLayout ItemSpacing="5"
-                                                   Orientation="Vertical" />
+                                <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
                             </CollectionView.ItemsLayout>
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="model:BluetoothDevice">
-                                    <Border Margin="5"
-                                            Stroke="Transparent">
-                                        <HorizontalStackLayout Margin="10"
-                                                               Spacing="10">
-                                            <Label FontFamily="Mat"
-                                                   FontSize="Medium"
-                                                   Text="{Binding Icon}"
-                                                   VerticalTextAlignment="Center" />
-                                            <Label Text="{Binding Name}"
-                                                   VerticalTextAlignment="Center" />
+                                    <Border Margin="5" Stroke="Transparent">
+                                        <HorizontalStackLayout Margin="10" Spacing="10">
+                                            <Label
+                                                FontFamily="Mat"
+                                                FontSize="Medium"
+                                                Text="{x:Binding Icon}"
+                                                VerticalTextAlignment="Center" />
+                                            <Label Text="{x:Binding Name}" VerticalTextAlignment="Center" />
                                         </HorizontalStackLayout>
                                         <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{x:Binding ConnectToDeviceCommand, Source={RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}}, x:DataType=vm:InventoryPageViewModel}"
-                                                                  CommandParameter="{Binding .}" />
+                                            <TapGestureRecognizer Command="{x:Binding ConnectToDeviceCommand, Source={RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}}, x:DataType=vm:InventoryPageViewModel}" CommandParameter="{x:Binding .}" />
                                         </Border.GestureRecognizers>
                                         <Border.Behaviors>
-                                            <mct:TouchBehavior DefaultBackgroundColor="{AppThemeBinding Light='Transparent', Dark='Transparent'}"
-                                                               PressedBackgroundColor="{AppThemeBinding Light=#CCCCCC, Dark=#444444}" />
+                                            <mct:TouchBehavior DefaultBackgroundColor="{x:AppThemeBinding Light='Transparent', Dark='Transparent'}" PressedBackgroundColor="{x:AppThemeBinding Light=#CCCCCC, Dark=#444444}" />
                                         </Border.Behaviors>
                                     </Border>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
-                        <buttons:SfButton Grid.Row="3"
-                                          Margin="10"
-                                          Command="{Binding CloseDevicesPopUpCommand, x:DataType=vm:InventoryPageViewModel}"
-                                          HorizontalOptions="End"
-                                          Style="{StaticResource RippleButtonStyle}"
-                                          Text="Close"
-                                          VerticalOptions="End" />
+                        <buttons:SfButton
+                            Grid.Row="3"
+                            Margin="10"
+                            Command="{x:Binding CloseDevicesPopUpCommand,
+                                                x:DataType=vm:InventoryPageViewModel}"
+                            HorizontalOptions="End"
+                            Style="{x:StaticResource RippleButtonStyle}"
+                            Text="Close"
+                            VerticalOptions="End" />
                     </Grid>
                 </DataTemplate>
             </sfPopup:SfPopup.ContentTemplate>

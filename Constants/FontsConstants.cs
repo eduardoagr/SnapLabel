@@ -1,6 +1,7 @@
 ﻿namespace SnapLabel.Constants;
 
-internal static class FontsConstants {
+public static class FontsConstants {
+
     public const string Error = "\ue000";
     public const string Error_outline = "\ue001";
     public const string Warning = "\ue002";

@@ -1,18 +1,21 @@
 ﻿namespace SnapLabel.Models;
 
-
-public class User : IFirebaseEntity {
+public partial class User : ObservableObject, IFirebaseEntity {
 
     public string? Id { get; set; }
 
-    public string? Username { get; set; }
+    [ObservableProperty]
+    public partial string? Username { get; set; }
 
-    public string? Email { get; set; }
+    [ObservableProperty]
+    public partial string? Email { get; set; }
+
+    [JsonIgnore]
+    [ObservableProperty]
+    public partial string? Password { get; set; }
+
+    public string? PhoneNumber { get; set; }
 
     public string? StoreId { get; set; }
-
-    public string? CreatedAt { get; set; }
-
-    public string? UpdatedAt { get; set; }
 }
 

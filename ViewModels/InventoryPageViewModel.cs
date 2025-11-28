@@ -4,14 +4,15 @@
 /// ViewModel responsible for Bluetooth device management,
 /// connection handling, and product printing logic.
 /// </summary>
-public partial class InventoryPageViewModel(IShellService shellService,
-    IBleManager bleManager, IMessenger messenger,
-    ICustomDialogService customDialogService, IDatabaseService<Product> databaseService) : ObservableObject {
+public partial class InventoryPageViewModel(
+    IBleManager bleManager,
+    IShellService shellService,
+    IDatabaseService<Product> databaseService,
+    ICustomDialogService customDialogService,
+    IMessenger messenger) : BasePageViewModel<Product>(shellService, databaseService, customDialogService, messenger) {
+
 
     #region 🔧 Internal State
-    // --------------------------------------------------------------------
-    // Internal fields that manage background BLE operations and logic flags
-    // --------------------------------------------------------------------
 
     // Subscription reference to the BLE scanning stream (used for cleanup).
     private IDisposable? scanSub;
@@ -22,11 +23,6 @@ public partial class InventoryPageViewModel(IShellService shellService,
     // Tracks whether a disconnect was triggered by the user (vs. lost signal).
     private bool userInitiatedDisconnect;
 
-    // Determines if we should ask the user to save the connection for auto-reconnect.
-    private bool _ShoudAskForSaveConnection;
-
-    // Ensures InitializeAsync() runs only once.
-    private bool _isInitialized;
     #endregion
 
     #region 📦 Observable Properties (UI-bound)
@@ -36,7 +32,9 @@ public partial class InventoryPageViewModel(IShellService shellService,
 
     // Currently connected Bluetooth device (null if not connected).
     [ObservableProperty]
-    public partial BluetoothDevice? Device { get; set; }
+    public partial BluetoothDevice? Device {
+        get; set;
+    }
 
     // List of discovered Bluetooth devices shown in the device selection popup.
     public ObservableCollection<BluetoothDevice> Devices { get; } = [];
@@ -46,11 +44,15 @@ public partial class InventoryPageViewModel(IShellService shellService,
 
     // Controls visibility of the "select Bluetooth device" popup.
     [ObservableProperty]
-    public partial bool IsDevicesPopupVisible { get; set; }
+    public partial bool IsDevicesPopupVisible {
+        get; set;
+    }
 
     // Controls visibility of the "connected device" popup (e.g. for disconnect).
     [ObservableProperty]
-    public partial bool IsDeviceConnectedPopupVisible { get; set; }
+    public partial bool IsDeviceConnectedPopupVisible {
+        get; set;
+    }
 
     // Icon that represents the Bluetooth connection state (connected/disconnected).
     [ObservableProperty]
@@ -65,30 +67,58 @@ public partial class InventoryPageViewModel(IShellService shellService,
     /// <summary>
     /// Initializes the ViewModel, optionally auto-reconnecting to the last known device.
     /// </summary>
+    ///
+
     public async Task InitializeAsync() {
-        if(_isInitialized) {
-            return;
+
+        var deviceId = Preferences.Get(AppConstants.PERIPHERALUUID, string.Empty);
+        var connectedPeripheral = !string.IsNullOrEmpty(deviceId) ? bleManager.GetKnownPeripheral(deviceId) : null;
+
+        if(connectedPeripheral is not null && connectedPeripheral.Status == ConnectionState.Connected) {
+
+            await UpdateDeviceConnectionState(ConnectionState.Connected, new BluetoothDevice(connectedPeripheral));
+
+            SubscribeToPeripheral(new BluetoothDevice(connectedPeripheral));
+            WatchDeviceForReconnect();
+        }
+        else {
+            await UpdateDeviceConnectionState(ConnectionState.Disconnected, null);
         }
 
-        _isInitialized = true;
-
-        var peripheralName = Preferences.Get(AppConstants.PERIPHERALNAME, string.Empty);
-        var autoReconnectEnabled = Preferences.Get(AppConstants.AUTORECONNECT, false);
-
-        var access = await bleManager.RequestAccessAsync();
-
-        if(!string.IsNullOrEmpty(peripheralName) && autoReconnectEnabled && access == AccessState.Available) {
-
+        // Optional: Auto-reconnect logic here if needed
+        if(Device == null && !string.IsNullOrEmpty(deviceId) &&
+            Preferences.Get(AppConstants.AUTORECONNECT, false)) {
             var scan = await bleManager.Scan()
-                         .TakeUntil(Observable.Timer(TimeSpan.FromSeconds(5)))
-                         .FirstOrDefaultAsync(s => s.Peripheral.Uuid.ToString() == peripheralName);
+                .TakeUntil(Observable.Timer(TimeSpan.FromSeconds(5)))
+                .FirstOrDefaultAsync(s => s.Peripheral.Uuid.ToString() == deviceId);
 
             if(scan?.Peripheral != null) {
                 await scan.Peripheral.ConnectAsync(new ConnectionConfig { AutoConnect = false });
+
                 await UpdateDeviceConnectionState(ConnectionState.Connected, new BluetoothDevice(scan.Peripheral));
+
+                WatchDeviceForReconnect();
+
             }
         }
     }
+
+
+    private void SubscribeToPeripheral(BluetoothDevice device) {
+
+        device.Peripheral.WhenStatusChanged().Subscribe(async status => {
+            // Ignore manual disconnect
+            if(status == ConnectionState.Disconnected && userInitiatedDisconnect)
+                return;
+
+            await UpdateDeviceConnectionState(status, device);
+        });
+
+        device.Peripheral.WhenConnectionFailed().Subscribe(async error => {
+            await DisplayToastAsync($"Failed to connect to {device.Name}: {error}");
+        });
+    }
+
     #endregion
 
     #region 🔌 Bluetooth Management
@@ -128,7 +158,7 @@ public partial class InventoryPageViewModel(IShellService shellService,
             else {
                 // Request Bluetooth access permission from OS
                 if(await bleManager.RequestAccessAsync() != AccessState.Available) {
-                    await shellService.DisplayAlertAsync("Error", "Bluetooth is not available. Please enable it.", "OK");
+                    await DisplayAlertAsync("Error", "Bluetooth is not available. Please enable it.", "OK");
                     return;
                 }
 
@@ -139,33 +169,48 @@ public partial class InventoryPageViewModel(IShellService shellService,
                 await StartScanningAsync();
             }
         } catch(Exception ex) {
-            await shellService.DisplayToastAsync($"Bluetooth error: {ex.Message}");
+            await DisplayToastAsync($"Bluetooth error: {ex.Message}");
         } finally {
             _isHandlingBluetooth = false;
         }
     }
 
-
     /// <summary>
-    /// Navigates to the NewProductPage to add a new product.
+    /// Connects to a selected Bluetooth device from the device list.
     /// </summary>
     [RelayCommand]
-    private async Task AddProduct() {
+    private async Task ConnectToDeviceAsync(BluetoothDevice? device) {
+        if(device == null)
+            return;
 
-        await shellService.NavigateToAsync(nameof(NewProductPage));
+        await DisplayToastAsync($"Connecting to: {device.Name}");
+
+        // Try connecting to the selected peripheral
+        await device.Peripheral.ConnectAsync(new ConnectionConfig { AutoConnect = true });
+
+        WatchDeviceForReconnect();
+
+        // Wait until device reports as connected
+        await device.Peripheral.WhenConnected().FirstAsync();
+
+        // Update ViewModel/UI state
+        await UpdateDeviceConnectionState(ConnectionState.Connected, device);
+
+        // Listen for status changes (e.g. disconnected unexpectedly)
+        device.Peripheral.WhenStatusChanged().Subscribe(status => {
+            MainThread.BeginInvokeOnMainThread(async () => {
+                if(device.Peripheral.Status == ConnectionState.Disconnected && userInitiatedDisconnect)
+                    return;
+
+                await UpdateDeviceConnectionState(status, device);
+            });
+        });
+
+        // Listen for failed connection attempts
+        device.Peripheral.WhenConnectionFailed().Subscribe(async error => {
+            await DisplayToastAsync($"Failed to connect to {device.Name}, reason: {error}");
+        });
     }
-
-
-
-    /// <summary>
-    /// Closes the device selection popup.
-    /// </summary>
-    [RelayCommand]
-    void CloseDevicesPopUp() {
-        IsDevicesPopupVisible = false;
-        Housekeeping();
-    }
-
 
     /// <summary>
     /// Starts scanning for nearby BLE devices and populates the device list.
@@ -191,105 +236,76 @@ public partial class InventoryPageViewModel(IShellService shellService,
                 }
             });
         } catch(Exception ex) {
-            await shellService.DisplayToastAsync($"Scan failed: {ex.Message}");
+            await DisplayToastAsync($"Scan failed: {ex.Message}");
         }
     }
 
+    #endregion
 
-    /// <summary>
-    /// Connects to a selected Bluetooth device from the device list.
-    /// </summary>
-    [RelayCommand]
-    private async Task ConnectToDeviceAsync(BluetoothDevice? device) {
-        if(device == null)
-            return;
-
-        await shellService.DisplayToastAsync($"Connecting to: {device.Name}");
-
-        // Try connecting to the selected peripheral
-        await device.Peripheral.ConnectAsync(new ConnectionConfig { AutoConnect = true });
-
-        // Wait until device reports as connected
-        await device.Peripheral.WhenConnected().FirstAsync();
-
-        _ShoudAskForSaveConnection = true;
-
-        // Update ViewModel/UI state
-        await UpdateDeviceConnectionState(ConnectionState.Connected, device);
-
-        // Listen for status changes (e.g. disconnected unexpectedly)
-        device.Peripheral.WhenStatusChanged().Subscribe(status => {
-            MainThread.BeginInvokeOnMainThread(async () => {
-                if(device.Peripheral.Status == ConnectionState.Disconnected && userInitiatedDisconnect)
-                    return;
-
-                await UpdateDeviceConnectionState(status, device);
-            });
-        });
-
-        // Listen for failed connection attempts
-        device.Peripheral.WhenConnectionFailed().Subscribe(async error => {
-            await shellService.DisplayToastAsync($"Failed to connect to {device.Name}, reason: {error}");
-        });
-    }
-
-
+    #region 🔄 Connection State Handling
     /// <summary>
     /// Updates the ViewModel/UI based on the current Bluetooth connection state.
     /// </summary>
     private async Task UpdateDeviceConnectionState(ConnectionState state, BluetoothDevice? device) {
+
         switch(state) {
             case ConnectionState.Disconnected:
                 BluetoothIcon = FontsConstants.Bluetooth;
                 IsDeviceConnectedPopupVisible = false;
 
-                var reason = userInitiatedDisconnect
-                    ? "Disconnected manually by user"
-                    : "Device powered off or out of range";
+                // Only show toast if there was a connected device before
+                if(Device != null || userInitiatedDisconnect) {
+                    var reason = userInitiatedDisconnect
+                        ? "Disconnected manually"
+                        : "Device powered off or out of range";
 
-                await shellService.DisplayToastAsync($"Disconnected: {reason}");
+                    MainThread.BeginInvokeOnMainThread(async () => {
+                        await DisplayToastAsync($"Disconnected: {reason}");
+                    });
+                }
 
-                Housekeeping(); // Stop scan, clean up
-                userInitiatedDisconnect = false; // Reset
+                Housekeeping();
+                userInitiatedDisconnect = false;
                 Device = null;
-
-                messenger.Send("IsDisconnected");
-
-                break;
-
-            case ConnectionState.Disconnecting:
-                BluetoothIcon = FontsConstants.Bluetooth;
-                await shellService.DisplayToastAsync("Disconnecting...");
                 break;
 
             case ConnectionState.Connected:
-                IsDevicesPopupVisible = false;
                 BluetoothIcon = FontsConstants.Bluetooth_connected;
                 Device = device;
-                await AutoConnect(device); // Ask to enable auto-connect
-
-                messenger.Send("IsConnected");
-
+                await AutoConnect(device!);
+                IsDevicesPopupVisible = false;
                 break;
 
             case ConnectionState.Connecting:
                 BluetoothIcon = FontsConstants.Bluetooth;
-                await shellService.DisplayToastAsync($"Connecting to {device?.Name}...");
+                MainThread.BeginInvokeOnMainThread(async () => {
+                    await DisplayToastAsync($"Connecting to {device?.Name}...");
+                });
+                break;
+
+            case ConnectionState.Disconnecting:
+                BluetoothIcon = FontsConstants.Bluetooth;
+                MainThread.BeginInvokeOnMainThread(async () => {
+                    await DisplayToastAsync("Disconnected");
+                });
                 break;
         }
     }
 
+    #endregion
 
+    #region 🔒 Auto-Connect Management
     /// <summary>
     /// Asks the user whether to remember this device for auto-reconnect.
     /// </summary>
-    private async Task AutoConnect(BluetoothDevice? device) {
-        if(!_ShoudAskForSaveConnection || device == null)
-            return;
+    private async Task AutoConnect(BluetoothDevice device) {
 
-        _ShoudAskForSaveConnection = false;
+        var deviceId = Preferences.Get(AppConstants.PERIPHERALUUID, string.Empty);
 
-        bool answer = await shellService.DisplayConfirmAsync(
+        if(!string.IsNullOrEmpty(deviceId))
+            return; // Already set, no need to ask again
+
+        bool answer = await DisplayConfirmAsync(
             "Auto-Connect",
             "Would you like to enable auto-connect for this device in the future?",
             "Yes",
@@ -297,7 +313,7 @@ public partial class InventoryPageViewModel(IShellService shellService,
         );
 
         if(answer) {
-            Preferences.Set(AppConstants.PERIPHERALNAME, device.Name);
+            Preferences.Set(AppConstants.PERIPHERALUUID, device.Uuid);
             Preferences.Set(AppConstants.AUTORECONNECT, true);
         }
         else {
@@ -317,19 +333,18 @@ public partial class InventoryPageViewModel(IShellService shellService,
     [RelayCommand]
     private async Task SendData(Product product) {
         if(Device == null || Device.Peripheral.Status == ConnectionState.Disconnected) {
-            await shellService.DisplayToastAsync("No device connected.");
+            await DisplayToastAsync("No device connected.");
             return;
         }
 
-        await customDialogService.ShowAsync("Printing...", "wait.gif");
+        await CustomDialogService.ShowAsync("Printing...", "wait.gif");
 
         // Example print job (replace with actual printer command)
         bool isFinished = await Printer.PrintTextAsync(Device.Peripheral, "Hello");
 
         if(isFinished) {
-            Debug.WriteLine("[Popup] Dismissing...");
 
-            await customDialogService.HideAsync();
+            await CustomDialogService.HideAsync();
         }
 
     }
@@ -348,4 +363,61 @@ public partial class InventoryPageViewModel(IShellService shellService,
         scanSub = null;
     }
     #endregion
+
+    /// <summary>
+    /// Navigates to the NewProductPage to add a new product.
+    /// </summary>
+    [RelayCommand]
+    private async Task AddProduct() {
+
+        await NavigateAsync(nameof(NewProductPage));
+    }
+
+    /// <summary>
+    /// Closes the device selection popup.
+    /// </summary>
+    [RelayCommand]
+    void CloseDevicesPopUp() {
+        IsDevicesPopupVisible = false;
+        Housekeeping();
+    }
+
+    private void WatchDeviceForReconnect() {
+        if(Device == null)
+            return;
+
+        Device.Peripheral.WhenStatusChanged().Subscribe(async status => {
+            await MainThread.InvokeOnMainThreadAsync(async () => {
+                if(Device == null)
+                    return; // prevent null crash
+
+                // Ignore user-initiated disconnect
+                if(status == ConnectionState.Disconnected && userInitiatedDisconnect)
+                    return;
+
+                await UpdateDeviceConnectionState(status, Device);
+
+                if(status == ConnectionState.Disconnected) {
+                    // Only auto-reconnect if disconnect was NOT triggered by the user
+                    if(!userInitiatedDisconnect) {
+                        var deviceId = Preferences.Get(AppConstants.PERIPHERALUUID, string.Empty);
+                        if(!string.IsNullOrEmpty(deviceId)) {
+                            var scan = await bleManager.Scan()
+                                .TakeUntil(Observable.Timer(TimeSpan.FromSeconds(5)))
+                                .FirstOrDefaultAsync(s => s.Peripheral.Uuid.ToString() == deviceId);
+
+                            if(scan?.Peripheral != null) {
+                                await scan.Peripheral.ConnectAsync(new ConnectionConfig { AutoConnect = true });
+                                await UpdateDeviceConnectionState(ConnectionState.Connected, new BluetoothDevice(scan.Peripheral));
+                                SubscribeToPeripheral(new BluetoothDevice(scan.Peripheral));
+                            }
+                        }
+                    }
+                }
+
+            });
+        });
+    }
+
+
 }

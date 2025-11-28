@@ -4,9 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-    x:Name="TileControl"
-    HeightRequest="140"
-    WidthRequest="150">
+    x:Name="TileControl">
 
     <Border Background="{Binding TileBackground, Source={x:Reference TileControl}}" HeightRequest="140">
         <Border.StrokeShape>
@@ -28,17 +26,16 @@
                 Text="{Binding Title, Source={x:Reference TileControl}}"
                 TextColor="White" />
             <Label
-                FontSize="Small" 
-                TextColor="White"
+                FontSize="Small"
                 HorizontalTextAlignment="Center"
-                Text="{Binding Subtitle, Source={x:Reference TileControl}}" />
+                Text="{Binding Subtitle, Source={x:Reference TileControl}}"
+                TextColor="White" />
         </VerticalStackLayout>
         <Border.Behaviors>
             <mct:TouchBehavior
                 Command="{Binding TapCommand, Source={x:Reference TileControl}}"
                 DefaultOpacity="1.0"
                 DefaultScale="1.0"
-                HoveredBackgroundColor="#2882D1"
                 PressedOpacity="0.8"
                 PressedScale="0.95" />
         </Border.Behaviors>

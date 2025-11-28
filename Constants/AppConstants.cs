@@ -5,7 +5,7 @@ public static class AppConstants {
 
     // App constant for reconnetng
 
-    public const string PERIPHERALNAME = "PeripheralName";
+    public const string PERIPHERALUUID = "DeviceUUID";
     public const string AUTORECONNECT = "AutoReconnectEnabled";
 
     public const string HOME = nameof(DashboardPage);

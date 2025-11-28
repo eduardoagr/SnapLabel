@@ -9,20 +9,9 @@ public partial class InventoryPage : ContentPage {
     }
 
     protected override async void OnNavigatedTo(NavigatedToEventArgs args) {
-
-        base.OnNavigatedTo(args);
-
-        if(BindingContext is InventoryPageViewModel vm) {
-            await vm.InitializeAsync();
+        if(BindingContext is InventoryPageViewModel viewModel) {
+            await viewModel.InitializeAsync();
         }
-    }
 
-    protected override void OnAppearing() {
-        base.OnAppearing();
-
-        if(BindingContext is InventoryPageViewModel vm) {
-            // Fire and forget async call, handle exceptions as needed
-            //  _ = vm.FetchData();
-        }
     }
 }

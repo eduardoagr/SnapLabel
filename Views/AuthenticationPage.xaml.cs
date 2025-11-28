@@ -8,12 +8,13 @@ public partial class AuthenticationPage : ContentPage {
 
         BindingContext = authenticationPageViewModel;
 
-        Loaded += async (sender, args) => {
+        if(DeviceInfo.Idiom == DeviceIdiom.Desktop) {
 
-            if(BindingContext is AuthenticationPageViewModel vm) {
-
-                //await vm.CheckAuth();
-            }
-        };
+            createAccountPopUp.WidthRequest = 400;
+            createAccountPopUp.HeightRequest = 500;
+        }
+        else {
+            createAccountPopUp.AutoSizeMode = PopupAutoSizeMode.Both;
+        }
     }
 }

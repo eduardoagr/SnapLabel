@@ -22,16 +22,8 @@
                                         Dark=White}" />
 
         <!--  📊 Centered content  -->
-        <FlexLayout
-            Grid.Row="1"
-            Padding="16"
-            AlignContent="Center"
-            AlignItems="Center"
-            BindableLayout.ItemsSource="{x:Binding DashboardTiles}"
-            Direction="Row"
-            JustifyContent="SpaceAround"
-            Wrap="Wrap">
-            <BindableLayout.ItemTemplate>
+        <CollectionView Grid.Row="1" ItemsSource="{x:Binding DashboardTiles}">
+            <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="model:DashboardTile">
                     <controls:TileView
                         Title="{Binding Title}"
@@ -41,9 +33,9 @@
                         TapCommand="{Binding Command}"
                         TileBackground="{Binding Background}" />
                 </DataTemplate>
-            </BindableLayout.ItemTemplate>
+            </CollectionView.ItemTemplate>
 
-        </FlexLayout>
+        </CollectionView>
 
 
     </Grid>

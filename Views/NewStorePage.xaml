@@ -4,32 +4,58 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:editors="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
     xmlns:sync="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:SnapLabel.ViewModels"
-    Title="Create a store">
-    
+    x:Name="CreateStorePage"
+    Title="Create a store"
+    x:DataType="vm:NewStorePageViewModel">
+
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            BindingContext="{Binding Path=BindingContext, Source={x:Reference CreateStorePage}, x:DataType=ContentPage}"
+            Command="{Binding GetUsersCommand}"
+            EventName="NavigatedTo" />
+    </ContentPage.Behaviors>
+
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="10">
             <!--  Manager  -->
             <sync:SfTextInputLayout Hint="Manager">
                 <editors:SfComboBox
-                    DisplayMemberPath="Name"
+                    DisplayMemberPath="Username"
+                    IsClearButtonVisible="False"
                     IsEditable="false"
-                    ItemsSource="{Binding SocialMedias}"
-                    TextMemberPath="Name" />
+                    ItemsSource="{x:Binding Users}"
+                    Placeholder="Select a manager (you are already managing a store)"
+                    SelectedItem="{x:Binding Manager}"
+                    TextColor="{x:AppThemeBinding Dark={StaticResource White},
+                                                  Light={StaticResource Black}}"
+                    TextMemberPath="Username" />
+
             </sync:SfTextInputLayout>
             <!--  Name  -->
             <sync:SfTextInputLayout Hint="Name">
-                <Entry Text="{Binding ProductVM.Name}" VerticalTextAlignment="Center" />
+                <Entry Keyboard="Text" Text="{x:Binding Store.Name}" />
             </sync:SfTextInputLayout>
             <!--  Address  -->
             <sync:SfTextInputLayout Hint="Address">
-                <Entry Text="{Binding ProductVM.Location}" VerticalTextAlignment="Center" />
+                <Entry Keyboard="Text" Text="{x:Binding Store.Address}" />
             </sync:SfTextInputLayout>
             <!--  Phones  -->
             <sync:SfTextInputLayout Hint="Phones">
-                <Entry Text="{Binding ProductVM.Location}" VerticalTextAlignment="Center" />
+                <Entry Keyboard="Telephone" Text="{x:Binding Store.Phones}" />
             </sync:SfTextInputLayout>
-
+            <!--  Store email  -->
+            <sync:SfTextInputLayout Hint="Email">
+                <Entry Keyboard="Email" Text="{x:Binding Store.StoreEmail}" />
+            </sync:SfTextInputLayout>
+            <!--  Create Button  -->
+            <Button
+                Margin="0,20,0,0"
+                Command="{x:Binding CreateStoreCommand}"
+                Text="Create"
+                WidthRequest="250" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

@@ -1,15 +1,10 @@
-﻿using Firebase.Auth.Providers;
-using Firebase.Auth.Repository;
-using Firebase.Database;
-
-namespace SnapLabel;
+﻿namespace SnapLabel;
 
 public static class MauiProgram {
     public static MauiApp CreateMauiApp() {
         SyncfusionLicenseProvider.RegisterLicense(AppConstants.SYNCFUSION);
         var builder = MauiApp.CreateBuilder();
         builder.UseMauiApp<App>()
-            .UseFFImageLoading()
             .UseShiny()
             .ConfigureSyncfusionCore().ConfigureFonts(fonts => {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -20,11 +15,6 @@ public static class MauiProgram {
         builder.Logging.AddDebug();
 #endif
         builder.Services.AddSingleton<AppShell>();
-
-        builder.Services.AddHttpClient("Firestore", client => {
-            client.BaseAddress = new Uri("https://firestore.googleapis.com/v1/");
-        });
-
 
         // Pages + ViewModels
 
@@ -46,7 +36,7 @@ public static class MauiProgram {
         builder.Services.AddTransient<AuthenticationPageViewModel>();
 
         builder.Services.AddTransient<StoresPage>();
-        builder.Services.AddTransient<StoresPageViewModel>();
+        builder.Services.AddTransient<StoresPageViewMode>();
 
         builder.Services.AddTransient<DashboardPage>();
         builder.Services.AddTransient<DashboardPageViewModel>();
@@ -64,7 +54,6 @@ public static class MauiProgram {
         builder.Services.AddSingleton(typeof(IDatabaseService<>), typeof(DatabaseService<>));
         builder.Services.AddBluetoothLE();
         builder.Services.AddSingleton(Connectivity.Current);
-
         builder.Services.AddSingleton<IFirebaseAuthClient>(new FirebaseAuthClient(new FirebaseAuthConfig {
 
             ApiKey = "AIzaSyC3zObE0sDsLJCFwUjlznXv6r5se3Wri-E",

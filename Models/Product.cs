@@ -1,21 +1,26 @@
 ﻿namespace SnapLabel.Models;
 
 
-public partial class Product : IFirebaseEntity {
+public partial class Product : ObservableObject, IFirebaseEntity {
 
     public string? Id { get; set; }
 
-    public string? Name { get; set; }
+    [ObservableProperty]
+    public partial string? Name { get; set; }
 
-    public decimal Price { get; set; }
+    [ObservableProperty]
+    public partial string Price { get; set; }
+
+    [ObservableProperty]
+    public partial string Location { get; set; }
+
+    [JsonIgnore]
+    [ObservableProperty]
+    public partial byte[] ImageeBytes { get; set; }
 
     public string? ImageUrl { get; set; }
 
     public string? QrUrl { get; set; }
 
     public string? StoreId { get; set; }
-
-    public string? CreatedAt { get; set; }
-
-    public string? UpdatedAt { get; set; }
 }

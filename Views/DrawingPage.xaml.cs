@@ -8,12 +8,4 @@ public partial class DrawingPage : ContentPage {
 
         InitializeComponent();
     }
-
-    protected override void OnNavigatedTo(NavigatedToEventArgs args) {
-        base.OnNavigatedTo(args);
-
-        if(BindingContext is DrawingPageViewModel vm) {
-            vm.RefreshBluetoothStatus();
-        }
-    }
 }
