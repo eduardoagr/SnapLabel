@@ -4,12 +4,14 @@
 /// ViewModel responsible for Bluetooth device management,
 /// connection handling, and product printing logic.
 /// </summary>
+///
 public partial class InventoryPageViewModel(
-    IBleManager bleManager,
     IShellService shellService,
+    IBleManager bleManager,
+    IFirebaseAuthClient firebaseAuthClient,
     IDatabaseService<Product> databaseService,
     ICustomDialogService customDialogService,
-    IMessenger messenger) : BasePageViewModel<Product>(shellService, databaseService, customDialogService, messenger) {
+    IMessenger messenger) : BasePageViewModel<Product>(shellService, firebaseAuthClient, databaseService, customDialogService, messenger) {
 
 
     #region 🔧 Internal State
@@ -32,9 +34,7 @@ public partial class InventoryPageViewModel(
 
     // Currently connected Bluetooth device (null if not connected).
     [ObservableProperty]
-    public partial BluetoothDevice? Device {
-        get; set;
-    }
+    public partial BluetoothDevice? Device { get; set; }
 
     // List of discovered Bluetooth devices shown in the device selection popup.
     public ObservableCollection<BluetoothDevice> Devices { get; } = [];
@@ -44,15 +44,11 @@ public partial class InventoryPageViewModel(
 
     // Controls visibility of the "select Bluetooth device" popup.
     [ObservableProperty]
-    public partial bool IsDevicesPopupVisible {
-        get; set;
-    }
+    public partial bool IsDevicesPopupVisible { get; set; }
 
     // Controls visibility of the "connected device" popup (e.g. for disconnect).
     [ObservableProperty]
-    public partial bool IsDeviceConnectedPopupVisible {
-        get; set;
-    }
+    public partial bool IsDeviceConnectedPopupVisible { get; set; }
 
     // Icon that represents the Bluetooth connection state (connected/disconnected).
     [ObservableProperty]
@@ -164,7 +160,6 @@ public partial class InventoryPageViewModel(
 
                 // Show device selection popup and start scanning
                 IsDevicesPopupVisible = true;
-                Devices.Clear();
 
                 await StartScanningAsync();
             }
@@ -222,6 +217,9 @@ public partial class InventoryPageViewModel(
             return;
 
         try {
+
+            Devices.Clear(); // Clear previous scan results
+
             // Subscribe to device discovery stream
             scanSub = bleManager.Scan().Subscribe(scan => {
                 var peripheral = scan.Peripheral;
@@ -418,6 +416,4 @@ public partial class InventoryPageViewModel(
             });
         });
     }
-
-
 }

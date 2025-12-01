@@ -6,13 +6,14 @@ public partial class NewStorePageViewModel : BasePageViewModel<Store> {
     private readonly ICustomDialogService _customDialogService;
     private readonly IDatabaseService<User> _usersDb;
 
-    public NewStorePageViewModel(IFirebaseAuthClient authClient, IShellService shellService,
+    public NewStorePageViewModel(
+        IFirebaseAuthClient authClient,
+        IShellService shellService,
         ICustomDialogService customDialogService,
         IDatabaseService<Store> storeDatabase,
         IDatabaseService<User> usersDatabase,
         IMessenger messenger)
-        : base(shellService, storeDatabase, customDialogService, messenger) {
-
+        : base(shellService, authClient, storeDatabase, customDialogService, messenger) {
         _firebaseAuthClient = authClient;
         _customDialogService = customDialogService;
         _usersDb = usersDatabase;

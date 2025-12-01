@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:constant="clr-namespace:SnapLabel.Constants"
     xmlns:controls="clr-namespace:SnapLabel.Controls"
+    xmlns:editors="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
     xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:sync="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:vm="clr-namespace:SnapLabel.ViewModels"
@@ -29,7 +30,12 @@
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
 
-        <ToolbarItem controls:ToolbarItemExtensions.IsVisible="{OnIdiom Desktop=False, Phone=True, Tablet=True}" Command="{Binding SaveProductAsyncCommand}">
+        <ToolbarItem
+            controls:ToolbarItemExtensions.IsVisible="{OnIdiom Desktop=False,
+                                                               Phone=True,
+                                                               Tablet=True}"
+            Command="{Binding PrintCommand}"
+            IsEnabled="{x:Binding IsDeviceConnected}">
             <ToolbarItem.IconImageSource>
                 <FontImageSource
                     FontFamily="Mat"
@@ -42,26 +48,38 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="5">
-
+            <!--  Store  -->
+            <sync:SfTextInputLayout Hint="Manager">
+                <editors:SfComboBox
+                    DisplayMemberPath="Name"
+                    IsClearButtonVisible="False"
+                    IsEditable="false"
+                    ItemsSource="{x:Binding Stores}"
+                    Placeholder="Selecta store"
+                    SelectedItem="{x:Binding Store}"
+                    TextColor="{x:AppThemeBinding Dark={StaticResource White},
+                                                  Light={StaticResource Black}}"
+                    TextMemberPath="Name" />
+            </sync:SfTextInputLayout>
             <!--  Name  -->
             <sync:SfTextInputLayout Hint="Name">
                 <Entry
                     Keyboard="Text"
-                    Text="{x:Binding ProductVM.Name}"
+                    Text="{x:Binding Product.Name}"
                     VerticalTextAlignment="Center" />
             </sync:SfTextInputLayout>
             <!--  Price  -->
             <sync:SfTextInputLayout Hint="Price">
                 <Entry
                     Keyboard="Numeric"
-                    Text="{x:Binding ProductVM.Price}"
+                    Text="{x:Binding Product.Price}"
                     VerticalTextAlignment="Center" />
             </sync:SfTextInputLayout>
             <!--  Location  -->
             <sync:SfTextInputLayout Hint="Location">
                 <Entry
                     Keyboard="Text"
-                    Text="{x:Binding ProductVM.Location}"
+                    Text="{x:Binding Product.Location}"
                     VerticalTextAlignment="Center" />
             </sync:SfTextInputLayout>
             <HorizontalStackLayout IsVisible="{x:Binding IsDeviceConnected}" Spacing="10">
@@ -78,14 +96,14 @@
             <Border
                 Margin="0,20,0,0"
                 BackgroundColor="#eee"
-                HeightRequest="200"
+                HeightRequest="300"
                 Stroke="#ccc"
-                WidthRequest="200">
-                <controls:PlaceholderImage
-                    Margin="10"
-                    Aspect="AspectFill"
+                WidthRequest="300">
+                <controls:SmartImage
+                    Margin="5"
+                    DynamicSource="{x:Binding Product.ImageeBytes}"
                     Placeholder="camera.png"
-                    Source="" />
+                    Error="error.png"/>
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="8" />
                 </Border.StrokeShape>

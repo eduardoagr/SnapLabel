@@ -7,10 +7,6 @@
     Title="SnapLabel"
     Shell.FlyoutBehavior="Disabled">
 
-    <ShellContent ContentTemplate="{DataTemplate views:AuthenticationPage}" Route="AuthenticationPage" />
-
-
     <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" Route="DashboardPage" />
-
-
+    <ShellContent ContentTemplate="{DataTemplate views:AuthenticationPage}" Route="AuthenticationPage" />
 </Shell>

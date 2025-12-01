@@ -2,6 +2,7 @@
 
 public abstract partial class BasePageViewModel<T>(
     IShellService shellService,
+    IFirebaseAuthClient firebaseAuthClient,
     IDatabaseService<T> databaseService,
     ICustomDialogService customDialogService,
     IMessenger messenger) : ObservableObject
@@ -12,6 +13,7 @@ public abstract partial class BasePageViewModel<T>(
     protected readonly IDatabaseService<T> DatabaseService = databaseService;
     protected readonly IMessenger Messenger = messenger;
     protected readonly ICustomDialogService CustomDialogService = customDialogService;
+    protected readonly IFirebaseAuthClient FirebaseAuthClient = firebaseAuthClient;
 
     private PropertyChangedEventHandler? _propertyChangedHandler;
     private INotifyPropertyChanged? _trackedModel;

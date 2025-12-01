@@ -12,11 +12,16 @@ public partial class DashboardPageViewModel : ObservableObject {
     public partial string? Username { get; set; }
 
     public DashboardPageViewModel(IShellService shellService, IFirebaseAuthClient firebaseAuth) {
+
         _shellService = shellService;
+
         _firebaseAuthClient = firebaseAuth;
+
         _tileServices = new DashboardTileServices(shellService, firebaseAuth);
+
         DashboardTiles = _tileServices.GetDashboardTiles();
-        Username = _firebaseAuthClient.User.Info.DisplayName;
+
+        Username = _firebaseAuthClient.User.Info?.DisplayName;
     }
 
     [RelayCommand]

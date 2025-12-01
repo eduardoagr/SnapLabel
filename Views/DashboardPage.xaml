@@ -22,7 +22,14 @@
                                         Dark=White}" />
 
         <!--  📊 Centered content  -->
-        <CollectionView Grid.Row="1" ItemsSource="{x:Binding DashboardTiles}">
+        <CollectionView
+            Grid.Row="1"
+            ItemsSource="{x:Binding DashboardTiles}"
+            VerticalOptions="Center">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="2" />
+            </CollectionView.ItemsLayout>
+
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="model:DashboardTile">
                     <controls:TileView

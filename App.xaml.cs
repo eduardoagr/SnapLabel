@@ -4,20 +4,14 @@ public partial class App : Application {
 
     private readonly AppShell _appShell;
     private readonly IConnectivity _connectivity;
-    private readonly NoInternetPage _noInternetPage;
-    private readonly IShellService _shellService;
 
-    public App(AppShell appShell, IConnectivity connectivity, NoInternetPage noInternetPage,
-        IShellService shellService) {
-
+    public App(AppShell appShell, IConnectivity connectivity) {
         InitializeComponent();
 
         _appShell = appShell;
         _connectivity = connectivity;
-        _noInternetPage = noInternetPage;
-        _shellService = shellService;
 
-        // Subscribe to connectivity changes (handled on main thread)
+        // Subscribe to connectivity changes
         _connectivity.ConnectivityChanged += (_, e) =>
             MainThread.BeginInvokeOnMainThread(async () => await HandleConnectivityAsync(e));
     }
@@ -25,41 +19,24 @@ public partial class App : Application {
     protected override Window CreateWindow(IActivationState? activationState) {
         var window = new Window(_appShell);
 
-        // Initialize app once the window is created
+        // Run initialization after window is created
         MainThread.BeginInvokeOnMainThread(async () => await InitAppAsync());
 
         return window;
     }
 
-    /// <summary>
-    /// Initializes Supabase if internet is available,
-    /// or shows the NoInternetPage if offline.
-    /// </summary>
     private async Task InitAppAsync() {
 
         if(_connectivity.NetworkAccess != NetworkAccess.Internet) {
-
-            // No internet on startup → show modal
-
-            if(!_appShell.Navigation.ModalStack.Contains(_noInternetPage))
-
-                await _appShell.Navigation.PushModalAsync(_noInternetPage);
-
-            return;
+            if(!_appShell.Navigation.ModalStack.OfType<NoInternetPage>().Any())
+                await _appShell.Navigation.PushModalAsync(new NoInternetPage());
         }
-
     }
 
-    /// <summary>
-    /// Handles when internet connectivity changes while the app is running.
-    /// </summary>
     private async Task HandleConnectivityAsync(ConnectivityChangedEventArgs e) {
-
-        var modalStack = _appShell.Navigation.ModalStack;
-        bool hasNoInternetModal = modalStack.OfType<NoInternetPage>().Any();
+        bool hasNoInternetModal = _appShell.Navigation.ModalStack.OfType<NoInternetPage>().Any();
 
         if(e.NetworkAccess != NetworkAccess.Internet) {
-
             if(!hasNoInternetModal)
                 await _appShell.Navigation.PushModalAsync(new NoInternetPage());
         }
