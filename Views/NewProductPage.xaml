@@ -101,9 +101,8 @@
                 WidthRequest="300">
                 <controls:SmartImage
                     Margin="5"
-                    DynamicSource="{x:Binding Product.ImageeBytes}"
-                    Placeholder="camera.png"
-                    Error="error.png"/>
+                    DynamicSource="https://picsum.photos/1200/800"
+                    Error="error.png" />
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="8" />
                 </Border.StrokeShape>

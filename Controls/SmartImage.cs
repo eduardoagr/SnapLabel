@@ -3,11 +3,22 @@
 
         private readonly Image _image;
         private readonly ActivityIndicator _spinner;
+
         private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(10) };
+        private static readonly Dictionary<string, byte[]> _cache = [];
+        private static readonly Dictionary<string, Task<byte[]>> _pendingDownloads = [];
+
+        // For cancellation
+        private CancellationTokenSource? _cts;
 
         public SmartImage() {
             _image = new Image { Aspect = Aspect.AspectFill };
-            _spinner = new ActivityIndicator { IsVisible = false, IsRunning = false, HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center };
+            _spinner = new ActivityIndicator {
+                IsVisible = false,
+                IsRunning = false,
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center
+            };
 
             Children.Add(_image);
             Children.Add(_spinner);
@@ -52,6 +63,11 @@
         private static async Task OnDynamicSourceChanged(BindableObject bindable, object oldValue, object newValue) {
             var control = (SmartImage)bindable;
 
+            // Cancel any previous download
+            control._cts?.Cancel();
+            control._cts = new CancellationTokenSource();
+            var ct = control._cts.Token;
+
             control._spinner.IsVisible = true;
             control._spinner.IsRunning = true;
             control._image.Source = control.Placeholder;
@@ -67,8 +83,9 @@
                         break;
 
                     case string str when !string.IsNullOrWhiteSpace(str):
-                        if(Uri.TryCreate(str, UriKind.Absolute, out var uri) && uri.Scheme.StartsWith("http")) {
-                            var remote = await LoadRemoteImage(uri);
+                        if(Uri.TryCreate(str, UriKind.Absolute, out var uri) &&
+                            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)) {
+                            var remote = await control.LoadRemoteImage(uri, ct);
                             control._image.Source = remote ?? control.Error;
                         }
                         else {
@@ -80,6 +97,8 @@
                         control._image.Source = control.Placeholder;
                         break;
                 }
+            } catch(OperationCanceledException) {
+                // Ignore canceled requests
             } catch {
                 control._image.Source = control.Error;
             } finally {
@@ -97,13 +116,42 @@
             }
         }
 
-        private static async Task<ImageSource?> LoadRemoteImage(Uri uri) {
+        private async Task<ImageSource?> LoadRemoteImage(Uri uri, CancellationToken ct) {
             try {
-                var stream = await _httpClient.GetStreamAsync(uri);
-                return ImageSource.FromStream(() => stream);
+                var key = uri.ToString();
+
+                if(_cache.TryGetValue(key, out var cachedBytes))
+                    return ImageSource.FromStream(() => new MemoryStream(cachedBytes, writable: false));
+
+                // Avoid duplicate downloads
+                Task<byte[]>? downloadTask;
+                lock(_pendingDownloads) {
+                    if(!_pendingDownloads.TryGetValue(key, out downloadTask) || downloadTask is null) {
+                        downloadTask = DownloadImageAsync(uri, ct);
+                        _pendingDownloads[key] = downloadTask;
+                    }
+                }
+
+                var bytes = await downloadTask;
+
+                lock(_pendingDownloads)
+                    _pendingDownloads.Remove(key);
+
+                _cache[key] = bytes;
+
+                return ImageSource.FromStream(() => new MemoryStream(bytes, writable: false));
+            } catch(OperationCanceledException) {
+                throw; // let caller ignore
             } catch {
                 return null;
             }
+        }
+
+        private static async Task<byte[]> DownloadImageAsync(Uri uri, CancellationToken ct) {
+            using var stream = await _httpClient.GetStreamAsync(uri, ct);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms, ct);
+            return ms.ToArray();
         }
     }
 }
