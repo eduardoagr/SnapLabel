@@ -1,4 +1,6 @@
-﻿namespace SnapLabel.Helpers;
+﻿using Supabase;
+
+namespace SnapLabel.Helpers;
 
 /// <summary>
 /// Provides utility methods for image compression, QR code generation, and cloud storage operations.
@@ -11,7 +13,7 @@ public class Operations {
     /// <param name="initialWidth">The starting width for resizing. Default is 1000 pixels.</param>
     /// <param name="maxSizeKb">The maximum allowed size in kilobytes. Default is 5 KB.</param>
     /// <returns>The compressed image as a byte array, or null if compression fails to meet the size constraint.</returns>
-    public static byte[]? CompressImage(byte[] originalBytes, int initialWidth = 1000, int maxSizeKb = 10) {
+    public static byte[]? CompressImage(byte[] originalBytes, int initialWidth = 1000, int maxSizeKb = 100) {
         int targetWidth = initialWidth;
         float compressionQuality = 0.6f;
 
@@ -39,26 +41,20 @@ public class Operations {
     }
 
 
-    /// <summary>
-    /// Generates a QR code from a serialized product object.
-    /// </summary>
-    /// <param name="product">The product object containing details to encode.</param>
-    /// <returns>A PNG image of the QR code as a byte array.</returns>
-    //public static byte[] GenerateProdutQrCode(Product product) {
-    //    var Obj = new ProductDto {
-    //        Id = product.Id,
-    //        Name = product.Name,
-    //        Price = product.Price,
-    //        Location = product.Location,
-    //        ImageBytes = product.ImageBytes,
-    //        GeneratedDate = product.GeneratedDate,
-    //    };
+    public static async Task<string?> SupabaseUploadAndGetUrlAsync(Client _client, string fileName, byte[] data, string bucket, string extension = "png") {
+        if(data is null || data.Length == 0)
+            return null;
 
-    //    var json = JsonSerializer.Serialize(Obj);
+        var path = $"{fileName}.{extension}";
 
-    //    return GenerateQrCode(json);
+        var uploadResponse = await _client.Storage
+            .From(bucket)
+            .Upload(data, path);
 
+        if(string.IsNullOrEmpty(uploadResponse))
+            return null;
 
-
+        return $"{AppConstants.SUPABASE_URL}/storage/v1/object/public/{AppConstants.SUPABASE_BUCKET}/{path}";
+    }
 }
 

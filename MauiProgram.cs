@@ -1,4 +1,6 @@
-﻿namespace SnapLabel;
+﻿using Supabase;
+
+namespace SnapLabel;
 
 public static class MauiProgram {
     public static MauiApp CreateMauiApp() {
@@ -14,6 +16,12 @@ public static class MauiProgram {
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
+
+        var options = new SupabaseOptions {
+            AutoRefreshToken = true,
+            AutoConnectRealtime = true,
+        };
+
         builder.Services.AddSingleton<AppShell>();
 
         // Pages + ViewModels
@@ -68,6 +76,8 @@ public static class MauiProgram {
         builder.Services.AddSingleton(provider => {
             return new FirebaseClient("https://snaplabel-88b46-default-rtdb.europe-west1.firebasedatabase.app/");
         });
+
+        builder.Services.AddSingleton(provider => new Client(AppConstants.SUPABASE_URL, AppConstants.SUPABASE_APIKEY, options));
 
 
 

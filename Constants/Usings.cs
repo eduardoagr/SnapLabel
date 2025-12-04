@@ -1,11 +1,9 @@
 ﻿global using CommunityToolkit.Maui;
 global using CommunityToolkit.Maui.Alerts;
 global using CommunityToolkit.Maui.Core;
-global using CommunityToolkit.Maui.Core.Views;
 global using CommunityToolkit.Mvvm.ComponentModel;
 global using CommunityToolkit.Mvvm.Input;
 global using CommunityToolkit.Mvvm.Messaging;
-global using System.ComponentModel;
 
 global using Firebase.Auth;
 global using Firebase.Auth.Providers;
@@ -14,6 +12,8 @@ global using Firebase.Database;
 
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Maui.Graphics.Platform;
+
+global using QRCoder;
 
 global using Shiny;
 global using Shiny.BluetoothLE;
@@ -29,17 +29,19 @@ global using SnapLabel.ViewModels;
 global using SnapLabel.ViewModels.Base;
 global using SnapLabel.Views;
 
+global using Supabase;
+
 global using Syncfusion.Licensing;
 global using Syncfusion.Maui.Core.Hosting;
 global using Syncfusion.Maui.Popup;
 
 global using System.Collections.ObjectModel;
+global using System.ComponentModel;
 global using System.Diagnostics;
-global using System.Numerics;
 global using System.Reactive.Linq;
 global using System.Text;
-global using System.Text.Json.Serialization;
 global using System.Threading;
 
 global using DeviceInfo = Microsoft.Maui.Devices.DeviceInfo;
+global using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;
 global using User = SnapLabel.Models.User;

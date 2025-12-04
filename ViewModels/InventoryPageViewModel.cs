@@ -1,4 +1,6 @@
-﻿namespace SnapLabel.ViewModels;
+﻿using Microsoft.IdentityModel.Tokens;
+
+namespace SnapLabel.ViewModels;
 
 /// <summary>
 /// ViewModel responsible for Bluetooth device management,
@@ -32,9 +34,6 @@ public partial class InventoryPageViewModel(
     // These properties are bound to the UI and automatically notify changes
     // --------------------------------------------------------------------
 
-    // Currently connected Bluetooth device (null if not connected).
-    [ObservableProperty]
-    public partial BluetoothDevice? Device { get; set; }
 
     // List of discovered Bluetooth devices shown in the device selection popup.
     public ObservableCollection<BluetoothDevice> Devices { get; } = [];
@@ -53,6 +52,10 @@ public partial class InventoryPageViewModel(
     // Icon that represents the Bluetooth connection state (connected/disconnected).
     [ObservableProperty]
     public partial string? BluetoothIcon { get; set; } = FontsConstants.Bluetooth;
+
+    // Currently connected Bluetooth device (null if not connected).
+    [ObservableProperty]
+    public partial BluetoothDevice? Device { get; set; }
     #endregion
 
     #region ⚙️ Initialization & Auto-Reconnect
@@ -94,8 +97,14 @@ public partial class InventoryPageViewModel(
                 await UpdateDeviceConnectionState(ConnectionState.Connected, new BluetoothDevice(scan.Peripheral));
 
                 WatchDeviceForReconnect();
-
             }
+        }
+
+        var prodList = await DatabaseService.GetAllAsync(AppConstants.PRODUCTS_NODE);
+
+        Products.Clear();
+        foreach(var item in prodList) {
+            Products.Add(item);
         }
     }
 
@@ -320,34 +329,6 @@ public partial class InventoryPageViewModel(
     }
     #endregion
 
-    #region 🖨️ Printing
-    // --------------------------------------------------------------------
-    // Handles sending data to the connected Bluetooth printer
-    // --------------------------------------------------------------------
-
-    /// <summary>
-    /// Sends print data to the connected Bluetooth printer.
-    /// </summary>
-    [RelayCommand]
-    private async Task SendData(Product product) {
-        if(Device == null || Device.Peripheral.Status == ConnectionState.Disconnected) {
-            await DisplayToastAsync("No device connected.");
-            return;
-        }
-
-        await CustomDialogService.ShowAsync("Printing...", "wait.gif");
-
-        // Example print job (replace with actual printer command)
-        bool isFinished = await Printer.PrintTextAsync(Device.Peripheral, "Hello");
-
-        if(isFinished) {
-
-            await CustomDialogService.HideAsync();
-        }
-
-    }
-    #endregion
-
     #region 🧹 Cleanup
     // --------------------------------------------------------------------
     // Stops BLE scanning and disposes of active subscriptions
@@ -379,6 +360,28 @@ public partial class InventoryPageViewModel(
         IsDevicesPopupVisible = false;
         Housekeeping();
     }
+
+    [RelayCommand]
+    async Task PrintAsynt(Product product) {
+        if(product == null || Device == null)
+            return;
+
+        await CustomDialogService.ShowAsync("Please Wait", "wait.gif");
+
+        using var http = new HttpClient();
+        var pngBytes = await http.GetByteArrayAsync(product.QrUrl);
+
+        if(pngBytes.IsNullOrEmpty()) {
+            await CustomDialogService.HideAsync();
+            return;
+        }
+
+        var isFinished = await Printer.PrintQrAsync(Device.Peripheral, pngBytes);
+
+        if(isFinished)
+            await CustomDialogService.HideAsync();
+    }
+
 
     private void WatchDeviceForReconnect() {
         if(Device == null)
@@ -416,4 +419,6 @@ public partial class InventoryPageViewModel(
             });
         });
     }
+
+
 }

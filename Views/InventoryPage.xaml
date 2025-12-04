@@ -70,12 +70,11 @@
             </sfPopup:SfPopup.ContentTemplate>
         </sfPopup:SfPopup>
         <CollectionView
-            HorizontalOptions="Start"
+            HorizontalOptions="Center"
             ItemSizingStrategy="MeasureAllItems"
             ItemsSource="{x:Binding Products}"
             SelectionMode="None"
-            VerticalScrollBarVisibility="Never"
-            WidthRequest="400">
+            VerticalScrollBarVisibility="Always">
 
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout ItemSpacing="5" Orientation="Vertical" />
@@ -96,8 +95,8 @@
                             <Label
                                 Grid.Row="1"
                                 Margin="6,0,0,0"
-                                Text="{x:Binding Price,
-                                                 StringFormat='{}{0:C}'}" />
+                                FontSize="Medium"
+                                Text="{Binding Price, StringFormat='{}$ {0}'}" />
                             <Border Grid.Row="2">
                                 <Border.Shadow>
                                     <Shadow
@@ -111,7 +110,7 @@
                                     <RoundRectangle CornerRadius="16" />
                                 </Border.StrokeShape>
                                 <Grid>
-                                    <controls:PlaceholderImage
+                                    <controls:SmartImage
                                         Aspect="AspectFill"
                                         IsAnimationPlaying="True"
                                         Placeholder="out.gif"
@@ -120,7 +119,7 @@
                                         Margin="10"
                                         BackgroundColor="{x:AppThemeBinding Light=#E0E0E0,
                                                                             Dark=#2A2A2A}"
-                                        Command="{x:Binding SendDataCommand,
+                                        Command="{x:Binding PrintAsyntCommand,
                                                             Source={x:RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}},
                                                             x:DataType=vm:InventoryPageViewModel}"
                                         CommandParameter="{x:Binding .}"
@@ -128,9 +127,6 @@
                                         FontFamily="Mat"
                                         FontSize="Large"
                                         HorizontalOptions="End"
-                                        IsVisible="{x:Binding IsRadyToPrint,
-                                                              Source={RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}},
-                                                              x:DataType=vm:InventoryPageViewModel}"
                                         Text="{x:Static constant:FontsConstants.Print}"
                                         TextColor="{x:AppThemeBinding Dark={StaticResource White},
                                                                       Light={StaticResource Black}}"

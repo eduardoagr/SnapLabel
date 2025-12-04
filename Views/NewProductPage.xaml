@@ -20,7 +20,7 @@
     </ContentPage.Behaviors>
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Command="{Binding SaveProductAsyncCommand}">
+        <ToolbarItem Command="{Binding SaveProductCommand}">
             <ToolbarItem.IconImageSource>
                 <FontImageSource
                     FontFamily="Mat"
@@ -31,9 +31,9 @@
         </ToolbarItem>
 
         <ToolbarItem
-            controls:ToolbarItemExtensions.IsVisible="{OnIdiom Desktop=False,
+            controls:ToolbarItemExtensions.IsVisible="{OnIdiom Tablet=True,
                                                                Phone=True,
-                                                               Tablet=True}"
+                                                               Desktop=False}"
             Command="{Binding PrintCommand}"
             IsEnabled="{x:Binding IsDeviceConnected}">
             <ToolbarItem.IconImageSource>
@@ -49,7 +49,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="5">
             <!--  Store  -->
-            <sync:SfTextInputLayout Hint="Manager">
+            <sync:SfTextInputLayout Hint="Store">
                 <editors:SfComboBox
                     DisplayMemberPath="Name"
                     IsClearButtonVisible="False"
@@ -91,7 +91,13 @@
                     VerticalTextAlignment="Center" />
                 <Switch IsToggled="{x:Binding IsCustomImage}" OnColor="Green" />
             </HorizontalStackLayout>
-
+            <!--  Quantity  -->
+            <sync:SfTextInputLayout Hint="Quantity">
+                <Entry
+                    Keyboard="Numeric"
+                    Text="{x:Binding Product.Quantity}"
+                    VerticalTextAlignment="Center" />
+            </sync:SfTextInputLayout>
             <!--  Image Preview  -->
             <Border
                 Margin="0,20,0,0"
@@ -101,8 +107,9 @@
                 WidthRequest="300">
                 <controls:SmartImage
                     Margin="5"
-                    DynamicSource="https://picsum.photos/1200/800"
-                    Error="error.png" />
+                    Aspect="AspectFill"
+                    DynamicSource="{x:Binding Product.ImageBytes}"
+                    Placeholder="camera.png" />
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="8" />
                 </Border.StrokeShape>

@@ -1,5 +1,7 @@
 ﻿using Firebase.Database.Query;
 
+using Microsoft.IdentityModel.Tokens;
+
 namespace SnapLabel.Services;
 
 public class DatabaseService<T>(FirebaseClient _client) : IDatabaseService<T> where T : IFirebaseEntity {
@@ -39,7 +41,8 @@ public class DatabaseService<T>(FirebaseClient _client) : IDatabaseService<T> wh
             .OrderByKey()
             .OnceAsync<T>();
 
-        return items.Select(item => item.Object);
+
+        return items.Select(item => item.Object) ?? [];
     }
 
     public async Task UpdateAsync(T entity) {

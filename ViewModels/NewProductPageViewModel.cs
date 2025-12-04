@@ -1,14 +1,35 @@
 ﻿
+
 namespace SnapLabel.ViewModels;
 
-public partial class NewProductPageViewModel(IShellService shellService,
-    IFirebaseAuthClient firebaseAuthClient,
-    IDatabaseService<Product> databaseService,
-    IMediaPicker mediaPicker,
-    ICustomDialogService customDialogService,
-    IBleManager bleManager,
-    IDatabaseService<Store> _storeDB,
-    IMessenger messenger) : BasePageViewModel<Product>(shellService, firebaseAuthClient, databaseService, customDialogService, messenger) {
+public partial class NewProductPageViewModel : BasePageViewModel<Product> {
+    private readonly IMediaPicker _mediaPicker;
+    private readonly IBleManager _bleManager;
+    private readonly IDatabaseService<Store> _storeDB;
+    private readonly Client _client;
+    private readonly IFirebaseAuthClient _firebaseAuthClient;
+
+    public NewProductPageViewModel(
+        IShellService shellService,
+        IFirebaseAuthClient firebaseAuthClient,
+        IDatabaseService<Product> databaseService,
+        IMediaPicker mediaPicker,
+        ICustomDialogService customDialogService,
+        IBleManager bleManager,
+        IDatabaseService<Store> storeDB,
+        Client client,
+        IMessenger messenger
+    ) : base(shellService, firebaseAuthClient, databaseService, customDialogService, messenger) {
+
+        _mediaPicker = mediaPicker;
+        _bleManager = bleManager;
+        _storeDB = storeDB;
+        _client = client;
+        _firebaseAuthClient = firebaseAuthClient;
+
+        Product = new Product();
+        TrackModel(Product, SaveProductCommand);
+    }
 
     [ObservableProperty]
     public partial Product Product { get; set; } = new Product();
@@ -29,9 +50,9 @@ public partial class NewProductPageViewModel(IShellService shellService,
 
         Stores = store.ToList();
 
-        Store = Stores.FirstOrDefault(s => s.ManagerEmail == FirebaseAuthClient.User.Info.Email)!;
+        Store = Stores.FirstOrDefault(s => s.ManagerEmail == _firebaseAuthClient.User.Info.Email)!;
 
-        var devices = bleManager.GetConnectedPeripherals();
+        var devices = _bleManager.GetConnectedPeripherals();
 
         var connectedDevice = devices.FirstOrDefault();
 
@@ -47,10 +68,10 @@ public partial class NewProductPageViewModel(IShellService shellService,
 
     [RelayCommand]
     public async Task CaptureImageAsync() {
-        if(!mediaPicker.IsCaptureSupported)
+        if(!_mediaPicker.IsCaptureSupported)
             return;
 
-        var photo = await mediaPicker.CapturePhotoAsync();
+        var photo = await _mediaPicker.CapturePhotoAsync();
         if(photo is null)
             return;
 
@@ -58,23 +79,44 @@ public partial class NewProductPageViewModel(IShellService shellService,
         using var ms = new MemoryStream();
         await stream.CopyToAsync(ms);
 
-        Product.ImageeBytes = Operations.CompressImage(ms.ToArray())!;
+        Product.ImageBytes = Operations.CompressImage(ms.ToArray())!;
     }
 
-    #endregion Command for picking/capturing images
+    #endregion
 
-    private async Task SaveProductAsync() {
+    // In SaveProductAsync(), remove the unnecessary assignment to 'uploadResponse'.
+    // The result of the upload is not used, so you can simply await the upload call.
 
-        //ProductVM.SaveToModel();
-        //var product = ProductVM.GetProduct();
-        //var id = await _databaseService.TryAddProductAsync(product);
-        //if(id > 0) {
-        //    //Convert everythin to json and Create from product
-        //    //var qr = Operations.GenerateProdutQrCode(product);
+    [RelayCommand(CanExecute = nameof(CanExecute))]
+    async Task SaveProductAsync() {
 
-        //    //await _shellService.NavigateBackAsync();
+        var p = new Product {
+            StoreId = Store.Id,
+            Name = Product.Name,
+            Price = Product.Price,
+            ImageBytes = null,
+            Location = Product.Location,
+            Quantity = Product.Quantity,
+            ImageUrl = await Operations.SupabaseUploadAndGetUrlAsync(_client, Product.Name!, Product.ImageBytes!, AppConstants.SUPABASE_BUCKET)
+        };
 
-        //}
+        var qrData = $"{p.Name}\n{p.Price}\n{p.Location}\n{p.ImageUrl}";
+
+        using var qrGenerator = new QRCodeGenerator();
+        using var qrCodeData = qrGenerator.CreateQrCode(qrData, QRCodeGenerator.ECCLevel.L);
+
+        // Use PngByteQRCode for cross-platform PNG byte[] generation
+        var pngQrCode = new PngByteQRCode(qrCodeData);
+        byte[] qrBytes = pngQrCode.GetGraphic(20); // pixelsPerModule: 20
+
+        // Upload QR
+        p.QrUrl = await Operations.SupabaseUploadAndGetUrlAsync(_client, $"{Product.Name}_QR"!, qrBytes, AppConstants.SUPABASE_BUCKET);
+
+        // Save product to Firebase
+        await DatabaseService.InsertAsync(p);
+
+        await NavigateBackAsync();
+
     }
 
     async partial void OnIsCustomImageChanged(bool value) {
@@ -85,21 +127,21 @@ public partial class NewProductPageViewModel(IShellService shellService,
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanExecute))]
     public async Task Print() {
-        if(!IsDeviceConnected) {
 
-            var goConnect = await DisplayConfirmAsync("No Device Connected",
-                "Do you want to connect to a device",
-                "OK", "Cancel");
 
-            if(goConnect) {
-                // Navigate back and say we want connection
-                await NavigateAsync("..?connect=true");
-            }
+    }
 
+    private bool CanExecute() =>
+       Validation.AllFilled(Product.Name, Product.Price, Product.Location, Product.Quantity)
+       && Product.ImageBytes is { Length: > 0 };
+
+    partial void OnProductChanged(Product value) {
+
+        if(value is null)
             return;
-        }
 
+        TrackModel(value, SaveProductCommand);
     }
 }
