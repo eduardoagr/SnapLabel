@@ -27,7 +27,11 @@
             ItemsSource="{x:Binding DashboardTiles}"
             VerticalOptions="Center">
             <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical" Span="2" />
+                <GridItemsLayout
+                    HorizontalItemSpacing="10"
+                    Orientation="Vertical"
+                    Span="2"
+                    VerticalItemSpacing="10" />
             </CollectionView.ItemsLayout>
 
             <CollectionView.ItemTemplate>

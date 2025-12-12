@@ -119,7 +119,7 @@
                                         Margin="10"
                                         BackgroundColor="{x:AppThemeBinding Light=#E0E0E0,
                                                                             Dark=#2A2A2A}"
-                                        Command="{x:Binding PrintAsyntCommand,
+                                        Command="{x:Binding PrintCommand,
                                                             Source={x:RelativeSource AncestorType={x:Type vm:InventoryPageViewModel}},
                                                             x:DataType=vm:InventoryPageViewModel}"
                                         CommandParameter="{x:Binding .}"

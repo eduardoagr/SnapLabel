@@ -12,7 +12,7 @@ public partial class Product : ObservableObject, IFirebaseEntity {
     public partial string? Price { get; set; }
 
     [ObservableProperty]
-    public partial string? Location { get; set; }
+    public partial string? Description { get; set; }
 
     [ObservableProperty]
     public partial string? Quantity { get; set; }
@@ -26,4 +26,6 @@ public partial class Product : ObservableObject, IFirebaseEntity {
     public string? QrUrl { get; set; }
 
     public string? StoreId { get; set; }
+
+
 }

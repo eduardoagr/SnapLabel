@@ -9,6 +9,7 @@ global using Firebase.Auth;
 global using Firebase.Auth.Providers;
 global using Firebase.Auth.Repository;
 global using Firebase.Database;
+global using Firebase.Database.Query;
 
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Maui.Graphics.Platform;

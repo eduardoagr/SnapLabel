@@ -30,22 +30,22 @@ public partial class NewStorePageViewModel : BasePageViewModel<Store> {
     public partial Store Store { get; set; } = new Store();
 
     [ObservableProperty]
-    public partial User? Manager { get; set; }
+    public partial User? Owner { get; set; }
 
 
     [RelayCommand]
     private async Task GetUsers() {
         var items = await _usersDb.GetAllAsync("Users");
 
-        Users = items.Where(u => string.IsNullOrEmpty(u.StoreId)).ToList();
+        Users = items.ToList();
 
         // If the current user is available, pre-populate Manager
         var currentUser = Users.FirstOrDefault(u => u.Email == _firebaseAuthClient.User.Info.Email);
         if(currentUser is not null) {
-            Manager = currentUser;
+            Owner = currentUser;
         }
         else {
-            Manager = null; // don’t pre-populate if already assigned
+            Owner = null; // don’t pre-populate if already assigned
         }
     }
 
@@ -59,9 +59,9 @@ public partial class NewStorePageViewModel : BasePageViewModel<Store> {
             Address = Store.Address,
             Phones = Store.Phones,
             StoreEmail = Store.StoreEmail,
-            ManagerEmail = Manager?.Email,
-            ManagerUsername = Manager?.Username,
-            ManagerId = Manager?.Id,
+            ManagerEmail = Owner?.Email,
+            ManagerUsername = Owner?.Username,
+            ManagerId = Owner?.Id,
             TotalRevenue = string.Empty,
             TotalSales = string.Empty,
             Id = string.Empty
@@ -69,8 +69,8 @@ public partial class NewStorePageViewModel : BasePageViewModel<Store> {
 
         await DatabaseService.InsertAsync(Store);
 
-        Manager!.StoreId = Store.Id;   // assign the new store’s Id
-        await _usersDb.UpdateAsync(Manager);
+        Owner!.StoreIds?.Add(Store.Id);   // assign the new store’s Id
+        await _usersDb.UpdateAsync(Owner);
 
 
         await _customDialogService.HideAsync();

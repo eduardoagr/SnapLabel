@@ -19,7 +19,7 @@ public static class AppConstants {
 
     // Strorage bucket name
 
-    public const string SUPABASE_BUCKET = "SnapLabel";
+    public const string SUPABASE_BUCKET = "SL";
 
     public const string UserData = "Secrets";
 

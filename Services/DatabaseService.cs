@@ -1,8 +1,4 @@
-﻿using Firebase.Database.Query;
-
-using Microsoft.IdentityModel.Tokens;
-
-namespace SnapLabel.Services;
+﻿namespace SnapLabel.Services;
 
 public class DatabaseService<T>(FirebaseClient _client) : IDatabaseService<T> where T : IFirebaseEntity {
 
@@ -10,20 +6,32 @@ public class DatabaseService<T>(FirebaseClient _client) : IDatabaseService<T> wh
 
     public async Task<string> InsertAsync(T entity) {
 
-        var result = await _client
-        .Child(_collectionName)
-        .PostAsync(entity);
+        if (string.IsNullOrEmpty(entity.Id)) {
+            // Auto-generated ID
+            var result = await _client
+                .Child(_collectionName)
+                .PostAsync(entity);
 
-        entity.Id = result.Key;
+            entity.Id = result.Key;
 
-        await UpdateAsync(entity);
+            // Update entity with its new Id
+            await UpdateAsync(entity);
 
-        return result.Key;
+            return result.Key;
+        } else {
+            // Custom ID provided
+            await _client
+                .Child(_collectionName)
+                .Child(entity.Id)
+                .PutAsync(entity);
+
+            return entity.Id;
+        }
     }
 
     public async Task<T?> GetByIdAsync(string id, string node) {
 
-        if(string.IsNullOrEmpty(id))
+        if (string.IsNullOrEmpty(id))
             throw new InvalidOperationException("Please provide id");
 
         var items = await _client
@@ -47,7 +55,7 @@ public class DatabaseService<T>(FirebaseClient _client) : IDatabaseService<T> wh
 
     public async Task UpdateAsync(T entity) {
 
-        if(string.IsNullOrEmpty(entity.Id))
+        if (string.IsNullOrEmpty(entity.Id))
             throw new InvalidOperationException("Entity must have an Id to update.");
 
         await _client
@@ -61,4 +69,19 @@ public class DatabaseService<T>(FirebaseClient _client) : IDatabaseService<T> wh
         throw new NotImplementedException();
     }
 
+    public async Task<User?> GetCurrentUser(string email, string node = AppConstants.USERS_NODE) {
+
+        if (string.IsNullOrEmpty(email))
+            throw new InvalidOperationException("Please provide email");
+
+        var items = await _client
+            .Child(node)
+            .OrderBy("Email")
+            .EqualTo(email)
+            .OnceAsync<User>();
+
+        return items.Select(i => i.Object).FirstOrDefault();
+
+
+    }
 }

@@ -20,19 +20,9 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="10">
-            <!--  Manager  -->
-            <sync:SfTextInputLayout Hint="Manager">
-                <editors:SfComboBox
-                    DisplayMemberPath="Username"
-                    IsClearButtonVisible="False"
-                    IsEditable="false"
-                    ItemsSource="{x:Binding Users}"
-                    Placeholder="Select a manager (you are already managing a store)"
-                    SelectedItem="{x:Binding Manager}"
-                    TextColor="{x:AppThemeBinding Dark={StaticResource White},
-                                                  Light={StaticResource Black}}"
-                    TextMemberPath="Username" />
-
+            <!--  Owner  -->
+            <sync:SfTextInputLayout Hint="Owner">
+                <Entry IsEnabled="False" Text="{x:Binding Owner.Username}" />
             </sync:SfTextInputLayout>
             <!--  Name  -->
             <sync:SfTextInputLayout Hint="Name">

@@ -34,7 +34,29 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to capture product images.</string>
+
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library to select product images.</string>
+
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app requires permission to save product images to your photo library.</string>
+
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>We use Bluetooth to discover nearby devices.</string>
+	<string>This app requires Bluetooth access to connect to label printers and scanners.</string>
+
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>This app requires Bluetooth access to communicate with peripherals.</string>
+
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app requires location access to discover nearby Bluetooth devices.</string>
+
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app requires location access to maintain Bluetooth connectivity in the background.</string>
+
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires microphone access if audio recording is needed.</string>
+
 </dict>
 </plist>

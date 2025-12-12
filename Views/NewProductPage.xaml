@@ -29,13 +29,13 @@
                                             Light={StaticResource Black}}" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
-
         <ToolbarItem
             controls:ToolbarItemExtensions.IsVisible="{OnIdiom Tablet=True,
                                                                Phone=True,
                                                                Desktop=False}"
+            BindingContext="{x:Reference NewProdPage}"
             Command="{Binding PrintCommand}"
-            IsEnabled="{x:Binding IsDeviceConnected}">
+            IsEnabled="{Binding IsDeviceConnected}">
             <ToolbarItem.IconImageSource>
                 <FontImageSource
                     FontFamily="Mat"
@@ -68,6 +68,15 @@
                     Text="{x:Binding Product.Name}"
                     VerticalTextAlignment="Center" />
             </sync:SfTextInputLayout>
+
+            <!--  Desc  -->
+            <sync:SfTextInputLayout Hint="Descrption">
+                <Entry
+                    Keyboard="Text"
+                    Text="{x:Binding Product.Description}"
+                    VerticalTextAlignment="Center" />
+            </sync:SfTextInputLayout>
+
             <!--  Price  -->
             <sync:SfTextInputLayout Hint="Price">
                 <Entry
@@ -75,13 +84,15 @@
                     Text="{x:Binding Product.Price}"
                     VerticalTextAlignment="Center" />
             </sync:SfTextInputLayout>
-            <!--  Location  -->
-            <sync:SfTextInputLayout Hint="Location">
+
+            <!--  Quantity  -->
+            <sync:SfTextInputLayout Hint="Quantity">
                 <Entry
-                    Keyboard="Text"
-                    Text="{x:Binding Product.Location}"
+                    Keyboard="Numeric"
+                    Text="{x:Binding Product.Quantity}"
                     VerticalTextAlignment="Center" />
             </sync:SfTextInputLayout>
+
             <HorizontalStackLayout IsVisible="{x:Binding IsDeviceConnected}" Spacing="10">
                 <Label
                     Margin="0,0,0,4"
@@ -91,13 +102,6 @@
                     VerticalTextAlignment="Center" />
                 <Switch IsToggled="{x:Binding IsCustomImage}" OnColor="Green" />
             </HorizontalStackLayout>
-            <!--  Quantity  -->
-            <sync:SfTextInputLayout Hint="Quantity">
-                <Entry
-                    Keyboard="Numeric"
-                    Text="{x:Binding Product.Quantity}"
-                    VerticalTextAlignment="Center" />
-            </sync:SfTextInputLayout>
             <!--  Image Preview  -->
             <Border
                 Margin="0,20,0,0"

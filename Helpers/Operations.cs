@@ -41,20 +41,42 @@ public class Operations {
     }
 
 
-    public static async Task<string?> SupabaseUploadAndGetUrlAsync(Client _client, string fileName, byte[] data, string bucket, string extension = "png") {
-        if(data is null || data.Length == 0)
+    public static async Task<string?> SupabaseUploadAndGetUrlAsync(IShellService shellService, Client _client, string fileName, byte[] data, string bucket, string extension = "png") {
+        if (data is null || data.Length == 0)
             return null;
 
         var path = $"{fileName}.{extension}";
+
+        var existingObjects = await _client.Storage
+            .From(bucket)
+            .List();
+
+        if (existingObjects != null && existingObjects.Any(o => o.Name != null && o.Name.Equals(path, StringComparison.OrdinalIgnoreCase))) {
+
+            await shellService.DisplayAlertAsync("Error", "This file aalready exist", "OK");
+            return null;
+        }
 
         var uploadResponse = await _client.Storage
             .From(bucket)
             .Upload(data, path);
 
-        if(string.IsNullOrEmpty(uploadResponse))
+        if (string.IsNullOrEmpty(uploadResponse))
             return null;
 
         return $"{AppConstants.SUPABASE_URL}/storage/v1/object/public/{AppConstants.SUPABASE_BUCKET}/{path}";
+    }
+
+    public static byte[] GeneerateQR(string data) {
+
+        using var qrGenerator = new QRCodeGenerator();
+        using var qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.Q);
+
+        // Use PngByteQRCode for cross-platform PNG byte[] generation
+        var pngQrCode = new PngByteQRCode(qrCodeData);
+        byte[] qrBytes = pngQrCode.GetGraphic(40);
+
+        return qrBytes;
     }
 }
 

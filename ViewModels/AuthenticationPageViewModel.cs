@@ -62,7 +62,7 @@ public partial class AuthenticationPageViewModel : BasePageViewModel<User> {
                 Email = User.Email,
                 Username = User.Username,
                 PhoneNumber = User.PhoneNumber,
-                StoreId = string.Empty,
+                StoreIds = [],
                 Id = string.Empty,
             };
 

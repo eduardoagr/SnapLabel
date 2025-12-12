@@ -16,6 +16,6 @@ public partial class User : ObservableObject, IFirebaseEntity {
 
     public string? PhoneNumber { get; set; }
 
-    public string? StoreId { get; set; }
+    public List<string> StoreIds { get; set; } = [];
 }
 

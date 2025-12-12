@@ -1,6 +1,4 @@
-﻿
-
-namespace SnapLabel.ViewModels;
+﻿namespace SnapLabel.ViewModels;
 
 public partial class NewProductPageViewModel : BasePageViewModel<Product> {
     private readonly IMediaPicker _mediaPicker;
@@ -56,7 +54,7 @@ public partial class NewProductPageViewModel : BasePageViewModel<Product> {
 
         var connectedDevice = devices.FirstOrDefault();
 
-        if(connectedDevice is not null) {
+        if (connectedDevice is not null) {
             IsDeviceConnected = true;
         }
     }
@@ -68,11 +66,11 @@ public partial class NewProductPageViewModel : BasePageViewModel<Product> {
 
     [RelayCommand]
     public async Task CaptureImageAsync() {
-        if(!_mediaPicker.IsCaptureSupported)
+        if (!_mediaPicker.IsCaptureSupported)
             return;
 
         var photo = await _mediaPicker.CapturePhotoAsync();
-        if(photo is null)
+        if (photo is null)
             return;
 
         using var stream = await photo.OpenReadAsync();
@@ -92,35 +90,39 @@ public partial class NewProductPageViewModel : BasePageViewModel<Product> {
 
         var p = new Product {
             StoreId = Store.Id,
-            Name = Product.Name,
-            Price = Product.Price,
+            Name = Product.Name!.TrimEnd(),
+            Price = Product.Price!,
+            Description = Product.Description!.TrimEnd(),
             ImageBytes = null,
-            Location = Product.Location,
             Quantity = Product.Quantity,
-            ImageUrl = await Operations.SupabaseUploadAndGetUrlAsync(_client, Product.Name!, Product.ImageBytes!, AppConstants.SUPABASE_BUCKET)
+            ImageUrl = await Operations.SupabaseUploadAndGetUrlAsync(
+                ShellService,
+                _client,
+                Product.Name!,
+                Product.ImageBytes!,
+                AppConstants.SUPABASE_BUCKET)
         };
 
-        var qrData = $"{p.Name}\n{p.Price}\n{p.Location}\n{p.ImageUrl}";
-
-        using var qrGenerator = new QRCodeGenerator();
-        using var qrCodeData = qrGenerator.CreateQrCode(qrData, QRCodeGenerator.ECCLevel.L);
-
-        // Use PngByteQRCode for cross-platform PNG byte[] generation
-        var pngQrCode = new PngByteQRCode(qrCodeData);
-        byte[] qrBytes = pngQrCode.GetGraphic(20); // pixelsPerModule: 20
-
-        // Upload QR
-        p.QrUrl = await Operations.SupabaseUploadAndGetUrlAsync(_client, $"{Product.Name}_QR"!, qrBytes, AppConstants.SUPABASE_BUCKET);
-
         // Save product to Firebase
-        await DatabaseService.InsertAsync(p);
+        var id = await DatabaseService.InsertAsync(p);
+
+        var qrCode = Operations.GeneerateQR(id);
+
+        p.QrUrl = await Operations.SupabaseUploadAndGetUrlAsync(
+            ShellService,
+            _client,
+            id,
+            qrCode!,
+            AppConstants.SUPABASE_BUCKET) ?? string.Empty;
+
+        await DatabaseService.UpdateAsync(p);
 
         await NavigateBackAsync();
 
     }
 
     async partial void OnIsCustomImageChanged(bool value) {
-        if(value) {
+        if (value) {
             await NavigateAsync(nameof(DrawingPage));
 
             IsCustomImage = false;
@@ -134,12 +136,12 @@ public partial class NewProductPageViewModel : BasePageViewModel<Product> {
     }
 
     private bool CanExecute() =>
-       Validation.AllFilled(Product.Name, Product.Price, Product.Location, Product.Quantity)
+       Validation.AllFilled(Product.Name, Product.Price, Product.Quantity, Product.Description)
        && Product.ImageBytes is { Length: > 0 };
 
     partial void OnProductChanged(Product value) {
 
-        if(value is null)
+        if (value is null)
             return;
 
         TrackModel(value, SaveProductCommand);

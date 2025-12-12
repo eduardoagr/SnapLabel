@@ -42,10 +42,10 @@ public abstract partial class BasePageViewModel<T>(
     }
 
     // Shell Helpers...
-    protected Task DisplayAlertAsync(string title, string message, string cancel) => ShellService.DisplayAlertAsync(title, message, cancel);
+    protected async Task DisplayAlertAsync(string title, string message, string cancel) => await ShellService.DisplayAlertAsync(title, message, cancel);
 
-    protected Task<bool> DisplayConfirmAsync(string title, string message, string accept, string cancel) =>
-        Shell.Current.DisplayAlertAsync(title, message, accept, cancel);
+    protected async Task<bool> DisplayConfirmAsync(string title, string message, string accept, string cancel) =>
+        await ShellService.DisplayConfirmAsync(title, message, accept, cancel);
 
     protected async Task DisplayToastAsync(string message, ToastDuration toastDuration = ToastDuration.Short, double fontSize = 14) {
         var cancellationTokenSource = new CancellationTokenSource();
@@ -54,7 +54,7 @@ public abstract partial class BasePageViewModel<T>(
     }
 
     // Navigation helpers...
-    protected Task NavigateAsync(string route) => ShellService.NavigateToAsync(route);
-    protected Task NavigateAsync(string route, IDictionary<string, object> parameters) => ShellService.NavigateToAsync(route, parameters);
-    protected Task NavigateBackAsync() => ShellService.NavigateBackAsync();
+    protected async Task NavigateAsync(string route) => await ShellService.NavigateToAsync(route);
+    protected async Task NavigateAsync(string route, IDictionary<string, object> parameters) => await ShellService.NavigateToAsync(route, parameters);
+    protected async Task NavigateBackAsync() => await ShellService.NavigateBackAsync();
 }
