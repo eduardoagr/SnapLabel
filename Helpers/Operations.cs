@@ -1,4 +1,4 @@
-﻿using Supabase;
+﻿using System.Globalization;
 
 namespace SnapLabel.Helpers;
 
@@ -42,8 +42,11 @@ public class Operations {
 
 
     public static async Task<string?> SupabaseUploadAndGetUrlAsync(IShellService shellService, Client _client, string fileName, byte[] data, string bucket, string extension = "png") {
-        if (data is null || data.Length == 0)
+        if(data is null || data.Length == 0)
             return null;
+
+        // 🔥 Sanitize filename to remove accents/tildes
+        fileName = RemoveDiacritics(fileName);
 
         var path = $"{fileName}.{extension}";
 
@@ -51,7 +54,7 @@ public class Operations {
             .From(bucket)
             .List();
 
-        if (existingObjects != null && existingObjects.Any(o => o.Name != null && o.Name.Equals(path, StringComparison.OrdinalIgnoreCase))) {
+        if(existingObjects != null && existingObjects.Any(o => o.Name != null && o.Name.Equals(path, StringComparison.OrdinalIgnoreCase))) {
 
             await shellService.DisplayAlertAsync("Error", "This file aalready exist", "OK");
             return null;
@@ -61,7 +64,7 @@ public class Operations {
             .From(bucket)
             .Upload(data, path);
 
-        if (string.IsNullOrEmpty(uploadResponse))
+        if(string.IsNullOrEmpty(uploadResponse))
             return null;
 
         return $"{AppConstants.SUPABASE_URL}/storage/v1/object/public/{AppConstants.SUPABASE_BUCKET}/{path}";
@@ -70,13 +73,34 @@ public class Operations {
     public static byte[] GeneerateQR(string data) {
 
         using var qrGenerator = new QRCodeGenerator();
-        using var qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.Q);
-
-        // Use PngByteQRCode for cross-platform PNG byte[] generation
+        using var qrCodeData = qrGenerator.CreateQrCode(data,
+            QRCodeGenerator.ECCLevel.L, requestedVersion: 2);
+        // Generate PNG with black modules only, transparent background
         var pngQrCode = new PngByteQRCode(qrCodeData);
-        byte[] qrBytes = pngQrCode.GetGraphic(40);
+        byte[] qrBytes = pngQrCode.GetGraphic(
+            10,
+            true
+        );
+
 
         return qrBytes;
+    }
+
+    public static string RemoveDiacritics(string text) {
+
+        if(string.IsNullOrWhiteSpace(text))
+            return text;
+
+        var normalized = text.Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder();
+
+        foreach(var c in normalized) {
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+            if(unicodeCategory != UnicodeCategory.NonSpacingMark)
+                sb.Append(c);
+        }
+
+        return sb.ToString().Normalize(NormalizationForm.FormC);
     }
 }
 

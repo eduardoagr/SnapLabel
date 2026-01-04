@@ -4,7 +4,7 @@ public partial class SmartImage : Image {
     private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(10) };
 
     // Simple in-memory cache: URL → image bytes
-    private static readonly Dictionary<string, byte[]> _cache = new();
+    private static readonly Dictionary<string, byte[]> _cache = [];
 
     public static readonly BindableProperty PlaceholderProperty =
         BindableProperty.Create(
@@ -70,8 +70,7 @@ public partial class SmartImage : Image {
                         (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)) {
                         // Remote image with caching
                         control.Source = await LoadRemoteImage(uri) ?? control.Error ?? control.Placeholder;
-                    }
-                    else {
+                    } else {
                         // Try Base64
                         TryBase64(control, str);
                     }
@@ -99,14 +98,12 @@ public partial class SmartImage : Image {
         try {
             var key = uri.ToString();
 
-            // ✅ Check cache first
+
             if(_cache.TryGetValue(key, out var cachedBytes))
                 return ImageSource.FromStream(() => new MemoryStream(cachedBytes, writable: false));
 
-            // Download if not cached
             var bytes = await DownloadImageAsync(uri);
 
-            // Store in cache
             _cache[key] = bytes;
 
             return ImageSource.FromStream(() => new MemoryStream(bytes, writable: false));

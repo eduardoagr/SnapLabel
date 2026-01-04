@@ -2,7 +2,7 @@
 
 public static class AppConstants {
 
-    public const string SYNCFUSION = "Ngo9BigBOggjHTQxAR8/V1JFaF5cXGRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXZfcnVcRWlfWEV2WEJWYEg=";
+    public const string SYNCFUSION = "Ngo9BigBOggjHTQxAR8/V1JGaF5cXGpCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWH1dcHVUQmNeUkR1VkJWYEs=";
 
     // App constant for reconnetng
 
@@ -23,15 +23,14 @@ public static class AppConstants {
 
     public const string UserData = "Secrets";
 
-    //QR Api
-
-    public const string QR_API = "https://quickchart.io/qr?";
-
     // Firebase nodes
 
     public const string PRODUCTS_NODE = "Products";
     public const string STORES_NODE = "Stores";
     public const string USERS_NODE = "Users";
 
+    // Tiles
 
+    public const string LogOut = "Log-Out";
+    public const string Employees = "Employees";
 }

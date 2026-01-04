@@ -19,6 +19,6 @@ public partial class StoresPageViewMode(
     async Task GetStores() {
         Stores.Clear();
         var stores = await DatabaseService.GetAllAsync("Stores");
-        Stores = stores.ToList();
+        Stores = stores.Where(s => s.ManagerEmail == FirebaseAuthClient.User.Info.Email).ToList();
     }
 }

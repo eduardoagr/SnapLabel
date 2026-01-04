@@ -54,7 +54,7 @@ public partial class NewProductPageViewModel : BasePageViewModel<Product> {
 
         var connectedDevice = devices.FirstOrDefault();
 
-        if (connectedDevice is not null) {
+        if(connectedDevice is not null) {
             IsDeviceConnected = true;
         }
     }
@@ -66,11 +66,11 @@ public partial class NewProductPageViewModel : BasePageViewModel<Product> {
 
     [RelayCommand]
     public async Task CaptureImageAsync() {
-        if (!_mediaPicker.IsCaptureSupported)
+        if(!_mediaPicker.IsCaptureSupported)
             return;
 
         var photo = await _mediaPicker.CapturePhotoAsync();
-        if (photo is null)
+        if(photo is null)
             return;
 
         using var stream = await photo.OpenReadAsync();
@@ -88,6 +88,8 @@ public partial class NewProductPageViewModel : BasePageViewModel<Product> {
     [RelayCommand(CanExecute = nameof(CanExecute))]
     async Task SaveProductAsync() {
 
+        await CustomDialogService.ShowAsync("Please wait", "loading.gif");
+
         var p = new Product {
             StoreId = Store.Id,
             Name = Product.Name!.TrimEnd(),
@@ -96,14 +98,14 @@ public partial class NewProductPageViewModel : BasePageViewModel<Product> {
             ImageBytes = null,
             Quantity = Product.Quantity,
             ImageUrl = await Operations.SupabaseUploadAndGetUrlAsync(
-                ShellService,
-                _client,
-                Product.Name!,
-                Product.ImageBytes!,
-                AppConstants.SUPABASE_BUCKET)
+               ShellService,
+               _client,
+               Product.Name!,
+               Product.ImageBytes!,
+               AppConstants.SUPABASE_BUCKET)
+
         };
 
-        // Save product to Firebase
         var id = await DatabaseService.InsertAsync(p);
 
         var qrCode = Operations.GeneerateQR(id);
@@ -119,18 +121,19 @@ public partial class NewProductPageViewModel : BasePageViewModel<Product> {
 
         await NavigateBackAsync();
 
+        await CustomDialogService.HideAsync();
     }
 
     async partial void OnIsCustomImageChanged(bool value) {
-        if (value) {
+        if(value) {
             await NavigateAsync(nameof(DrawingPage));
 
             IsCustomImage = false;
         }
     }
 
-    [RelayCommand(CanExecute = nameof(CanExecute))]
-    public async Task Print() {
+    [RelayCommand]
+    public async Task PrintProductAsync() {
 
 
     }
@@ -141,7 +144,7 @@ public partial class NewProductPageViewModel : BasePageViewModel<Product> {
 
     partial void OnProductChanged(Product value) {
 
-        if (value is null)
+        if(value is null)
             return;
 
         TrackModel(value, SaveProductCommand);

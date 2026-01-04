@@ -1,33 +1,48 @@
 ﻿namespace SnapLabel.ViewModels;
 
-public partial class DashboardPageViewModel : ObservableObject {
+public partial class DashboardPageViewModel(IShellService shellService, IFirebaseAuthClient firebaseAuthClient,
+    IDatabaseService<Store> databaseService,
+    ITileService tileService,
+    ICustomDialogService customDialogService, IMessenger messenger) :
+    BasePageViewModel<Store>(shellService, firebaseAuthClient, databaseService, customDialogService, messenger) {
 
-    private readonly IShellService? _shellService;
-    private readonly IFirebaseAuthClient? _firebaseAuthClient;
-    private readonly DashboardTileServices? _tileServices;
-
-    public ObservableCollection<DashboardTile> DashboardTiles { get; set; } = [];
+    [ObservableProperty]
+    public partial ObservableCollection<Tile> DashboardTiles { get; set; } = [];
 
     [ObservableProperty]
     public partial string? Username { get; set; }
 
-    public DashboardPageViewModel(IShellService shellService, IFirebaseAuthClient firebaseAuth) {
+    [RelayCommand]
+    async Task InitializeAsync() {
 
-        _shellService = shellService;
+        tileService ??= new TileService(ShellService, FirebaseAuthClient);
 
-        _firebaseAuthClient = firebaseAuth;
+        int? tilesCount = DashboardTiles?.Count;
+        if(tilesCount < 4)
+            DashboardTiles = tileService.GetDashboardTiles();
 
-        _tileServices = new DashboardTileServices(shellService, firebaseAuth);
+        Username = FirebaseAuthClient.User.Info?.DisplayName;
 
-        DashboardTiles = _tileServices.GetDashboardTiles();
-
-        Username = _firebaseAuthClient.User.Info?.DisplayName;
+        await CheckForStores();
     }
+
+    private async Task CheckForStores() {
+        var stores = await DatabaseService.GetAllAsync(AppConstants.STORES_NODE);
+        if(stores.Any()) {
+
+            var prodTile = DashboardTiles.FirstOrDefault(t => t.Title == AppConstants.PRODUCTS_NODE);
+            var empTile = DashboardTiles.FirstOrDefault(t => t.Title == AppConstants.Employees);
+
+            prodTile?.IsVisible = true;
+            empTile?.IsVisible = true;
+        }
+    }
+
 
     [RelayCommand]
     async Task GoToManageStores() {
 
-        await _shellService!.NavigateToAsync(nameof(StoresPage));
+        await NavigateAsync(nameof(StoresPage));
 
     }
 

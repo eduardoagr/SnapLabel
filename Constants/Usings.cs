@@ -42,6 +42,7 @@ global using System.Diagnostics;
 global using System.Reactive.Linq;
 global using System.Text;
 global using System.Threading;
+global using System.Windows.Input;
 
 global using DeviceInfo = Microsoft.Maui.Devices.DeviceInfo;
 global using JsonIgnoreAttribute = Newtonsoft.Json.JsonIgnoreAttribute;

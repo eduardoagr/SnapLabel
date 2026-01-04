@@ -1,6 +1,4 @@
-﻿using Supabase;
-
-namespace SnapLabel;
+﻿namespace SnapLabel;
 
 public static class MauiProgram {
     public static MauiApp CreateMauiApp() {
@@ -58,6 +56,7 @@ public static class MauiProgram {
         builder.Services.AddSingleton(SecureStorage.Default);
         builder.Services.AddSingleton(MediaPicker.Default);
         builder.Services.AddSingleton<IShellService, ShellService>();
+        builder.Services.AddSingleton<ITileService, TileService>();
         builder.Services.AddSingleton<ICustomDialogService, CustomDialogService>();
         builder.Services.AddSingleton(typeof(IDatabaseService<>), typeof(DatabaseService<>));
         builder.Services.AddBluetoothLE();
@@ -78,7 +77,6 @@ public static class MauiProgram {
         });
 
         builder.Services.AddSingleton(provider => new Client(AppConstants.SUPABASE_URL, AppConstants.SUPABASE_APIKEY, options));
-
 
 
         return builder.Build();

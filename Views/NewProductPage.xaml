@@ -30,12 +30,9 @@
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
         <ToolbarItem
-            controls:ToolbarItemExtensions.IsVisible="{OnIdiom Tablet=True,
-                                                               Phone=True,
-                                                               Desktop=False}"
-            BindingContext="{x:Reference NewProdPage}"
-            Command="{Binding PrintCommand}"
-            IsEnabled="{Binding IsDeviceConnected}">
+            controls:ToolbarItemExtensions.IsVisible="{x:Binding IsDeviceConnected}"
+            BindingContext="{Binding Path=BindingContext, Source={x:Reference NewProdPage}, x:DataType=ContentPage}"
+            Command="{Binding PrintProductCommand}">
             <ToolbarItem.IconImageSource>
                 <FontImageSource
                     FontFamily="Mat"

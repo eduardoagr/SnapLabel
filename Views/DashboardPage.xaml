@@ -4,10 +4,19 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:constant="clr-namespace:SnapLabel.Constants"
     xmlns:controls="clr-namespace:SnapLabel.Controls"
+    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:model="clr-namespace:SnapLabel.Models"
     xmlns:vm="clr-namespace:SnapLabel.ViewModels"
+    x:Name="dash"
     x:DataType="vm:DashboardPageViewModel"
     NavigationPage.HasNavigationBar="False">
+
+    <ContentPage.Behaviors>
+        <mct:EventToCommandBehavior
+            BindingContext="{Binding Path=BindingContext, Source={x:Reference dash}, x:DataType=ContentPage}"
+            Command="{Binding InitializeCommand}"
+            EventName="NavigatedTo" />
+    </ContentPage.Behaviors>
 
     <Grid Padding="24" RowDefinitions="Auto,*">
 
@@ -35,14 +44,15 @@
             </CollectionView.ItemsLayout>
 
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="model:DashboardTile">
+                <DataTemplate x:DataType="model:Tile">
                     <controls:TileView
-                        Title="{Binding Title}"
+                        Title="{x:Binding Title}"
                         Margin="8"
-                        IconSource="{Binding Icon}"
-                        Subtitle="{Binding Subtitle}"
-                        TapCommand="{Binding Command}"
-                        TileBackground="{Binding Background}" />
+                        IconSource="{x:Binding Icon}"
+                        IsVisible="{x:Binding IsVisible}"
+                        Subtitle="{x:Binding Subtitle}"
+                        TapCommand="{x:Binding Command}"
+                        TileBackground="{x:Binding Background}" />
                 </DataTemplate>
             </CollectionView.ItemTemplate>
 

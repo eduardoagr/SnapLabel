@@ -1,38 +1,43 @@
 ﻿namespace SnapLabel.Services {
 
-    public partial class DashboardTileServices(IShellService shellService, IFirebaseAuthClient authClient) {
+    public partial class TileService(IShellService shellService,IFirebaseAuthClient authClient):ITileService {
 
-        public ObservableCollection<DashboardTile> GetDashboardTiles() {
+        public ObservableCollection<Tile> GetDashboardTiles() {
 
             return [
                 new() {
                     Background = Color.FromArgb("#af7f3c"),
-                    Title = "Stores",
+                    Title = AppConstants.STORES_NODE,
                     Command = GoToStoresPageCommand,
                     Subtitle = "Tap to open",
-                    Icon = "stores.png"
-                },
-                new() {
-                    Background = Color.FromArgb("#167533"),
-                    Title = "Inventory",
-                    Command = GoToInventoryPageCommand,
-                    Subtitle = "Tap to open",
-                    Icon = "products.png",
-                },
-                new() {
-                    Background = Color.FromArgb("#003f5c"),
-                    Title = "employees",
-                    //command = GoToStoresPageCommand,
-                    Subtitle = "Tap to open",
-                    Icon = "employees.png",
+                    Icon = "stores.png",
+                    IsVisible = true,
                 },
                 new() {
                     Background = Color.FromArgb("#851d22"),
-                    Title = "logout",
+                    Title = AppConstants.LogOut,
                     Command = LogoutCommand,
                     Subtitle = "Tap to logout",
                     Icon = "logout.png",
-                }
+                    IsVisible = true,
+                },
+                new() {
+                    Background = Color.FromArgb("#167533"),
+                    Title = AppConstants.PRODUCTS_NODE,
+                    Command = GoToInventoryPageCommand,
+                    Subtitle = "Tap to open",
+                    Icon = "products.png",
+                    IsVisible = false,
+                },
+                new() {
+                    Background = Color.FromArgb("#003f5c"),
+                    Title = AppConstants.Employees,
+                    //command = GoToStoresPageCommand,
+                    Subtitle = "Tap to open",
+                    Icon = "employees.png",
+                    IsVisible = false,
+                },
+
             ];
         }
 
@@ -55,7 +60,7 @@
                 authClient.SignOut();
             }
 
-            var secretsPath = Path.Combine(FileSystem.AppDataDirectory, AppConstants.UserData);
+            var secretsPath = Path.Combine(FileSystem.AppDataDirectory,AppConstants.UserData);
             if(File.Exists(secretsPath)) {
                 File.Delete(secretsPath);
             }

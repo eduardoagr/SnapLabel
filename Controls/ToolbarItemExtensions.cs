@@ -3,7 +3,7 @@
 public static class ToolbarItemExtensions {
 
     public static readonly BindableProperty IsVisibleProperty =
-        BindableProperty.Create(
+        BindableProperty.CreateAttached(
             "IsVisible",
             typeof(bool),
             typeof(ToolbarItemExtensions),
@@ -21,21 +21,27 @@ public static class ToolbarItemExtensions {
             return;
 
         item.Dispatcher?.Dispatch(async () => {
-            if(item.Parent is not ContentPage page) {
-                await Task.Delay(10); // tiny delay
-                if(item.Parent is not ContentPage retryPage)
-                    return;
-                page = retryPage;
-            }
+            var page = await WaitForParentAsync(item);
+            if(page == null)
+                return;
 
             bool visible = (bool)newValue;
             if(visible) {
                 if(!page.ToolbarItems.Contains(item))
                     page.ToolbarItems.Add(item);
-            }
-            else {
+            } else {
                 page.ToolbarItems.Remove(item);
             }
         });
+    }
+
+    private static async Task<ContentPage?> WaitForParentAsync(ToolbarItem item, int retries = 5) {
+        for(int i = 0 ; i < retries ; i++) {
+            if(item.Parent is ContentPage page)
+                return page;
+
+            await Task.Delay(10);
+        }
+        return item.Parent as ContentPage;
     }
 }

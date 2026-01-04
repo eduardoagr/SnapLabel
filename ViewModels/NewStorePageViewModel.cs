@@ -43,8 +43,7 @@ public partial class NewStorePageViewModel : BasePageViewModel<Store> {
         var currentUser = Users.FirstOrDefault(u => u.Email == _firebaseAuthClient.User.Info.Email);
         if(currentUser is not null) {
             Owner = currentUser;
-        }
-        else {
+        } else {
             Owner = null; // don’t pre-populate if already assigned
         }
     }
@@ -55,10 +54,10 @@ public partial class NewStorePageViewModel : BasePageViewModel<Store> {
         await _customDialogService.ShowAsync("Creating Store...", "loading.gif");
 
         Store = new Store {
-            Name = Store.Name,
-            Address = Store.Address,
-            Phones = Store.Phones,
-            StoreEmail = Store.StoreEmail,
+            Name = Store.Name?.Trim(),
+            Address = Store.Address?.Trim(),
+            Phones = Store.Phones?.Trim(),
+            StoreEmail = Store.StoreEmail?.Trim(),
             ManagerEmail = Owner?.Email,
             ManagerUsername = Owner?.Username,
             ManagerId = Owner?.Id,
